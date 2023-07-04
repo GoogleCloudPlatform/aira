@@ -1,0 +1,94 @@
+[tool.poetry]
+name = "stt-exams"
+version = "0.5.1"
+description = ""
+authors = ["Gustavo Albino <gustavo@radhark.tech>"]
+readme = "README.md"
+packages = [{include = "api", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "3.11.*"
+unidecode = "^1.3.6"
+ffmpeg-python = "^0.2.0"
+google-cloud-speech = "^2.19.0"
+google-cloud-storage = "^2.9.0"
+google-auth = "^2.20.0"
+fastapi = "^0.98.0"
+fastapi-injector = "^0.5.0"
+gunicorn = "^20.1.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+aiohttp = "^3.8.4"
+injector = "^0.20.1"
+structlog = "^23.1.0"
+pydantic = {extras = ["email"], version = "^1.10.9"}
+google-cloud-secret-manager = "^2.16.1"
+python-jose = {extras = ["cryptography"], version="^3.3.0"}
+aiocache = "^0.12.1"
+alembic = "^1.11.1"
+sqlalchemy = {extras = ["postgresql_asyncpg", "postgresql_psycopg2binary", "asyncio"], version = "^2.0.15"}
+python-dateutil = "^2.8.2"
+firebase-admin = "^6.1.0"
+types-python-jose = "^3.3.4.7"
+fastapi-pagination = "^0.12.5"
+types-google-cloud-ndb = "^2.1.0.7"
+google-api-python-client = "^2.90.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+types-passlib = "^1.7.7.12"
+google-cloud-pubsub = "^2.17.1"
+google-cloud-bigquery = "^3.11.0"
+opentelemetry-api = "^1.18.0"
+opentelemetry-sdk = "^1.18.0"
+opentelemetry-exporter-gcp-trace = "^1.5.0"
+opentelemetry-instrumentation-fastapi = "^0.39b0"
+opentelemetry-exporter-otlp-proto-grpc = "^1.18.0"
+opentelemetry-instrumentation-aiohttp-client = "^0.39b0"
+opentelemetry-instrumentation-asyncpg = "^0.39b0"
+opentelemetry-instrumentation-grpc = "^0.39b0"
+opentelemetry-instrumentation-requests = "^0.39b0"
+opentelemetry-instrumentation-sqlalchemy = "^0.39b0"
+opentelemetry-propagator-gcp = "^1.5.0"
+opentelemetry-resourcedetector-gcp = "^1.5.0a0"
+httpx = "^0.24.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+isort = "^5.12.0"
+shed = "^2023.5.2"
+pylint = "^2.17.4"
+pytest = "^7.3.1"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.0.0"
+pytest-mypy = "^0.10.3"
+pytest-pylint = {git = "https://github.com/carsongee/pytest-pylint.git", rev = "804add7d1959367a5d347180df5e6f7f3d789f08"}
+hypothesis = "^6.79.3"
+pytest-socket = "^0.6.0"
+pytest-xdist = "^3.3.1"
+pytest-dotenv = "^0.5.2"
+pytest-env = "^0.8.1"
+mypy = "^1.3.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = "tests"
+env_files = [".env"]
+env = [
+    "PYTHONASYNCIODEBUG=1",
+    "_TEST_MODE=1",
+    "_EXPORT_TO=none"
+]
+markers = ["disable_autouse", "disable_db"]
+filterwarnings = [
+    "error::pytest.PytestUnraisableExceptionWarning",
+    "ignore::pytest.PytestRemovedIn8Warning",
+    "ignore::DeprecationWarning",
+    "ignore:unclosed transport <_SelectorSocketTransport:ResourceWarning",
+]

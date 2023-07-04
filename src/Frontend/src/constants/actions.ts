@@ -1,0 +1,9 @@
+export const ACTION_CREATE = 'create';
+export const ACTION_EDIT = 'edit';
+export const ACTION_DELETE = 'delete';
+export const ACTION_EXIT = 'exit';
+export const ACTION_CLOSE = 'close';
+export const ACTION_CANCEL = 'cancel';
+export const ACTION_GET_BY_ID = 'get-by-id';
+export const ACTION_GET_BY_ID_REDIRECT = 'get-by-id-with-redirect';
+export const ACTION_CUSTOM = 'custom';

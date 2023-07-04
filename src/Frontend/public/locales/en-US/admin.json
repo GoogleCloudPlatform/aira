@@ -1,0 +1,11 @@
+{
+    "message": "This is a page to admin",
+    "admin": "Admin",
+    "organizations": "Organizations",
+    "groups": "Classes",
+    "roles": "Roles",
+    "exams": "Exams",
+    "users": "Users",
+    "create": "Create",
+    "actions": "Actions"
+}

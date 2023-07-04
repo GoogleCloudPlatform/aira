@@ -1,0 +1,88 @@
+[
+    {
+      "name": "school_uuid",
+      "type": "STRING"
+    },
+    {
+      "name": "school_name",
+      "type": "STRING"
+    },
+    {
+      "name": "school_city",
+      "type": "STRING"
+    },
+    {
+      "name": "school_region",
+      "type": "STRING"
+    },
+    {
+      "name": "class_uuid",
+      "type": "STRING"
+    },
+    {
+      "name": "class_name",
+      "type": "STRING"
+    },
+    {
+      "name": "class_grade",
+      "type": "STRING"
+    },
+    {
+      "name": "student_uuid",
+      "type": "STRING"
+    },
+    {
+      "name": "student_customer_id",
+      "type": "STRING"
+    },
+    {
+      "name": "student_name",
+      "type": "STRING"
+    },
+    {
+      "name": "exam_uuid",
+      "type": "STRING"
+    },
+    {
+      "name": "exam_name",
+      "type": "STRING"
+    },
+    {
+      "name": "exam_grade",
+      "type": "STRING"
+    },
+    {
+      "name": "exam_start_date",
+      "type": "TIMESTAMP"
+    },
+    {
+      "name": "exam_end_date",
+      "type": "TIMESTAMP"
+    },
+    {
+      "name": "question_uuid",
+      "type": "STRING"
+    },
+    {
+      "name": "question_words",
+      "type": "STRING",
+      "mode": "REPEATED"
+    },
+    {
+      "name": "question_amount_words",
+      "type": "INTEGER"
+    },
+    {
+      "name": "response_words",
+      "type": "STRING",
+      "mode": "REPEATED"
+    },
+    {
+      "name": "response_amount_hits",
+      "type": "INTEGER"
+    },
+    {
+      "name": "response_timestamp",
+      "type": "TIMESTAMP"
+  }
+  ]

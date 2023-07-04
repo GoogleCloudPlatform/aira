@@ -1,0 +1,19 @@
+{
+    "question": "Pergunta",
+    "of": "de",
+    "top_message": "Quando estiver pronto, clique no botão 'Iniciar Gravação' e leia o texto abaixo com seu microfone",
+    "bottom_message": "Ao finalizar a gravação, clique no botão 'Parar Gravação' e em seguida em 'Próximo'",
+    "seconds": "segundos",
+    "stop": "Parar",
+    "record": "Gravar",
+    "next": "Próximo",
+    "recording_state": "Gravando...",
+    "stop_recording_state": "Parar Gravação",
+    "success_message": "Sucesso",
+    "audio_success_record": "seus áudios foram gravados com sucesso",
+    "analisys_message": "Após análise, seus resultados estarão disponíveis na área do aluno para seus pais, responsáveis e professores",
+    "start_again": "Iniciar outra sequência de gravação",
+    "show_results": "Ver resultados",
+    "redirecting": "Redirecionando",
+    "start_exam": "Iniciar Exame"
+}

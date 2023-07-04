@@ -1,0 +1,27 @@
+{
+    "reports": "Informes",
+    "learners": "Estudiantes",
+    "exams": "Examenes",
+    "dashboard": "Tablero",
+    "admin": "Administrador",
+    "users": "Usuarios",
+    "roles": "Roles",
+    "groups": "Clases",
+    "organizations": "Organizaciones",
+    "/dashboard": "Tablero",
+    "/exams": "Examenes",
+    "/exams/[id]": "Examen de Lectura",
+    "/admin": "Administrador",
+    "/admin/exams": "Examenes",
+    "/admin/users": "Usuarios",
+    "/admin/roles": "Roles",
+    "/admin/groups": "Clases",
+    "/admin/organizations": "Organizaciones",
+    "/reports": "Informes",
+    "/reports/dashboard": "Tablero",
+    "/reports/learners": "Vista del Tablero de Estudiantes",
+    "exit": "Cerrar Sesión",
+    "/finish": "Fim del Examene",
+    "/home": "Home"
+  }
+  

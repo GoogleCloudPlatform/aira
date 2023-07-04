@@ -1,0 +1,19 @@
+{
+    "question": "Question",
+    "of": "of",
+    "top_message": "When you're ready, please click on the 'Start Record' button and read the text bellow with your microphone",
+    "bottom_message": "On record end, click on the 'Stop Record' button e then in 'Next'",
+    "seconds": "seconds",
+    "stop": "Stop",
+    "record": "Record",
+    "next": "Next",
+    "recording_state": "Recording...",
+    "stop_recording_state": "Stop Recording",
+    "success_message": "Success",
+    "audio_success_record": "your audios were successfully recorded",
+    "analisys_message": "After analisys, your results will be available on students area to your parents, responsables and teachers",
+    "start_again": "Start another record flow",
+    "show_results": "See results",
+    "start_exam": "Start Exam",
+    "redirecting": "Redirecting"
+}

@@ -1,0 +1,27 @@
+{
+    "reports": "Relatórios",
+    "learners": "Alunos",
+    "exams": "Exames",
+    "dashboard": "Painel",
+    "admin": "Administração",
+    "users": "Usuários",
+    "roles": "Funções",
+    "groups": "Turmas",
+    "organizations": "Organizações",
+    "/dashboard": "Painel",
+    "/exams": "Exames",
+    "/exams/[id]": "Exame de Leitura",
+    "/admin": "Administração",
+    "/admin/exams": "Exames",
+    "/admin/users": "Usuários",
+    "/admin/roles": "Funções",
+    "/admin/groups": "Turmas",
+    "/admin/organizations": "Organizações",
+    "/reports": "Relatórios",
+    "/reports/dashboard": "Painel",
+    "/reports/learners": "Visão do Painel de Alunos",
+    "exit": "Sair",
+    "/finish": "Fim do exame",
+    "/home": "Início"
+}
+  

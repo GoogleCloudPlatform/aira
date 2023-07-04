@@ -1,0 +1,20 @@
+{
+    "translation": "i18n tradução com tailwind",
+    "title": "Painel de Análise de Performance de Leitura",
+    "loading": "Carregando",
+    "showing": "Mostrando",
+    "to": "até",
+    "of": "de",
+    "results": "resultados",
+    "language": "Idioma",
+    "en-US": "English",
+    "pt-BR": "Português",
+    "es-ES": "Español",
+    "no_data": "Não foi possível encontrar dados",
+    "no_records": "Não há dados",
+    "error_load_exam": "Erro ao carregar exame",
+    "warning_no_questions": "Não foram encontradas questões para este exame",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "search": "Pesquisar"
+}

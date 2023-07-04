@@ -1,0 +1,44 @@
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
+        ".",
+      ]
+
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
+      ]
+
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "deploy",
+        "frontend",
+        '--project=$_PROJECT_ID',
+        "--image",
+        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
+        "--region",
+        "us-east1",
+        "--service-account",
+        "$_PROJECT_ID-frontend-engine@$_PROJECT_ID.iam.gserviceaccount.com",
+        "--update-secrets=FIREBASE_API_KEY=apiKey:latest,FIREBASE_APP_ID=appId:latest,FIREBASE_AUTH_DOMAIN=authDomain:latest,API_URL=api_url:latest",
+        "--set-env-vars=FIREBASE_PROJECT_ID=$_PROJECT_ID,LOOKER=???,LOOKER_GENERAL_DASHBOARD_ID=???,LOOKER_LEARNERS_DASHBOARD_ID=???",
+        "--allow-unauthenticated",
+        "--vpc-connector=vpc-con",
+      ]
+images:
+  - "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

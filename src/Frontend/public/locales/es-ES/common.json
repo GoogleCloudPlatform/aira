@@ -1,0 +1,20 @@
+{
+    "translation": "traducción i18n con tailwind",
+    "title": "Tablero de análisis de rendimiento de lectura",
+    "loading": "Cargando",
+    "showing": "Demostración",
+    "to": "a",
+    "of": "de",
+    "results": "resultados",
+    "language": "Idioma",
+    "en-US": "English",
+    "pt-BR": "Português",
+    "es-ES": "Español",
+    "no_data": "No se encontraron datos",
+    "no_records": "No hay datos",
+    "error_load_exam": "Error al cargar el examen",
+    "warning_no_questions": "Não foram encontró questões for this exame",
+    "previous": "Anterior",
+    "next": "Proximo",
+    "search": "Pesquisar"
+}

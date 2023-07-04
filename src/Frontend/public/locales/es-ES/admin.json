@@ -1,0 +1,11 @@
+{
+    "message": "Esta es una página de inicio para el administrador",
+    "admin": "Administración",
+    "organizations": "Organizaciones",
+    "groups": "Turmas",
+    "roles": "Papeles",
+    "exams": "Pruebas",
+    "users": "Usuarios",
+    "create": "Criacion",
+    "actions": "Acciones"
+}

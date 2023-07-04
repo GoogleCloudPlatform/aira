@@ -1,0 +1,20 @@
+{
+    "translation": "i18n translation with tailwind class",
+    "title": "Reading Performance Analysis Panel",
+    "loading": "Loading",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results",
+    "language": "Language",
+    "en-US": "English",
+    "pt-BR": "Português",
+    "es-ES": "Español",
+    "no_data": "Could not find data",
+    "no_records": "No Items",
+    "error_load_exam": "Error to load exam",
+    "warning_no_questions": "No questions found",
+    "previous": "Previous",
+    "next": "Next",
+    "search": "Search"
+}
