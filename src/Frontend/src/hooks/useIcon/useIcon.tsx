@@ -1,3 +1,16 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 import { ICON_ARROW_RIGHT, ICON_MICROPHONE, ICON_STOP, ICON_ARROW_PATH, ICON_PENCIL, ICON_TRASH, ICON_PLUS, ICON_BUILDING_LIBRARY, ICON_USER_GROUP, ICON_X_MARK, ICON_EXCLAMATION_TRIANGLE, ICON_ARROW_LEFT, ICON_CHEVRON_LEFT, ICON_CHEVRON_RIGHT, ICON_USER, ICON_PENCIL_SQUARE, ICON_ACADEMIC_CAP, ICON_EYE, ICON_LANGUAGE, ICON_TABLE_CELLS, ICON_BARS_3, ICON_ARROW_LEFT_ON_RECTANGLE, ICON_HOME, ICON_DOCUMENT_TEXT, ICON_COG, ICON_CHEVRON_DOWN, ICON_USER_CIRCLE, ICON_ELLIPSIS_VERTICAL, ICON_PRESENTATION_CHART_BAR, ICON_CHART_PIE, ICON_ARROWS_POINTING_OUT, ICON_ARROWS_POINTING_IN, ICON_MAGNIFYING_GLASS } from "@/constants/icons";
 import { IIcon } from "@/interfaces/icons";
 import { MicrophoneIcon, StopIcon, ArrowRightIcon, ArrowPathIcon, TrashIcon, PencilIcon, PlusIcon, BuildingLibraryIcon, UserGroupIcon, XMarkIcon, ExclamationTriangleIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, PencilSquareIcon, AcademicCapIcon, EyeIcon, LanguageIcon, TableCellsIcon, Bars3Icon, ArrowLeftOnRectangleIcon, HomeIcon, DocumentTextIcon, CogIcon, ChevronDownIcon, UserCircleIcon, EllipsisVerticalIcon, PresentationChartBarIcon, ChartPieIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
