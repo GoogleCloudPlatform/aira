@@ -4,6 +4,5 @@ This is a dynamic table that lists all the contributors to this project. If you 
 
 | Contributor | Github username | Role |
 | ---------- | ---------- | ---------- |
-| Fabricio Lopes Sanchea | [@fabriciosanchez](https://github.com/fabriciosanchez) | Project Admin |
+| Fabricio Lopes Sanchez | [@fabriciosanchez](https://github.com/fabriciosanchez) | Project Admin |
 | Pedro Jorge Machado | [@PJOMachado](https://github.com/PJOMachado) | Contributor |
-| Gustavo Albino | [@galbino](https://github.com/galbino) | Contributor |
