@@ -6,7 +6,7 @@ It uses [Google Cloud's Speech to Text API](https://cloud.google.com/speech-to-t
 
 ## Usage scenarios
 
-By default, the experiment app brings its own graphical interface considering a scenario of utilization where a complete deployment can be held, but it doesn't mean that there is no other way to use it. 
+By default, the experiment app brings its own graphical interface considering a scenario of utilization where a complete deployment can be held, but it doesn't mean that there is no other way to use it.
 
 The whole process is made through API calls in the back, which means that the user interface is completely decoupled from the backend and so it could be easily incoporated to whatever pre-existing system necessary.
 
