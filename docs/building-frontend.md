@@ -29,13 +29,6 @@ docker build -t stt:0.0.1 --no-cache .
 docker run -p 3000:3000 --env-file=.env -t stt:0.0.1
 ````
 
-### Docker Compose
-
-````
-docker compose build && docker compose up
-````
-
-
 * ```docker cli``` is necessary to run a docker.
 
 ## Learn More
