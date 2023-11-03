@@ -1,18 +1,3 @@
-# Pre-requisites
-
-If you want to evolve or customize the application code, you need some basic components to build and run the application. Below is the list of these components:
-
-* ```Install python >= 3.11``` is necessary for the backend service.
-* ```Install node >= 16.16.0 and pnpm >= 8.6.6``` is necessary for the frontend service.
-* ```Install the gcloud sdk``` if you want to do operations in GCP using your local terminal.
-* ```Install docker ``` is required to build the container images and host locally.
-* ```Install terraform >= v1.4.6.``` if you want to execute the step [building-cloud-infrastructure](./building-cloud-infrastructure.md) using your local terminal.
-
-## About Backend and Frontend 
-Both the frontend and backend use Docker and all necessary requirements are declared in the Dockerfile files for each component. The requirements present here regarding the frontend and backend are necessary for local execution without building and using Docker. That is, if you want to develop and test locally using Docker, all the necessary requirements will already be installed when the applications are built.
-
-## About terraform and gcloud sdk
-Instead of running terraform using your local terminal, a good option is to use [Cloud Shell](https://cloud.google.com/shell) on GCP. In the Cloud Shell environment, you will already be authenticated and the terraform and gcloud SDK requirements are already installed, thus avoiding the need to install these two requirements locally to perform the step [building-cloud-infrastructure](./building-cloud-infrastructure.md).
 
 
 ## About Looker requirements
@@ -43,4 +28,4 @@ You can change the values ​​of these variables in the .env.example file in t
 
 To enable message passing and event notification from the embedded Looker iframe to the parent web page, you must include embed_domain=https://parent_domain.com as a query parameter in your SSO embed URL, AND you must add that same domain https://parent_domain.com to this allowlist to tell the Looker server that the domain is allowed as a cross-domain message destination.
 
-In you looker console go to Admin > Embed. The first option will be Embedded Domain Allowlist, there you need to add your frontend url to allows the frontend url to call the looker service.
+In the looker console, go to Admin > Embed. The first option will be Embedded Domain Allowlist where you need to add your frontend URL to allow the frontend to call the looker service.
