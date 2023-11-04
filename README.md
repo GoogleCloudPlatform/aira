@@ -15,6 +15,7 @@ After applying an online test, thanks to [Google Cloud's AI platform](https://cl
 * [Concepts and architecture](./docs/concepts-architecture.md)
 * [Pre-requisites](./docs/pre-requisites.md)
 * [Building the cloud infrastructure](./docs/building-cloud-infrastructure.md)
+* [Looker requirements](./docs/looker-requirements.md)
 * [Building the frontend](./docs/building-frontend.md)
 * [Building the backend](./docs/building-backend.md)
 * [Publishing AIRA into Google Cloud](./docs/publishing-aira.md)

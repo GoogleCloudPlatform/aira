@@ -46,7 +46,7 @@ steps:
         "--service-account",
         "$_PROJECT_ID-frontend-engine@$_PROJECT_ID.iam.gserviceaccount.com",
         "--update-secrets=FIREBASE_API_KEY=apiKey:latest,FIREBASE_APP_ID=appId:latest,FIREBASE_AUTH_DOMAIN=authDomain:latest,API_URL=api_url:latest",
-        "--set-env-vars=FIREBASE_PROJECT_ID=$_PROJECT_ID,LOOKER=???,LOOKER_GENERAL_DASHBOARD_ID=???,LOOKER_LEARNERS_DASHBOARD_ID=???",
+        "--set-env-vars=FIREBASE_PROJECT_ID=$_PROJECT_ID,LOOKER=your_looker_url,LOOKER_GENERAL_DASHBOARD_ID=your_general_dash_id,LOOKER_LEARNERS_DASHBOARD_ID=your_general_learnears_dash_id",
         "--allow-unauthenticated",
         "--vpc-connector=vpc-con",
       ]
