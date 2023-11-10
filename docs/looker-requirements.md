@@ -1,5 +1,5 @@
 ## About Looker requirements
-How we are using Looker embedded, both applications the frontend and backend requires some information from Looker, and Looker require some information from our application to allow the requests from our app.
+As we are using Looker embedded, both applications (frontend and backend) do require some information from Looker, the same way Looker also require some information from our application to allow the requests from the web app to properly happen.
 
 ### Frontend
 
