@@ -30,6 +30,10 @@ resource "google_pubsub_subscription" "processor_queue" {
 
   ack_deadline_seconds = 600
 
+  expiration_policy {
+    ttl = ""
+  }
+
   push_config {
     push_endpoint = "${var.backend_url}/api/v1/processor/_handle" 
 
@@ -57,6 +61,10 @@ resource "google_pubsub_subscription" "conversion_queue" {
 
   ack_deadline_seconds = 600
 
+  expiration_policy {
+    ttl = ""
+  }
+  
   push_config {
     push_endpoint = "${var.backend_url}/api/v1/processor/convert/_handle" 
 
