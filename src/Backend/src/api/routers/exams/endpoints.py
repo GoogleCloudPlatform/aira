@@ -1,21 +1,11 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing all endpoints related to exam services
 """
+
+# pylint: disable=unused-argument,redefined-outer-name
 from __future__ import annotations
 
+import json
 import logging
 import uuid
 
@@ -23,27 +13,25 @@ import fastapi
 import fastapi_injector
 
 from api import dependencies, errors, models, ports, typings
-from api.helpers import auth
+from api.helpers import auth, util
 from api.helpers import schemas as util_schemas
 from api.helpers import session_manager as sess_mg
-from api.helpers import util
 
-from . import schemas
+from . import crud, schemas
 
-router = fastapi.APIRouter()
+router = fastapi.APIRouter(tags=["exams"])
 
 logger = logging.getLogger(__name__)
 
 
-@router.get("", dependencies=[fastapi.Security(auth.get_token)])
+@router.get(
+    "", dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "exam.list"])]
+)
 async def list_resources(
     list_data: util_schemas.ListSchema = fastapi.Depends(),
     list_exams: ports.ListExams = fastapi_injector.Injected(ports.ListExams),
     session_manager: sess_mg.SessionManager = fastapi.Depends(
         dependencies.get_session_manager
-    ),
-    list_pending: ports.ListPendingExams = fastapi_injector.Injected(
-        ports.ListPendingExams
     ),
 ) -> schemas.ExamList:
     """
@@ -55,26 +43,15 @@ async def list_resources(
     """
     session = await session_manager.get_current_session()
     scopes = session.user.role.scopes
-    if "user" in scopes:
-        group_id = session.user.groups[0].id
-        if not group_id:
-            raise errors.NotFound("group")
-        result, pagination_metadata = await list_pending(
-            user_id=session.user_id,
-            group_id=group_id,
-            page_size=list_data.page_size,
-            page=list_data.page,
-        )
-    else:
-        groups = None
-        if "admin" not in scopes:
-            groups = [group.id for group in session.user.groups]
-        result, pagination_metadata = await list_exams(
-            groups=groups,
-            page_size=list_data.page_size,
-            page=list_data.page,
-            query=list_data.q,
-        )
+    groups = None
+    if "exam.list" in scopes:
+        groups = [group.id for group in session.user.groups]
+    result, pagination_metadata = await list_exams(
+        groups=groups,
+        page_size=list_data.page_size,
+        page=list_data.page,
+        query=list_data.q,
+    )
 
     return schemas.ExamList(
         items=[schemas.Exam.from_orm(item) for item in result],
@@ -111,6 +88,47 @@ async def get(
     return schemas.ExamGet.from_orm(exam)
 
 
+@router.get(
+    "/{exam_id}/users/{user_id}",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["exam.list"])],
+)
+async def get_user_exam(
+    get_user_exam: ports.GetUsersExamDetails = fastapi_injector.Injected(
+        ports.GetUsersExamDetails
+    ),
+    storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    exam_id: uuid.UUID = fastapi.Path(...),
+    user_id: uuid.UUID = fastapi.Path(...),
+) -> schemas.ExamWithQuestionsDataGet:
+    """
+    Get exams.
+
+    Handles requests related to finding a specific exam.
+
+    :param get_user_exam: implementation exam get query.
+    :param exam_id: query param with exam identifier.
+    :param user_id: query param with user identifier.
+    """
+    result = await get_user_exam(exam_id=exam_id, user_id=user_id)
+
+    if not result:
+        raise errors.NotFound()
+
+    exam, questions = result[0]
+    exam_dict = exam.__dict__
+    questions = json.loads(questions)
+
+    for question in questions:
+        if question.get("response"):
+            signed_audio_url = await storage.generate_signed_url(
+                question["response"]["audio_url"].split("/", 4)[-1], "", "GET"
+            )
+            question["response"]["audio_url"] = signed_audio_url
+    exam_dict["questions"] = sorted(questions, key=lambda x: x["order"])
+
+    return schemas.ExamWithQuestionsDataGet(**exam_dict)
+
+
 @router.post(
     "",
     dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
@@ -119,7 +137,8 @@ async def create(
     uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
         ports.UnitOfWorkBuilder
     ),
-    speech: ports.SpeechToText = fastapi_injector.Injected(ports.SpeechToText),
+    settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
+    storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
     body: schemas.ExamCreate = fastapi.Body(...),
 ) -> schemas.ExamGet:
     """
@@ -128,32 +147,23 @@ async def create(
     Handles requests related to finding a specific exam.
 
     :param uow_builder: implementation uow builder.
+    :param settings: Settings port.
+    :param storage: Storage port.
     :param body: exam creation body.
     """
     async with uow_builder() as uow:
         question_list = []
         for question in body.questions:
-            text_list: list[str] = []
-            match question.type:
-                case models.QuestionType.PHRASES:
-                    phrase_list = (
-                        question.data.split(". ")
-                        if ". " in question.data
-                        else question.data.split(".")
-                    )
-                    for phrase in phrase_list:
-                        text_list.extend(util.words_recursion(phrase))
-                case models.QuestionType.WORDS:
-                    text_list = question.data.split(" ")
-            phrases = [{"value": text, "boost": 100} for text in text_list]
-            phrase_set_id = await speech.create_phrase_set(phrases)
-            phrase_id = phrase_set_id.split("/")[-1]
+            speech = dependencies.get_speech_to_text("v1", settings, storage)
+            phrase_id = await crud.build_question_phrase(question, speech)
             question_list.append(
                 models.Question(
                     name=question.name,
                     data=question.data,
+                    formatted_data=question.formatted_data,
                     phrase_id=phrase_id,
                     type=question.type,
+                    order=question.order,
                 )
             )
         exam = models.Exam(
@@ -168,128 +178,54 @@ async def create(
     return schemas.ExamGet.from_orm(exam_model)
 
 
-@router.get(
-    "/{exam_id}/questions",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["user"])],
+@router.patch(
+    "/{exam_id}",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
 )
-async def get_questions(
-    session_manager: sess_mg.SessionManager = fastapi.Depends(
-        dependencies.get_session_manager
-    ),
+async def update_exam(
     exam_id: uuid.UUID = fastapi.Path(...),
-    list_questions: ports.ListQuestionsWithStatus = fastapi_injector.Injected(
-        ports.ListQuestionsWithStatus
-    ),
-) -> list[schemas.QuestionList]:
-    """
-    List pending questions.
-
-    Handles requests related to questions being listed.
-
-    :param list_questions: implementation of questions list.
-    """
-    session = await session_manager.get_current_session()
-    group_id = session.user.groups[0].id
-    results = await list_questions(session.user_id, group_id, exam_id)
-    return [
-        schemas.QuestionList(
-            id=question.id,
-            data=question.data,
-            name=question.name,
-            type=question.type,
-            status=question_status.status
-            if question_status
-            else models.ExamStatus.NOT_STARTED,
-        )
-        for question, question_status in results
-    ]
-
-
-@router.post(
-    "/{exam_id}/questions/{question_id}",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["user"])],
-)
-# pylint: disable=too-many-locals
-async def send_question_data(
-    session_manager: sess_mg.SessionManager = fastapi.Depends(
-        dependencies.get_session_manager
-    ),
-    exam_id: uuid.UUID = fastapi.Path(...),
-    question_id: uuid.UUID = fastapi.Path(...),
-    get_pending: ports.GetPendingQuestion = fastapi_injector.Injected(
-        ports.GetPendingQuestion
-    ),
-    get_exam_user: ports.GetExamUserStatus = fastapi_injector.Injected(
-        ports.GetExamUserStatus
-    ),
-    session_factory: typings.SessionFactory = fastapi_injector.Injected(
-        typings.SessionFactory
-    ),
-    publisher: ports.MessagePublisher = fastapi_injector.Injected(
-        ports.MessagePublisher
-    ),
-    body: schemas.QuestionPost = fastapi.Body(...),
+    body: schemas.ExamPatch = fastapi.Body(...),
     settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
-) -> fastapi.Response:
+    storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+) -> schemas.ExamGet:
     """
-    Answer a pending question.
+    Patch exams.
 
-    Handles requests related to questions being listed.
+    Handles requests related to updating a specific exam.
 
-    :param list_pending_questions: implementation of questions list.
+    :param exam_id: query param with exam identifier.
+    :param uow_builder: implementation uow builder.
+    :param settings: Settings port.
+    :param storage: Storage port.
+    :param body: exam creation body.
     """
-    user_session = await session_manager.get_current_session()
-    group_id = user_session.user.groups[0].id
-    organization_id = user_session.user.organizations[0].id
-    async with session_factory() as session:
-        question_data = await get_pending(
-            user_session.user_id, group_id, exam_id, question_id
-        )
-        if not question_data:
-            raise fastapi.HTTPException(
-                status_code=400,
-                detail="You already finished this exam/question",
+    speech = dependencies.get_speech_to_text("v1", settings, storage)
+    async with uow_builder() as uow:
+        exam = await uow.exam_repository.get(exam_id=exam_id)
+        if util.time_now() >= exam.start_date:
+            raise errors.CantEditExam
+        body_data = body.dict()
+        body_data.pop("questions")
+        for q in exam.questions:
+            await speech.delete_phrase_set(q.phrase_id)
+        exam.questions.clear()
+        for question in body.questions:
+            phrase_id = await crud.build_question_phrase(question, speech)
+            exam.questions.append(
+                models.Question(
+                    name=question.name,
+                    data=question.data,
+                    formatted_data=question.formatted_data,
+                    phrase_id=phrase_id,
+                    type=question.type,
+                    order=question.order,
+                )
             )
+        for k, v in body_data.items():
+            setattr(exam, k, v)
+        await uow.commit()
 
-        if not await get_exam_user(
-            user_id=user_session.user_id, exam_id=exam_id, group_id=group_id
-        ):
-            exam_user = models.ExamUser(
-                exam_id=exam_id,
-                user_id=user_session.user_id,
-                status=models.ExamStatus.IN_PROGRESS,
-            )
-            session.add(exam_user)
-
-        exam_user_question = models.ExamUserQuestion(
-            exam_id=exam_id,
-            user_id=user_session.user_id,
-            question_id=question_id,
-            group_id=group_id,
-            organization_id=organization_id,
-            result=[],
-            right_count=0,
-            audio_url="",
-        )
-        session.add(exam_user_question)
-
-        text_list = (
-            question_data.data.replace(". ", " ")
-            .replace(", ", " ")
-            .replace(".", " ")
-            .replace(",", " ")
-            .strip()
-            .split(" ")
-        )
-
-        await publisher.publish(
-            schemas.QuestionMessage(
-                result_id=exam_user_question.id,
-                phrase_set_id=question_data.phrase_id,
-                audio=body.url,
-                words=text_list,
-            ),
-            topic=settings.get("pubsub_convert_topic"),
-        )
-        await session.commit()
-    return fastapi.Response(status_code=fastapi.status.HTTP_201_CREATED)
+    return schemas.ExamGet.from_orm(exam)

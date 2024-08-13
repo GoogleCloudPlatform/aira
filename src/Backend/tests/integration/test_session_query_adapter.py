@@ -1,28 +1,16 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the session_model repository.
 """
+
 import contextlib
 import datetime
 import uuid
 
 import pytest
-
 from api import errors, models
 from api.adapters.sqlalchemy import session_query
 from api.helpers import time_now
+
 from tests.helpers import database
 
 
@@ -38,6 +26,7 @@ def _create_session_model(user_id: uuid.UUID, qty: int = 1) -> list[models.Sessi
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_session_model_query() -> None:
     """
     Test of adapter to get an session_model from query.
@@ -58,6 +47,7 @@ async def test_get_session_model_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_session_model_repo_query() -> None:
     """
     Test of adapter to get session_query.
@@ -76,6 +66,7 @@ async def test_get_session_model_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_create_session_model() -> None:
     """
     Test of adapter to create session_query.
@@ -92,6 +83,7 @@ async def test_create_session_model() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create session_query.

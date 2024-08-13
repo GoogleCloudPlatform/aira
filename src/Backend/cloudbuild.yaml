@@ -11,22 +11,46 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 steps:
-# Build the container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA', '.' ]
-  
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA",
+        ".",
+      ]
 
-# Push the container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push','us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA']
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      ["push", "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA"]
 
-# Deploy container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args: ['run', 'deploy', 'backend', '--project=$_PROJECT_ID', '--image', 'us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA', '--region', 'us-east1', '--service-account', '$PROJECT_ID-backend-engine@$PROJECT_ID.iam.gserviceaccount.com','--update-secrets=_BUCKET_PATH=bucket_name:latest,_DATABASE_URI=sql_connection_url:latest,_PUBSUB_TOPIC=processor_queue:latest,_BQ_DATASET=dataset_name:latest,_BQ_TABLE_NAME=table_name:latest,_PUBSUB_CONVERT_TOPIC=conversion_queue:latest,_ORIGIN=front_url:latest,/secrets/api/gcs_sa_key=gcs_sa_key:latest','--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=your_looker_url,_LOOKER_SECRET=your_looker_secret','--allow-unauthenticated','--vpc-connector=vpc-con','--set-cloudsql-instances=$PROJECT_ID:us-east1:$PROJECT_ID-sql-instance']
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "deploy",
+        "backend",
+        "--project=$_PROJECT_ID",
+        "--image",
+        "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA",
+        "--region",
+        "us-east1",
+        "--service-account",
+        "$PROJECT_ID-backend-engine@$PROJECT_ID.iam.gserviceaccount.com",
+        "--update-secrets=_BUCKET_PATH=bucket_name:latest,_DATABASE_URI=sql_connection_url:latest,_PUBSUB_TOPIC=processor_queue:latest,_BQ_DATASET=dataset_name:latest,_BQ_TABLE_NAME=table_name:latest,_PUBSUB_CONVERT_TOPIC=conversion_queue:latest,_ORIGIN=front_url:latest,LOOKERSDK_BASE_URL=lookersdk_base_url:latest,LOOKERSDK_CLIENT_ID=lookersdk_client_id:latest,LOOKERSDK_CLIENT_SECRET=lookersdk_client_secret:latest,_LOOKER_SECRET=looker_secret:latest,/secrets/api/gcs_sa_key=gcs_sa_key:latest",
+        "--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=update_value.cloud.looker.com,_FRONT_BASE_URL=https://frontend-url,_SENDGRID_KEY=update-here,_FORGOT_PW_TEMPLATE=update-here,_SENDER_EMAIL=update-here@domain.com",
+        "--allow-unauthenticated",
+        "--vpc-connector=vpc-con",
+        "--set-cloudsql-instances=$PROJECT_ID:us-east1:$PROJECT_ID-sql-instance",
+      ]
 images:
-  - 'us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA'
+  - "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:$SHORT_SHA"
 
 options:
   logging: CLOUD_LOGGING_ONLY

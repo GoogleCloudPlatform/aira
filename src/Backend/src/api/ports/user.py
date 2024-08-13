@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module related to the port of any external auth.
 """
+
 import abc
 import uuid
 
@@ -32,6 +20,7 @@ class UserRepository(abc.ABC):
         user_id: uuid.UUID | None = None,
         external_id: str | None = None,
         email: str | None = None,
+        reset_token: str | None = None,
     ) -> models.User:
         """
         Returns the model data.
@@ -56,6 +45,51 @@ class UserRepository(abc.ABC):
         :param user_model: the user model parameter.
         """
 
+    @abc.abstractmethod
+    async def create_or_update_student(
+        self,
+        student: typings.CreateOrUpdateUser,
+        group_customer_id: str,
+        updated_groups: dict[str, models.Group],
+        cached_users: list[models.User],
+    ) -> models.User | None:
+        """
+        Method to create or update a list of student filtering by customer id.
+
+        :param student: student to insert or update.
+        :param group_customer_id: group customer id to filter.
+        """
+
+    @abc.abstractmethod
+    async def create_or_update_professor(
+        self,
+        professor: typings.CreateOrUpdateUser,
+        groups_customer_id: list[str],
+        organizations_customer_id: list[str],
+        updated_organizations: dict[str, models.Organization],
+        updated_groups: dict[str, models.Group],
+        cached_profs: list[models.User],
+    ) -> models.User | None:
+        """
+        Method to create or update a list of professor
+        filtering by customer id and email.
+
+        :param professor: professor to insert or update.
+        :param group_customer_id: group customer id to filter.
+        """
+
+    @abc.abstractmethod
+    async def list(
+        self,
+        user_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.User]:
+        """
+        Method to facilitate user import and list users based on an id list.
+
+        :param user_ids: array with user ids.
+        """
+
 
 class ListUsers(abc.ABC):
     """
@@ -74,6 +108,27 @@ class ListUsers(abc.ABC):
     ) -> tuple[list[models.User], typings.PaginationMetadata]:
         """
         Method to list all users.
+        """
+
+
+class ListUsersWithExams(abc.ABC):
+    """
+    Query to get all users.
+    """
+
+    @abc.abstractmethod
+    async def __call__(
+        self,
+        groups: list[uuid.UUID],
+        organizations: list[uuid.UUID],
+        role_ids: list[uuid.UUID] | None = None,
+        query: str | None = None,
+        show_finished: bool = True,
+        page_size: int = 10,
+        page: int = 1,
+    ) -> tuple[list[dict], typings.PaginationMetadata]:  # type:ignore[type-arg]
+        """
+        Method to list all users with exams.
         """
 
 
@@ -102,4 +157,20 @@ class CheckUserOnGroup(abc.ABC):
         Method to check if user on group.
 
         :param group_id: the group identifier.
+        """
+
+
+class ListPersonifiableUsers(abc.ABC):
+    """
+    List users that a user can impersonate.
+    """
+
+    @abc.abstractmethod
+    async def __call__(self, groups: list[uuid.UUID]) -> list[models.User]:
+        """
+        Method to list users that a user can impersonate.
+
+        :param groups: list of identifier for groups.
+
+        :returns: list of users that can be impersonated.
         """

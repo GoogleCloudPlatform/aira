@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all role related sqlalchemy memory implementation queries.
 """
+
 import uuid
 
 from api import errors, models, ports, typings
@@ -34,8 +22,8 @@ class RoleRepository(ports.RoleRepository):
         """
         Get role by params.
 
-        :params role_id: role id on database.
-        :params name: name on database.
+        :param role_id: role id on database.
+        :param name: name on database.
         """
         if self._items:
             items = self._items
@@ -81,6 +69,7 @@ class ListRoles(ports.ListRoles):
 
     async def __call__(
         self,
+        scope: str | None = None,
         page_size: int = 10,
         page: int = 1,
     ) -> tuple[list[models.Role], typings.PaginationMetadata]:
@@ -88,6 +77,7 @@ class ListRoles(ports.ListRoles):
         Method to list all roles.
         """
         items = self._items
+        items = [item for item in items if scope in item.scopes] if scope else items
         self.called += 1
 
         return items[

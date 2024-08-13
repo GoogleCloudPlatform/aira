@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all organization related sqlalchemy memory implementation queries.
 """
+
 import uuid
 
 from api import errors, models, ports, typings
@@ -35,7 +23,7 @@ class OrganizationRepository(ports.OrganizationRepository):
         """
         Get organization by params.
 
-        :params organization_id: organization id on database.
+        :param organization_id: organization id on database.
         """
         if self._items:
             items = self._items
@@ -67,6 +55,30 @@ class OrganizationRepository(ports.OrganizationRepository):
         :param organization_model: the organization model parameter.
         """
         self._items = [item for item in self._items if item.id != organization_model.id]
+
+    async def create_or_update(
+        self,
+        sync_org: typings.CreateOrUpdateOrganization,
+        cached_orgs: list[models.Organization],
+    ) -> models.Organization:
+        raise NotImplementedError()
+
+    async def list(
+        self,
+        org_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Organization]:
+        """
+        List orgs by org_ids.
+
+        :param org_ids: organization id on database.
+        """
+        items = self._items
+        if org_ids:
+            items = [item for item in items if item.id in org_ids]
+        if customer_ids:
+            items = [item for item in items if item.customer_id in customer_ids]
+        return items
 
 
 class GetOrganization(ports.GetOrganization):

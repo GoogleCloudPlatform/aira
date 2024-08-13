@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing all modules to be instantiated
 """
+
 import logging
 import os
 
@@ -23,8 +11,8 @@ import injector
 from passlib import context
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
-from . import ports
-from .adapters import google, memory
+from . import logging_config, ports, tracing
+from .adapters import google, memory, sendgrid, sere
 from .adapters.sqlalchemy import (
     exam,
     group,
@@ -192,6 +180,18 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
 
     @injector.provider
     @injector.singleton
+    def provide_list_users_with_exams(
+        self, session_factory: SessionFactory
+    ) -> ports.ListUsersWithExams:
+        """
+        Provides sqlalchemy list users.
+        """
+        return user.ListUsersWithExams(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
     def provide_get_user(self, session_factory: SessionFactory) -> ports.GetUser:
         """
         Provides sqlalchemy get user.
@@ -242,6 +242,18 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
 
     @injector.provider
     @injector.singleton
+    def provide_get_users_exam_details(
+        self, session_factory: SessionFactory
+    ) -> ports.GetUsersExamDetails:
+        """
+        Provides sqlalchemy get user's exam details.
+        """
+        return exam.GetUsersExamDetails(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
     def provide_list_pending_exams(
         self, session_factory: SessionFactory
     ) -> ports.ListPendingExams:
@@ -249,6 +261,18 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
         Provides sqlalchemy get user.
         """
         return exam.ListPendingExams(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_exams_with_results(
+        self, session_factory: SessionFactory
+    ) -> ports.ListExamsWithResults:
+        """
+        Provides sqlalchemy list exams with results.
+        """
+        return exam.ListExamsWithResults(
             session_factory=session_factory,
         )
 
@@ -336,6 +360,44 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
             session_factory=session_factory,
         )
 
+    @injector.provider
+    @injector.singleton
+    def provide_list_org_utils(
+        self, session_factory: SessionFactory
+    ) -> ports.ListOrganizationUtils:
+        """
+        Provides sqlalchemy ListOrganizationUtils.
+        """
+        return organization.ListOrganizationUtils(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_personifiable(
+        self, session_factory: SessionFactory
+    ) -> ports.ListPersonifiableUsers:
+        """
+        Provides sqlalchemy ListPersonifiableUsers.
+        """
+        return user.ListPersonifiableUsers(
+            session_factory=session_factory,
+        )
+
+
+class SyncModule(injector.Module):
+    """
+    Sync related module.
+    """
+
+    @injector.provider
+    @injector.singleton
+    def provide_sere_connector(self, settings: Settings) -> sere.SereApi:
+        """
+        Provides sqlalchemy ListSereProfessors.
+        """
+        return sere.SereApi(settings.get("sere_api_key", ""))
+
 
 class MemoryModule(injector.Module):
     """
@@ -374,20 +436,6 @@ class GoogleModule(injector.Module):
             project_id=settings.get("project_id", ""),
             storage_path=settings.get("bucket_path", ""),
             creds_path=settings.get("gcp_storage_credentials", ""),
-        )
-
-    @injector.provider
-    @injector.singleton
-    def provide_speech_to_text(
-        self, settings: Settings, storage: ports.Storage
-    ) -> ports.SpeechToText:
-        """
-        Provide the Cloud Speech to Text.
-        """
-        return google.SpeechToText(
-            project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_stt_credentials", ""),
-            storage=storage,
         )
 
     @injector.provider
@@ -449,17 +497,137 @@ class GoogleModule(injector.Module):
         )
 
 
-def create_container() -> injector.Injector:
+class UtilModule(injector.Module):
+    """
+    Module for util packages.
+    """
+
+    @injector.provider
+    @injector.singleton
+    def provide_notification_handler(self, settings: Settings) -> ports.Notification:
+        """
+        Provides the sendgrid notification handler.
+        """
+        return sendgrid.Sendgrid(
+            api_key=settings.get("sendgrid_key", ""),
+            sender_email=settings.get("sender_email", ""),
+        )
+
+
+class InternetlessModule(injector.Module):
+    """
+    Google module.
+    """
+
+    @injector.provider
+    @injector.singleton
+    def provide_secret_manager(self) -> ports.SecretManager:
+        """
+        Provide the GCP's Secret Manager.
+        """
+        return memory.SecretManager()
+
+    @injector.provider
+    @injector.singleton
+    def provice_firebase_auth(self, settings: Settings) -> ports.ExternalAuth:
+        """
+        Provide the GCP's Secret Manager.
+        """
+        return google.FirebaseAuth(
+            project_id=settings.get("project_id", ""),
+            creds_path=settings.get("gcp_fb_credentials", ""),
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_pubsub(self, settings: Settings) -> ports.MessagePublisher:
+        """
+        Provide the GCP's Pubsub.
+        """
+        return google.MessagePublisher(
+            project_id=settings.get("project_id", ""),
+            creds_path=settings.get("gcp_bucket_credentials", ""),
+            topic=settings.get("pubsub_topic", ""),
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_bigquery(self, settings: Settings) -> ports.AnalyticalResult:
+        """
+        Provide the GCP's BigQuery.
+        """
+        return google.BigQuery(
+            project_id=settings.get("project_id", ""),
+            dataset=settings.get("bq_dataset", ""),
+            table_name=settings.get("bq_table_name", ""),
+            creds_path=settings.get("gcp_bigquery_credentials", ""),
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_looker(self, settings: Settings) -> ports.Dashboard:
+        """
+        Provide the GCP's Looker.
+        """
+        return google.LookerDashboard(
+            looker_secret=settings.get("looker_secret", ""),
+            looker_host=settings.get("looker_host", ""),
+        )
+
+
+class TracingModule(injector.Module):
+    @injector.provider
+    @injector.singleton
+    def provide_tracing_context(
+        self,
+        settings: Settings,
+    ) -> tracing.TracingContext:
+        """
+        Provide the tracing contexts.
+        """
+        match settings.get("export_to", "console"):
+            case "google":
+                return tracing.GoogleTracingContext(
+                    project_id=settings.get("project_id", "unknown"),
+                    environment=settings.get("env", "unknown"),
+                )
+
+            case "console":
+                return tracing.ConsoleTracingContext(
+                    project_id=settings.get("project_id", "unknown"),
+                    environment=settings.get("env", "unknown"),
+                )
+
+            case _:
+                return tracing.MemoryTracingContext(
+                    project_id=settings.get("project_id", "unknown"),
+                    environment=settings.get("env", "unknown"),
+                )
+
+    @injector.provider
+    def provide_log_context(
+        self,
+    ) -> logging_config.LogContext:
+        """
+        Provide the log contexts.
+        """
+        return logging_config.StructLogLogContext()
+
+
+def create_container(mods: tuple[injector.Module] | None = None) -> injector.Injector:
     """
     Create the dependency injection container.
 
     :return: configured dependency injection container.
     """
-    modules = (
+    modules = mods or (
         SettingsModule(),
         EngineSQLAlchemy(),
         SQLAlchemyModule(),
+        SyncModule(),
         GoogleModule(),
+        UtilModule(),
+        TracingModule(),
     )
 
     return injector.Injector(modules)
@@ -475,3 +643,34 @@ def get_session_manager(
     return session_manager.SessionManager(
         token_data=token_data, get_session_query=get_session_query
     )
+
+
+def get_speech_to_text(
+    version: str,
+    settings: Settings,
+    storage: ports.Storage,
+) -> ports.SpeechToText:
+    """
+    Get the speech to text.
+    """
+    match version:
+        case "v2":
+            return google.SpeechToTextV2(
+                project_id=settings.get("project_id", ""),
+                creds_path=settings.get("gcp_stt_credentials", ""),
+                storage=storage,
+            )
+        case "v1":
+            return google.SpeechToText(
+                project_id=settings.get("project_id", ""),
+                creds_path=settings.get("gcp_stt_credentials", ""),
+                storage=storage,
+            )
+        case "v2chirp":
+            return google.SpeechToTextV2Chirp(
+                project_id=settings.get("project_id", ""),
+                creds_path=settings.get("gcp_stt_credentials", ""),
+                storage=storage,
+            )
+        case _:
+            raise ValueError("Invalid version")

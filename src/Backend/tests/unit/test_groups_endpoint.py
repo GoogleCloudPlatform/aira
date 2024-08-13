@@ -1,31 +1,19 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Unit tests for `groups/endpoints.py`
 """
+
 import datetime
+import unittest.mock
 import uuid
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
 from api import errors, models
 from api.adapters.memory import group, unit_of_work, user
 from api.helpers import schemas as util_schemas
 from api.routers.groups import endpoints as groups_endpoint
 from api.routers.groups import schemas
+from hypothesis import strategies as st
 
 
 @pytest.mark.asyncio
@@ -43,6 +31,7 @@ async def test_list_groups(
     shift: str | None,
     grade: models.Grades | None,
     fake_org: models.Organization,
+    fake_session: models.Session,
 ) -> None:
     """
     tests if auth endpoint calls correctly.
@@ -52,7 +41,7 @@ async def test_list_groups(
         tmp_group = models.Group(
             grade=models.Grades.FIRST_FUND,
             customer_id="fake",
-            shift=f"test-{i}",
+            shift=models.Shifts.MORNING,
             name=f"test-{i}",
             organization_id=fake_org.id,
         )
@@ -61,6 +50,9 @@ async def test_list_groups(
         tmp_group.updated_at = datetime.datetime.now(tz=datetime.UTC)
         groups.append(tmp_group)
     list_groups = group.ListGroups(groups)
+    session_mg = unittest.mock.AsyncMock()
+    fake_session.user.role.scopes = ["admin"]
+    session_mg.get_current_session.return_value = fake_session
     response = await groups_endpoint.list_resources(
         shift=shift,
         grade=grade,
@@ -70,6 +62,7 @@ async def test_list_groups(
             page_size=page_size,
             page=1,
         ),
+        session_manager=session_mg,
     )
     tmp_response = [
         schemas.GroupGet.from_orm(group)

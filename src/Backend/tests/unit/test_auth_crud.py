@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Unit tests for `process`
 """
+
 import datetime
 import functools
 import logging
@@ -23,9 +11,6 @@ import uuid
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-from passlib import context
-
 from api import errors, models, typings
 from api.adapters.memory import (
     external_auth,
@@ -36,6 +21,9 @@ from api.adapters.memory import (
 )
 from api.helpers import schemas as helper_schema
 from api.routers.auth import crud, schemas
+from hypothesis import strategies as st
+from passlib import context
+
 from tests.helpers import strats
 
 logger = logging.getLogger(__name__)
@@ -112,7 +100,7 @@ async def test_login(
     access_token=st.text(min_size=1, max_size=100),
     refresh_token=st.text(min_size=1, max_size=100),
 )
-async def test_create_session(  # pylint: disable=too-many-locals
+async def test_create_session(
     user_id: uuid.UUID,
     user_name: str,
     session_id: uuid.UUID,
@@ -131,6 +119,7 @@ async def test_create_session(  # pylint: disable=too-many-locals
         "id": session_id,
         "user_name": user_name,
         "scopes": scopes,
+        "user_id": user_id,
     }
     create_token = functools.partial(side_eff_create_token, data=data)
     secret_mg = secret_manager.SecretManager()
@@ -216,7 +205,7 @@ async def test_should_not_refresh(
 @hypothesis.settings(
     suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture],
 )
-async def test_should_refresh_successfully(  # pylint: disable=too-many-locals
+async def test_should_refresh_successfully(
     user_id: uuid.UUID,
     user_name: str,
     session_id: uuid.UUID,
@@ -237,6 +226,7 @@ async def test_should_refresh_successfully(  # pylint: disable=too-many-locals
         "id": session_id,
         "user_name": user_name,
         "scopes": scopes,
+        "user_id": user_id,
     }
 
     secret_mg = secret_manager.SecretManager()
@@ -282,7 +272,7 @@ async def test_should_refresh_successfully(  # pylint: disable=too-many-locals
     suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture],
 )
 @pytest.mark.asyncio
-async def test_refresh_function(  # pylint: disable=too-many-locals
+async def test_refresh_function(
     user_id: uuid.UUID,
     user_name: str,
     session_id: uuid.UUID,
@@ -303,6 +293,7 @@ async def test_refresh_function(  # pylint: disable=too-many-locals
         "id": session_id,
         "user_name": user_name,
         "scopes": scopes,
+        "user_id": user_id,
     }
 
     secret_mg = secret_manager.SecretManager()

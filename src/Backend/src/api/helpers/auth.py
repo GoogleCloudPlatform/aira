@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing things auth related.
 """
+
 import datetime
 import logging
 import uuid
@@ -22,9 +10,10 @@ import aiocache
 import fastapi
 import fastapi.security
 import fastapi_injector
+import jwt
 from fastapi.security import http as http_sec
-from jose import exceptions, jwt
-from jose.constants import ALGORITHMS
+from google.auth.transport import requests
+from google.oauth2 import id_token
 
 from api import errors, ports
 from api.typings import Settings
@@ -84,10 +73,28 @@ def create_token(
         "scopes": sorted(scopes),
     }
     return jwt.encode(
-        claims=claims,
+        payload=claims,
         key=certificate,
-        algorithm=ALGORITHMS.RS512,
+        algorithm="RS512",
     )
+
+
+async def validate_scheduler_token(
+    token: http_sec.HTTPAuthorizationCredentials = fastapi.Depends(auth_scheme),
+    settings: Settings = fastapi_injector.Injected(Settings),
+) -> None:
+    """
+    Validate the cloud scheduler token.
+    """
+    request = requests.Request()
+    try:
+        id_token.verify_oauth2_token(
+            id_token=token.credentials,
+            request=request,
+            audience=settings.get("project_id"),
+        )
+    except ValueError as exc:
+        raise errors.TokenExpired() from exc
 
 
 async def get_token(
@@ -110,10 +117,10 @@ async def get_token(
         decoded_token = jwt.decode(
             creds,
             key=public_key,
-            algorithms=[ALGORITHMS.RS512],
+            algorithms=["RS512"],
             audience=settings.get("project_id"),
         )
-    except (exceptions.JWKError, exceptions.JWTError) as exc:
+    except jwt.PyJWTError as exc:
         raise errors.TokenExpired() from exc
     token_data = TokenData.parse_obj(decoded_token)
     if scopes.scopes and not any(

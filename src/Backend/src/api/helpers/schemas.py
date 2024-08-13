@@ -1,24 +1,16 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Schemas for helpers.
 """
+
 import dataclasses
 import datetime
+import enum
+import urllib.parse
 import uuid
 
 import pydantic
+
+from api import errors, models
 
 
 class TokenData(pydantic.BaseModel):
@@ -34,13 +26,22 @@ class TokenData(pydantic.BaseModel):
     scopes: list[str]
 
 
+class ImportData(pydantic.BaseModel):
+    """
+    Schema related to all import data
+    """
+
+    url: pydantic.AnyHttpUrl
+    key_relation: dict[str, str]
+
+
 class ListSchema(pydantic.BaseModel):
     """
     Default list schema for list resources endpoints.
     """
 
     page_size: int = pydantic.Field(10, ge=-1, le=100)
-    page: int = pydantic.Field(1, ge=1, le=100)
+    page: int = pydantic.Field(1, ge=1, le=1000)
     q: str | None = None
 
     @pydantic.validator("q")
@@ -49,15 +50,11 @@ class ListSchema(pydantic.BaseModel):
         """
         Validator to ensure that, if the field is sent, it's not None.
         """
-        if q:
-            if q.strip() != "" and len(q) < 3:
-                return (  # pylint: disable=fixme
-                    None  # TODO raise error when frontend starts treating it properly
-                )
-                # raise errors.FieldShouldBeLenghtier(field="q", min_length=3)
-            if q.strip() == "":
-                return None
-        return q
+        if q and q.strip() != "":
+            if len(q) < 3:
+                raise errors.FieldShouldBeLenghtier(field="q", min_length=3)
+            return urllib.parse.unquote(q)
+        return None
 
 
 @dataclasses.dataclass
@@ -69,7 +66,9 @@ class AnalyticalResult:  # pylint: disable=too-many-instance-attributes
     school_uuid: uuid.UUID
     school_name: str
     school_city: str
+    school_state: str
     school_region: str | None
+    school_county: str
     class_uuid: uuid.UUID
     class_name: str
     class_grade: str
@@ -87,3 +86,14 @@ class AnalyticalResult:  # pylint: disable=too-many-instance-attributes
     response_words: list[str]
     response_amount_hits: int
     response_timestamp: datetime.datetime
+    user_rating: models.UserRating | None
+
+
+class ImportType(enum.StrEnum):
+    """
+    Enum for type of import
+    """
+
+    USER = "USER"
+    ORGANIZATION = "ORGANIZATION"
+    GROUP = "GROUP"

@@ -1,28 +1,16 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the user repository.
 """
+
 import contextlib
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
 from api import errors, models
 from api.adapters.sqlalchemy import user
 from api.routers.users import schemas
+from hypothesis import strategies as st
+
 from tests.helpers import database, strats
 
 
@@ -35,17 +23,21 @@ def _create_user_from_schema(
             name=schema.name,
             type=schema.type,
             email_address=schema.email_address,
-            external_id=schema.external_id,  # type: ignore[arg-type]
-            customer_id=schema.customer_id,  # type: ignore[arg-type]
+            external_id=schema.external_id,
+            customer_id=schema.customer_id,
             groups=[],
             organizations=[],
             role_id=role_model.id,
+            state=None,
+            region=None,
+            county=None,
         )
         for schema in schema_list
     ]
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_user_query() -> None:
     """
     Test of adapter to get an user from query.
@@ -65,6 +57,7 @@ async def test_get_user_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_user_repo_query() -> None:
     """
     Test of adapter to get user.
@@ -79,6 +72,7 @@ async def test_get_user_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     user_schema=st.builds(
         schemas.UserCreate,
@@ -105,6 +99,7 @@ async def test_create_user(user_schema: schemas.UserCreate) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create user.
