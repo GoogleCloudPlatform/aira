@@ -1,0 +1,44 @@
+{
+    "exam": {
+        "titles": {
+            "question": "Question",
+            "of": "of",
+            "exam_instructions": "Exam Instructions",
+            "students": "Students"
+        },
+        "messages": {
+            "select_student": "Select a student to take a new exam.",
+            "top_message_multiple_choice": "When you are ready, please read the text below and select the answer you think is correct",
+            "top_message": "When you are ready, please click the 'Start Recording' button and read the text below with your microphone",
+            "bottom_message": "When you finish the recording, click the 'Stop Recording' button and then 'Next'",
+            "success_message": "Success",
+            "audio_success_record": "your audio recordings were successful",
+            "recorded_as_impersonate": "Recorded as teacher",
+            "analisys_message": "If you want to analyze a student's result, simply access the Results option in the menu and search for the name of the student you want. Once you identify the student, click on View Results and choose which assessment you want to check the result.\nIt takes about 2 minutes after an assessment is completed for the result to be available in the Results menu.",
+            "redirecting": "Redirecting",
+            "seconds": "seconds",
+            "no_users_found": "No students found."
+        },
+        "buttons": {
+            "start_exam": "Start Exam",
+            "go_to_group": "View Class",
+            "go_to_exams": "View Exams",
+            "go_to_results": "Results",
+            "stop": "Stop",
+            "record": "Record",
+            "next": "Next",
+            "start_again": "Start another recording session",
+            "next_student": "Next student",
+            "recording_state": "Recording...",
+            "stop_recording_state": "Stop Recording",
+            "microphone_tester": "Microphone Tester",
+            "close": "Close"
+        },
+        "tips": {
+            "tip_test_mic": "Microphone Test.\nClick the play button below and say a few words.",
+            "tip_get_a_place": "Find a quiet place to take the test, so external interference won't disturb your recording.",
+            "tip_only_the_student": "Only the student should read the words during the recording. If someone is helping the student during the test, it is important to remain silent during the recording to avoid compromising the result.",
+            "tip_tour": "If you have any questions about how to proceed with the exam, use the help button at the bottom right corner of the screen."
+        }
+    }
+}

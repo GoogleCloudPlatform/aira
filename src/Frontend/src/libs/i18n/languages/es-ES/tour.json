@@ -1,0 +1,14 @@
+{
+  "tour": {
+    "step_exam__mic__tester": "",
+    "step__exam__question__info": "Observe las instrucciones referentes a la pregunta.",
+    "step__exam__visor": "Aquí encontrará las palabras o el texto que deben leerse.",
+    "step__exam__visor__expand": "Haga clic aquí para expandir el cuadro con las palabras o el texto",
+    "step__exam__timer": "¡Atención al tiempo! Tan pronto como haga clic en grabar, el temporizador de 60 segundos comenzará a contar. Si no puede terminar de leer dentro de este intervalo de tiempo, proceda a la siguiente pregunta normalmente.",
+    "step__exam__record__button__stop": "Haga clic aquí para detener la grabación si ha terminado de leer antes del final de los 60 segundos.",
+    "step__exam__record__button__start": "Haga clic aquí para comenzar la grabación, tan pronto como haga clic, el temporizador de 60 segundos comenzará a contar.",
+    "step__exam__record__button__pause": "Haga clic aquí para pausar la grabación si ha terminado de leer antes del final de los 60 segundos.",
+    "step__exam__record__button__next": "Al hacer clic en el botón de siguiente irá a la próxima pregunta o si no hay más preguntas el Avaliaçãon finalizará.",
+    "step__tour__button": "Este es el botón de ayuda, al activarlo se mostrará una guía virtual sobre cómo realizar el Avaliaçãon. Este botón estará disponible siempre que sea necesario."
+  }
+}

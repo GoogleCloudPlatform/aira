@@ -1,0 +1,59 @@
+{
+    "home": {
+        "messages": {
+            "hello_message": "Hello",
+            "welcome__message": "Welcome to LIA, our platform for assessing reading proficiency in Portuguese.",
+            "welcome__message_saber": "Welcome to Le.ia, your artificial intelligence platform for assessing reading and pronunciation in Portuguese.",
+            "lia_message": "LIA is an initiative of the State Department of Education of Paraná, aimed at providing real-time fluency levels of students in the municipal education network.",
+            "saber_message": "Le.ia is a tool designed to assess and provide results on students' reading and pronunciation levels, informing which fluency level they are categorized in."
+        },
+        "profiles": {
+            "profile__type": "Your user has a profile of",
+            "profile__user__admin": "Administrator",
+            "profile__user__impersonate_saber": "Teacher",
+            "profile__user__impersonate": "Examiner",
+            "profile__user__student": "Student"
+        },
+        "permissions": {
+            "view_permissions": "You can perform the following actions on our platform:",
+            "permission__user_groups": "Check which groups are associated with your user.",
+            "permission__studants_groups": "Check the students who are linked to these groups.",
+            "permission__apply_exams": "Administer exams to your students.",
+            "permission__analyze_performance": "Analyze the performance of your students.",
+            "permission__url": "Consult the platform's tutorial documentation.",
+            "permission__actions": "Perform the viewing, editing, creating, or deleting of the following platform resources: Schools, Groups, Users, Exams.",
+            "permission__reports": "Access reports and view the results of all students on the platform.",
+            "permission__docs": "Consult the platform's tutorial documentation.",
+            "permission__exams": "Consult exams and apply them."
+        },
+        "cards": {
+            "titles": {
+                "exams": "Exams",
+                "group": "Group",
+                "groups": "Classes",
+                "users": "Users",
+                "organizations": "Schools"
+            },
+            "descriptions": {
+                "group": "Administer exams and view results for your students.",
+                "organizations": "Dashboard for managing schools.",
+                "users": "Dashboard for managing users.",
+                "groups": "Dashboard for managing classes."
+            },
+            "buttons": {
+                "view_group": "View group",
+                "view_groups": "View groups",
+                "view_users": "View users",
+                "view_organizations": "View schools"
+            }
+        },
+        "home_table": {
+            "title": "Exams",
+            "button": "View all",
+            "name": "Name",
+            "grade": "Grade",
+            "start_date": "Start date",
+            "end_date": "End date"
+        }
+    }
+}

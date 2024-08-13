@@ -1,0 +1,59 @@
+{
+    "home": {
+        "messages": {
+            "hello_message": "Hola",
+            "welcome__message": "Bienvenido a LIA, nuestra plataforma para evaluar la competencia lectora en portugués.",
+            "welcome__message_saber": "Bienvenido a Le.ia, tu plataforma de inteligencia artificial para evaluar la lectura y pronunciación en portugués.",
+            "lia_message": "LIA es una iniciativa de la Secretaría de Educación del Estado de Paraná, destinada a proporcionar niveles de fluidez en tiempo real de los estudiantes en la red de educación municipal.",
+            "saber_message": "Le.ia es una herramienta diseñada para evaluar y presentar resultados sobre los niveles de lectura y pronunciación de los estudiantes, informando en qué nivel de fluidez están categorizados."
+        },
+        "profiles": {
+            "profile__type": "Tu usuario tiene un perfil de",
+            "profile__user__admin": "Administrador",
+            "profile__user__impersonate_saber": "Profesor",
+            "profile__user__impersonate": "Examinador",
+            "profile__user__student": "Estudiante"
+        },
+        "permissions": {
+            "view_permissions": "Puede realizar las siguientes acciones en nuestra plataforma:",
+            "permission__user_groups": "Verifique qué grupos están asociados a su usuario.",
+            "permission__studants_groups": "Consulte los estudiantes que están vinculados a estos grupos.",
+            "permission__apply_exams": "Administre exámenes a sus estudiantes.",
+            "permission__analyze_performance": "Analice el rendimiento de sus estudiantes.",
+            "permission__url": "Consulte la documentación tutorial de la plataforma.",
+            "permission__actions": "Realizar la visualización, edición, creación o eliminación de los siguientes recursos de la plataforma: Escuelas, Grupos, Usuarios, Exámenes.",
+            "permission__reports": "Acceda a informes y vea los resultados de todos los estudiantes en la plataforma.",
+            "permission__docs": "Consulte la documentación tutorial de la plataforma.",
+            "permission__exams": "Consulte exámenes y aplíquelos."
+        },
+        "cards": {
+            "titles": {
+                "exams": "Exámenes",
+                "group": "Grupo",
+                "groups": "Grupos",
+                "users": "Usuarios",
+                "organizations": "Escuelas"
+            },
+            "descriptions": {
+                "group": "Administre exámenes y vea los resultados de sus estudiantes.",
+                "organizations": "Panel para gestionar escuelas.",
+                "users": "Panel para gestionar usuarios.",
+                "groups": "Panel para gestionar grupos."
+            },
+            "buttons": {
+                "view_group": "Ver grupo",
+                "view_groups": "Ver grupos",
+                "view_users": "Ver usuarios",
+                "view_organizations": "Ver escuelas"
+            }
+        },
+        "home_table": {
+            "title": "Exámenes",
+            "button": "Ver todo",
+            "name": "Nombre",
+            "grade": "Grado",
+            "start_date": "Fecha de inicio",
+            "end_date": "Fecha de término"
+        }
+    }
+}

@@ -1,170 +1,298 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { ENDPOINT_GROUPS } from "@/constants/endpoint";
-import { IFormStore, IModalStore, IGroupsStore, IPaginationStore, ISettingsStore } from "@/interfaces/store";
-import { api } from "@/pages/api/api";
+'use client';
+
 import { useEffect, useState } from "react";
-import useSWR, { SWRResponse, mutate } from 'swr';
-import ActionTable from "../action-table/ActionTable";
-import { ICON_PENCIL, ICON_PLUS, ICON_TRASH } from "@/constants/icons";
-import { IAction } from "@/interfaces/actions";
-import { ACTION_CREATE, ACTION_DELETE, ACTION_EDIT, ACTION_GET_BY_ID } from "@/constants/actions";
-import useForm from "@/hooks/useForm/useForm";
-import { useModalStore } from "@/store/modal";
-import { useFormStore } from "@/store/form";
-import { usePaginationStore } from "@/store/pagination";
-import { getURL } from "@/utils";
-import { useGroupsStore } from "@/store/groups";
-import { createGroup, deleteGroupById, getGroupById, updateGroupById } from "@/services/groups";
-import { SCOPE_ADMIN } from "@/constants/rbac";
-import NoData from "../no-data/NoData";
-import { RBACWrapper } from "@/context/rbac";
-import { IGroup, IGroupsResponse } from "@/interfaces/group";
-import { useSettingsStore } from "@/store/settings";
-import { ShimmerActionTable } from "../shimmer";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { 
+    ColumnDef 
+} from "@tanstack/react-table"; 
+import { useTranslations } from "next-intl";
 import { isEmpty } from "lodash";
-import { toast } from "react-toastify";
-import { useTranslation } from "react-i18next";
+import { RBACWrapper } from "@/context/rbac";
+import { getGroups, getGroupById, getExportedGroups, deleteGroupById } from "@/services/group";
+import { usePaginationStore } from "@/store/pagination";
+import { getFormattedDate } from "@/utils";
 
+import { TActionSheetOptions } from "@/interfaces/component";
+import { TTableHeader } from "@/interfaces/table";
+import { IPaginationStore } from "@/interfaces/store";
+import { SchemaCreateGroup, SchemaEditGroup, SchemaImportGroup, SchemaCreateGroupDefaultValues, SchemaImportGroupDefaultValues } from "@/forms/group/schema";
 
-const fetcher = (url: string) => api.get(url).then((res) => res.data);
+import Search from "../search/Search";
+import FormCreateGroup from "@/forms/group/FormCreateGroup";
+import FormEditGroup from "@/forms/group/FormEditGroup";
+import FormImportGroup from "@/forms/group/FormImportGroup";
+import SkeletonGroups from "../skeletons/SkeletonGroups";
+import { Button } from "../ui/button";
+import { ActionTable  } from "@/components";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
 
+import { SCOPE_ADMIN, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
+import { CATEGORY_GROUPS, MODE_CREATE, MODE_DELETE, MODE_EDIT, MODE_IMPORT } from "@/constants";
+import FormDeleteGroup from "@/forms/group/FormDeleteGroup";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { LucideEdit, LucideLineChart, LucideTrash2, MoreHorizontal, NotepadTextIcon } from "lucide-react";
+  
 const Groups : React.FC = () => {
     const [mounted, setMounted] = useState<boolean>(false);
+    const [openSheet, setOpenSheet] = useState<boolean>(false);
+    const [options, setOptions] = useState<TActionSheetOptions>({} as TActionSheetOptions);
+    
+    const t = useTranslations();
+    const queryClient = useQueryClient();
+    const { locale } = useParams()
+    const router = useRouter()
+    const { page, query, page_size, setPagination } : IPaginationStore = usePaginationStore();
 
-    const { t } = useTranslation();
-    const { setSettings } : ISettingsStore = useSettingsStore();
-    const { groups, setGroups } : IGroupsStore = useGroupsStore();
-    const { setModal } : IModalStore = useModalStore();
-    const { getForm } : IFormStore = useFormStore();
-    const { query, page, page_size, setPagination, getPagination } : IPaginationStore = usePaginationStore();
-    const { setForm, checkFormSubmit } = useForm();
+    useEffect(() => {
+        if (mounted) {
+            queryClient.invalidateQueries({ queryKey: [CATEGORY_GROUPS] });
+        }
+    }, [mounted, page_size, query, queryClient]);
 
     useEffect(() => {
         setMounted(true);
         return () => {
-            setModal("open", false);
-            setForm("inputs", []);
-            setPagination("page", 1);
-            setSettings("loading", false);
-            setGroups("groups", null);
-            setPagination("query", "");
-            mutate(null);
+            setPagination('page_size', 10)
             setMounted(false);
         }
-    }, [setModal, setForm, setPagination, setSettings, setGroups]);
+    }, [mounted, setPagination]);
 
-    
-    const url = getURL(ENDPOINT_GROUPS, { page: page, page_size: page_size, q: query });
-    const { data, error, isLoading } : SWRResponse = useSWR(
-        mounted ? url : null, 
-        fetcher,
-        { revalidateIfStale: false, revalidateOnFocus: false, shouldRetryOnError: false, revalidateOnMount: true }
-    );
+    const { data, isLoading } = useQuery({ 
+        queryKey: [CATEGORY_GROUPS, page],
+        queryFn: ()=> getGroups(),
+        retryOnMount: false, retry: false,
+        enabled: mounted
+    });
 
+    if (isLoading) return <SkeletonGroups />;
+    if (!mounted || !data) return null;
 
-    useEffect(() => {
-        if (data) {
-            if (isEmpty(data.items)) toast.warn(t('warning_no_groups', { ns: "toast" }));
-            setGroups("groups", data);
-        }
-    }, [mounted, data, setGroups, t]);
-
-
-    useEffect(() => {
-        const queryString = `page=${page}&page_size=${page_size}&q=${query}`;
-    
-        const shouldMutate = () => {    
-            const hasQueryString = url.includes(queryString);
-            return hasQueryString;
-        };        
-
-        if (mounted) {
-            if (shouldMutate() && groups && data && groups.current_page !== page && groups.current_page !== data.current_page) {
-                mutate(`${ENDPOINT_GROUPS}?${queryString}`);
-            }            
-        }
-
-        return () => {
-            mutate(null); // Clear SWR cache keys
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mounted, page, query, page_size, url, groups]);
-
-    if (!mounted || !groups) return null;
-    if (isLoading) return <ShimmerActionTable />;
-    if (error) return <NoData />;
-
-    const clean = () => {
-        setModal("open", false);
-        setForm("inputs", []);
-        setSettings("loading", false);
-    }
-
-    const create = () => {
-        if (checkFormSubmit()) return;
-        const { inputs } = getForm();
-        setSettings("loading", true);
-        createGroup(inputs).then(response => {
-            mutate(url)
-            clean();
-        }).finally(() => setSettings("loading", false));
+    const create = async () => {
+        setOptions({
+            mode: MODE_CREATE,
+            title: "form.group.create.create_group",
+            subtitle: "form.group.create.create_subtitle_group",
+            formData: {
+                schema: SchemaCreateGroup,
+                defaultValues: SchemaCreateGroupDefaultValues,
+                category: CATEGORY_GROUPS,
+            }
+        });
+        setOpenSheet(true);
     };
-   
-
+    
+    const editById = async (id: string) => {
+        setOptions({
+            mode: MODE_EDIT,
+            title: "form.group.edit.edit_group",
+            subtitle: "form.group.edit.edit_subtitle_group",
+            formData: {
+                schema: SchemaEditGroup,
+                defaultValues: () => getGroupById(id),
+                category: CATEGORY_GROUPS,
+            }
+        });
+        setOpenSheet(true);
+    };
+    
+    const importGroups = () => {
+        setOptions({
+            mode: MODE_IMPORT,
+            title: "form.group.import.import_group",
+            subtitle: "form.group.import.import_subtitle_group",
+            formData: {
+                schema: SchemaImportGroup,
+                defaultValues: SchemaImportGroupDefaultValues,
+                category: CATEGORY_GROUPS,
+            }
+        });
+        setOpenSheet(true);
+    };
+    
+    const exportGroups = async () => {
+        const data = await getExportedGroups();
+        window.open(data?.url, "_blank");
+    };
+    
     const deleteById = (id : string) => {
-        setSettings("loading", true);
-        deleteGroupById(id).then(response => {
-            const showing = (page - 1) * page_size + 1;
-            const entries = items.length === page_size ? page * page_size : data.total;
-
-            if (showing >= entries && showing > 1) setPagination("page", 1);
-            else mutate(url)
-
-            clean();
-        }).finally(() => setSettings("loading", false));
+        setOptions({
+            mode: MODE_DELETE,
+            title: "title",
+            subtitle: "subtitle",
+            formData: {
+                confirm: async () => await deleteGroupById(id),
+                category: CATEGORY_GROUPS
+            }
+        });
     }
+    
+    const columns: ColumnDef<TTableHeader>[] = [
+        {
+            accessorKey: "name",
+            header: t("table.headers.name"),
+        },
+        {
+            accessorKey: "grade",
+            header: t("table.headers.grade"),
+        },
+        {
+            accessorKey: "shift",
+            header: t("table.headers.shift"),
+            cell: ({ row }) => {
+                const shift : string = row.getValue('shift');
+                return t(`table.shifts.${shift}`);
+            }
+        },
+        {
+            accessorKey: "organization.name",
+            header: t("table.headers.organization"),
+        },
+        {
+            accessorKey: "created_at",
+            header: t("table.headers.created_at"),
+            cell: ({ row }) => {
+                const date : string = row.getValue('created_at');
+                const formattedDate = getFormattedDate(locale as string, new Date(date))
+                return formattedDate;
+            }
+        },
+        {
+            accessorKey: "updated_at",
+            header: t("table.headers.updated_at"),
+            cell: ({ row }) => {
+                const date : string = row.getValue('updated_at');
+                const formattedDate = getFormattedDate(locale as string, new Date(date))
+                return formattedDate;
+            }
+        },
+        {
+            accessorKey: "actions",
+            header: t("table.headers.actions"),
+            cell: ({ row }) => {
+                const group = row.original
 
-    const editById = (id : string) => {
-        if (checkFormSubmit()) return;
-        const { inputs } = getForm();
-        setSettings("loading", true);
-        updateGroupById(id, inputs).then(response => {
-            mutate(url);
-            clean();
-        }).finally(() => setSettings("loading", false));
-    }
+                return (
+                    <div className="flex justify-center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">{t('table.messages.open')}</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <RBACWrapper requiredScopes={[SCOPE_ADMIN]}>
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs"
+                                        onClick={() => editById(group.id)}
+                                    >
+                                        {t('table.buttons.edit')}
+                                        <LucideEdit className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                </RBACWrapper>
+                                
+                                <RBACWrapper requiredScopes={[SCOPE_USER_IMPERSONATE]}>
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs px-2 gap-2"
+                                        onClick={() => router.push(`/users/exams?groups=${group.id}`)}
+                                    >
+                                        {t('table.buttons.go_to_exams')}
+                                        <NotepadTextIcon className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs px-2 gap-2"
+                                        onClick={() => router.push(`/users/results?groups=${group.id}`)}
+                                    >
+                                        {t('table.buttons.go_to_results')}
+                                        <LucideLineChart className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                </RBACWrapper>
 
-    const { items } = groups as IGroupsResponse;
-    const object : IGroup | [] = items && items.length ? items[0] : [];
-    const fields : Array<string> = Object.keys(object).filter(k => !["id", "customer_id"].includes(k));;
-    const actions : Array<IAction> = [
-        { name: ACTION_GET_BY_ID, icon: "", classes: '', action: (id : string) => getGroupById(id), render: false, scopes: [SCOPE_ADMIN] }, 
-        { name: ACTION_CREATE, icon: ICON_PLUS, classes: 'text-white', action: () => create(), render: false, scopes: [SCOPE_ADMIN] }, 
-        { name: ACTION_EDIT, icon: ICON_PENCIL, classes: 'text-blue-500', action: (id : string) => editById(id), render: true, scopes: [SCOPE_ADMIN] }, 
-        { name: ACTION_DELETE, icon: ICON_TRASH, classes: 'text-red-500', action: (id : string) => deleteById(id), render: true, scopes: [SCOPE_ADMIN] }
+                                <RBACWrapper requiredScopes={[SCOPE_ADMIN]}>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs"
+                                        onClick={() => deleteById(group.id)}
+                                    >
+                                        {t('table.buttons.delete')}
+                                        <LucideTrash2 className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                </RBACWrapper>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
+            }
+        },
     ];
 
+    const renderForm = () => {
+        if (!options || isEmpty(options)) return null;
+
+        if (options.mode === MODE_CREATE) {
+            return <FormCreateGroup setOpen={setOpenSheet} {...options} />
+        }
+
+        if (options.mode === MODE_EDIT) {
+            return <FormEditGroup setOpen={setOpenSheet} {...options} />;
+        }
+
+        if (options.mode === MODE_IMPORT) {
+            return <FormImportGroup setOpen={setOpenSheet} {...options} />
+        }
+
+        return null;
+    }
+
     return (
-        <RBACWrapper requiredScopes={[SCOPE_ADMIN]}>
-            <ActionTable 
-                data={groups} 
-                fields={fields}
-                actions={actions}
-                pagination
-            />
-        </RBACWrapper>
+        <>
+            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 2xl:mt-10 sm:container">
+                <div className='w-full sm:w-80'>
+                    <Search />
+                </div>
+                <RBACWrapper requiredScopes={[SCOPE_ADMIN]}>
+                    <div className="grid grid-flow-col space-x-2">
+                        <Button onClick={importGroups}>
+                            {t('table.buttons.import')}
+                        </Button>
+                        <Button onClick={exportGroups}>
+                            {t('table.buttons.export')}
+                        </Button>
+                        <Button onClick={create}>
+                            {t('table.buttons.create')}
+                        </Button>
+                    </div>
+                </RBACWrapper>
+            </div>
+
+            <section className="sm:container pt-5 2xl:pt-10">
+                <ActionTable 
+                    columns={columns} 
+                    data={data}
+                    pagination
+                />
+            </section>
+
+            {openSheet && 
+                <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+                    <SheetContent className="overflow-auto w-full sm:min-w-[420px]">
+                        {!isEmpty(options) ? 
+                            <SheetHeader>
+                                <SheetTitle>{t(options.title)}</SheetTitle>
+                                <SheetDescription>{t(options.subtitle)}</SheetDescription>
+                            </SheetHeader>
+                            :
+                            null
+                        }
+                        <div className="py-5">
+                            {renderForm()}
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            }
+            {options.mode === MODE_DELETE && <FormDeleteGroup setOpen={() => setOptions({} as TActionSheetOptions)} {...options} />}
+        </>
     );
 }
 

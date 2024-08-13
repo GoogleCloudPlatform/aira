@@ -1,0 +1,44 @@
+{
+    "exam": {
+        "titles": {
+            "question": "Pregunta",
+            "of": "de",
+            "exam_instructions": "Instrucciones del Examen",
+            "students": "Estudiantes"
+        },
+        "messages": {
+            "select_student": "Seleccione un estudiante para realizar un nuevo examen.",
+            "top_message": "Cuando esté listo, haga clic en el botón 'Iniciar Grabación' y lea el texto a continuación con su micrófono",
+            "top_message_multiple_choice": "Cuando estés listo, por favor lee el texto a continuación y selecciona la respuesta que creas correcta",
+            "bottom_message": "Cuando termine la grabación, haga clic en el botón 'Detener Grabación' y luego en 'Siguiente'",
+            "success_message": "Éxito",
+            "audio_success_record": "sus grabaciones de audio fueron exitosas",
+            "recorded_as_impersonate": "Grabado como profesor",
+            "analisys_message": "Si desea analizar el resultado de un estudiante, simplemente acceda a la opción Resultados en el menú y busque el nombre del estudiante que desea. Una vez identificado el estudiante, haga clic en Ver Resultados y elija qué evaluación desea verificar el resultado.\nSe necesitan aproximadamente 2 minutos después de que se complete una evaluación para que el resultado esté disponible en el menú de Resultados.",
+            "redirecting": "Redirigiendo",
+            "seconds": "segundos",
+            "no_users_found": "No se encontraron estudiantes."
+        },
+        "buttons": {
+            "start_exam": "Iniciar Examen",
+            "go_to_group": "Ver Clase",
+            "go_to_exams": "Ver Exámenes",
+            "go_to_results": "Resultados",
+            "stop": "Detener",
+            "record": "Grabar",
+            "next": "Siguiente",
+            "start_again": "Iniciar otra sesión de grabación",
+            "next_student": "Siguiente estudiante",
+            "recording_state": "Grabando...",
+            "stop_recording_state": "Detener Grabación",
+            "microphone_tester": "Probador de Micrófono",
+            "close": "Cerrar"
+        },
+        "tips": {
+            "tip_test_mic": "Prueba de Micrófono.\nHaga clic en el botón de reproducción a continuación y diga algunas palabras.",
+            "tip_get_a_place": "Encuentre un lugar tranquilo para hacer la prueba, de esta manera las interferencias externas no perturbarán su grabación.",
+            "tip_only_the_student": "Solo el estudiante debe leer las palabras durante la grabación. Si alguien está ayudando al estudiante durante la prueba, es importante permanecer en silencio durante la grabación para no comprometer el resultado.",
+            "tip_tour": "Si tiene alguna duda sobre cómo proceder con el examen, use el botón de ayuda en la esquina inferior derecha de la pantalla."
+        }
+    }
+}

@@ -1,26 +1,4 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { IAction } from "./actions";
-import { IExamResponse } from "./exams";
-import { IExamsResponse } from "./exams"
-import { IInput } from "./form";
-import { IGroupResponse, IGroupsResponse } from "./group";
-import { IIcon } from "./icons";
-import { IOrganizationResponse, IOrganizationsResponse } from "./organization";
-import { IQuestion } from "./question";
-import { IRoleResponse, IRolesResponse } from "./role";
-import { IUserResponse, IUsersResponse } from "./user";
+import { IUser } from "./auth";
 
 export interface ISettingsStore {
     loading: boolean;
@@ -33,14 +11,40 @@ export interface ISettingsStore {
     resetSettings: () => void;
 }
 
+export interface ISheetStore {
+    options: any;
+    getSheet: () => ISheetStore,
+    setSheet: (prop: 'options', value: any) => void;
+    updateSheet: (newState : ISheetStore) => void;
+    resetSheet: () => void;
+}
+
+export interface IPaginationStore {
+    page_size: number;
+    page: number;
+    query: string;
+    show_finished: boolean;
+    getPagination: () => IPaginationStore;
+    setPagination: (prop: keyof IPaginationStore, value: any) => void;
+    updatePagination: (newState : IPaginationStore) => void; 
+    resetPagination: () => void;
+}
+
+export interface IUserStore {
+    user: null | Partial<IUser>;
+    getUser: () => IUserStore;
+    setUser: (prop: keyof IUserStore, value: any) => void;
+    updateUser: (newState : IUserStore) => void; 
+    resetUser: () => void;
+}
+
 export interface IExamsStore {
-    exams: null | IExamsResponse;
-    exam: null | IExamResponse | Array<IQuestion>;
     expanded: boolean;
     questionIndex: number;
-    finished: false;
+    user?: null | IUser;
+    group?: string;
     getExams: () => IExamsStore,
-    setExams: (prop: 'exams' | 'exam' | 'questionIndex' | 'finished' | 'expanded', value: any) => void;
+    setExams: (prop: 'questionIndex' | 'expanded' | 'user' | 'group', value: any) => void;
     updateExams: (newState : IExamsStore) => void;
     resetExams: () => void;
 }
@@ -53,75 +57,30 @@ export interface IRecordStore {
     audioChunks: BlobPart[] | Array<any>;
     canStop: boolean;
     seconds: number,
+    examID: string;
     getRecord: () => IRecordStore,
-    setRecord: (prop: 'microphonePermission' | 'state' | 'stream' | 'audioURL' | 'audioChunks' | 'canStop' | 'seconds', value: any) => void;
+    setRecord: (prop: 'microphonePermission' | 'state' | 'stream' | 'audioURL' | 'audioChunks' | 'canStop' | 'seconds' | 'examID', value: any) => void;
     setBlobData: (blobData : any) => void,
     updateRecord: (newState : IRecordStore) => void;    
     resetRecord: () => void;
 }
 
-export interface IOrganizationsStore {
-    organizations: null | IOrganizationsResponse;
-    organization: null | IOrganizationResponse;
-    getOrganizations: () => IOrganizationsStore;
-    setOrganizations: (prop: 'organizations' | 'organization', value: any) => void;
-    updateOrganizations: (newState : IOrganizationsStore) => void; 
-    resetOrganizations: () => void;
-}
-
-export interface IModalStore {
-    open: boolean;
-    title: string;
-    icon: IIcon;
-    actions: Array<IAction>;
-    message: string;
-    getModal: () => IModalStore;
-    setModal: (prop: 'open' | 'title' | 'icon' | 'actions' | 'message', value: any) => void;
-    updateModal: (newState : IModalStore) => void; 
-    resetModal: () => void;
-}
-
-export interface IFormStore {
-    inputs: Array<IInput>;
-    getForm: () => IFormStore,
-    setForm: (prop: 'inputs', value: any) => void;
-    updateForm: (newState : IFormStore) => void; 
-    resetForm: () => void;
-}
-
-export interface IPaginationStore {
-    page_size: number;
-    page: number;
-    query: string;
-    getPagination: () => IPaginationStore;
-    setPagination: (prop: 'page_size' | 'page' | 'query', value: any) => void;
-    updatePagination: (newState : IPaginationStore) => void; 
-    resetPagination: () => void;
-}
-
-export interface IGroupsStore {
-    groups: null | IGroupsResponse;
-    group: null | IGroupResponse;
-    getGroups: () => IGroupsStore;
-    setGroups: (prop: 'groups' | 'group', value: any) => void;
-    updateGroups: (newState : IGroupsStore) => void; 
-    resetGroups: () => void;
-}
-
-export interface IRolesStore {
-    roles: null | IRolesResponse;
-    role: null | IRoleResponse;
-    getRoles: () => IRolesStore;
-    setRoles: (prop: 'roles' | 'role', value: any) => void;
-    updateRoles: (newState : IRolesStore) => void; 
-    resetRoles: () => void;
-}
-
-export interface IUsersStore {
-    users: null | IUsersResponse;
-    user: null | IUserResponse;
-    getUsers: () => IUsersStore;
-    setUsers: (prop: 'users' | 'user', value: any) => void;
-    updateUsers: (newState : IUsersStore) => void; 
-    resetUsers: () => void;
+export interface ICrudStore {
+    exam: {
+        name:string;
+        questions: Array<{
+            order: number,
+            name: string,
+            type: string,
+            data: string,
+            formatted_data: string
+        }>;
+        grade:string;
+        start_date: Date;
+        end_date: Date;
+    }
+    getCRUD: () => ICrudStore,
+    setCRUD: (prop: 'exam' , value: any) => void;
+    updateCRUD: (newState : ICrudStore) => void;
+    resetCRUD: () => void;
 }

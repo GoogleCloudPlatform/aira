@@ -1,0 +1,59 @@
+{
+    "home" : {      
+        "messages": {
+            "hello_message": "Olá",
+            "welcome__message" : "Bem-vindo ao LIA, nossa plataforma para avaliação da proficiência de leitura em Português.",
+            "welcome__message_saber" : "Boas-vindas ao Le.ia, sua plataforma de inteligência artificial na avaliação de leitura e pronúncia em português.",
+            "lia_message": "O LIA é uma iniciativa da Secretaria de Estado da Educação do Paraná, destinada a fornecer resultados em tempo real dos níveis de fluência dos alunos na rede municipal de ensino.",
+            "saber_message": "O Le.ia é uma ferramenta destinada a avaliar e apresentar resultados sobre o nível de leitura e pronúncia de estudantes, informando em qual nível de fluência estão categorizados."
+        },
+        "profiles": {
+            "profile__type": "Seu usuário tem um perfil de",
+            "profile__user__admin": "Administrador",
+            "profile__user__impersonate_saber": "Professor",
+            "profile__user__impersonate": "Examinador",
+            "profile__user__student": "Estudante"
+        },
+        "permissions": {
+            "view_permissions": "Você pode realizar as seguintes ações em nossa plataforma:",
+            "permission__user_groups": "Verifique quais grupos estão associados ao seu usuário.",
+            "permission__studants_groups": "Verifique os alunos que estão vinculados a esses grupos.",
+            "permission__apply_exams": "Administrar Avaliações para seus alunos.",
+            "permission__analyze_performance": "Analisar o desempenho de seus alunos.",
+            "permission__url": "Consulte a documentação tutorial da plataforma.",
+            "permission__actions": "Realizar a visualização, alteração, criação ou exclusão dos seguintes recursos da plataforma: Escolas, Grupos, Usuários, Avaliações.",
+            "permission__reports": "Acessar relatórios e ver os resultados de todos os alunos na plataforma.",
+            "permission__docs": "Consultar a documentação tutorial da plataforma.",
+            "permission__exams": "Consultar Avaliações e aplicá-los."
+        },
+        "cards": {
+            "titles": {
+                "exams": "Avaliações",
+                "group": "Turma",
+                "groups": "Turmas",
+                "users": "Usuários",
+                "organizations": "Escolas"
+            },
+            "descriptions": {
+                "group": "Aplique Avaliações e veja os resultados de seus alunos.",
+                "organizations": "Painel para gerenciamento das escolas.",
+                "users": "Painel para gerenciamento dos usuários.",
+                "groups": "Painel para gerenciamento das turmas."
+            },
+            "buttons": {
+                "view_group": "Ver turma",
+                "view_groups": "Ver turmas",
+                "view_users": "Ver usuários",
+                "view_organizations": "Ver escolas"
+            }
+        },
+        "home_table": {
+            "title": "Avaliações",
+            "button": "Ver todos",
+            "name": "Nome",
+            "grade": "Ano letivo",
+            "start_date": "Data de início",
+            "end_date": "Data de término"
+        }
+    }
+}

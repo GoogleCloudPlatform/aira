@@ -1,0 +1,35 @@
+{
+    "results": {
+        "exam": "Avaliaçãon",
+        "learner_response": "Respuesta del Estudiante",
+        "question": "Pregunta",
+        "correct_words": "Palabras Correctas",
+        "status": "Estado",
+        "status_suficient": "Suficiente",
+        "status_insuficient": "Insuficiente",
+        "created_at": "Creado en",
+        "no_browser_support": "Tu navegador no admite el elemento de audio",
+        "learner_audio": "Audio del Estudiante",
+        "total_accuracy": "Precisión",
+        "words_accuracy": "Precisión de Palabras",
+        "phrases_accuracy": "Precisión de Texto Narrativo",
+        "student_accuracy": "Precisión del Estudiante",
+        "item_word_total": "Total de Palabras del Ítem",
+        "words_read_total": "Total de Palabras Leídas",
+        "correctly_read_total": "Total de Palabras Leídas Correctamente",
+        "true": "Correcto",
+        "false": "Incorrecto",
+        "buttons": {
+            "show_results": "Ver Resultados"
+        },
+        "classification": {
+            "no_classification": "Sin Clasificación",
+            "pre_reader_one": "Pre-Lector Uno",
+            "pre_reader_two": "Pre-Lector Dos",
+            "pre_reader_three": "Pre-Lector Tres",
+            "pre_reader_four": "Pre-Lector Cuatro",
+            "reader": "Lector principiante",
+            "fluent": "Lector Fluido"
+        }
+    }
+}

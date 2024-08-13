@@ -1,0 +1,15 @@
+{
+    "tour": {
+      "step_exam__mic__tester": "",
+      "step__exam__question__info": "Pay attention to the instructions regarding the question.",
+      "step__exam__visor": "Here you will find the words or the text that should be read.",
+      "step__exam__visor__expand": "Click here to expand the frame with the words or the text",
+      "step__exam__timer": "Attention to the time! As soon as you click record, the 60-second timer will start counting. If you are unable to finish reading within this time interval, proceed to the next question normally.",
+      "step__exam__record__button__stop": "Click here to stop the recording if you have finished reading before the end of the 60 seconds.",
+      "step__exam__record__button__start": "Click here to start the recording, as soon as you click the 60-second timer will start counting.",
+      "step__exam__record__button__pause": "Click here to pause the recording if you have finished reading before the end of the 60 seconds.",
+      "step__exam__record__button__next": "By clicking the next button you will go to the next question or if there are no more questions the exam will be finished.",
+      "step__tour__button": "This is the help button, when activated it will display a virtual guide on how to take the exam. This button will be available whenever necessary."
+    }
+  }
+  
