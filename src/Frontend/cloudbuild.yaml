@@ -45,7 +45,7 @@ steps:
         "--region",
         "us-east1",
         "--service-account",
-        "${PROJECT_ID}-frontend-engine@${PROJECT_ID}.iam.gserviceaccount.com",
+        "sa-${PROJECT_ID}-front-engine@${PROJECT_ID}.iam.gserviceaccount.com",
         "--update-secrets=NEXT_PUBLIC_FIREBASE_API_KEY=apiKey:latest,NEXT_PUBLIC_FIREBASE_APP_ID=appId:latest,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=authDomain:latest,API_URL=api_url:latest",
         "--set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=${PROJECT_ID},NEXT_PUBLIC_LOOKER=liabi.cloud.looker.com,NEXT_PUBLIC_LOOKER_GENERAL_DASHBOARD_ID=1,NEXT_PUBLIC_LOOKER_LEARNERS_DASHBOARD_ID=2,NEXT_PUBLIC_TUTORIAL_BUCKET=rad-stt-dev-store-public-files",
         "--allow-unauthenticated",
