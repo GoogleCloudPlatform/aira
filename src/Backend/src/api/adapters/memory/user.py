@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all user related sqlalchemy memory implementation queries.
 """
+
 import uuid
 
 from api import errors, models, ports, typings
@@ -33,12 +21,13 @@ class UserRepository(ports.UserRepository):
         user_id: uuid.UUID | None = None,
         external_id: str | None = None,
         email: str | None = None,
+        reset_token: str | None = None,
     ) -> models.User:
         """
         Get user by params.
 
-        :params user_id: user id on database.
-        :params external_id: user id provided by firebase.
+        :param user_id: user id on database.
+        :param external_id: user id provided by firebase.
         """
         if self._items:
             items = self._items
@@ -48,6 +37,9 @@ class UserRepository(ports.UserRepository):
                 items = [item for item in items if item.external_id == external_id]
             if email:
                 items = [item for item in items if item.email_address == email]
+            if reset_token:
+                items = [item for item in items if item.reset_token == reset_token]
+
             if len(items) == 1:
                 return items[0]
         raise errors.NotFound
@@ -78,6 +70,44 @@ class UserRepository(ports.UserRepository):
         :param user_model: the user model parameter.
         """
         self._items = [item for item in self._items if item.id != user_model.id]
+
+    async def create_or_update_student(
+        self,
+        student: typings.CreateOrUpdateUser,
+        group_customer_id: str,
+        updated_groups: dict[str, models.Group],
+        cached_users: list[models.User],
+    ) -> models.User:
+        raise NotImplementedError()
+
+    async def create_or_update_professor(
+        self,
+        professor: typings.CreateOrUpdateUser,
+        groups_customer_id: list[str],
+        organizations_customer_id: list[str],
+        updated_organizations: dict[str, models.Organization],
+        updated_groups: dict[str, models.Group],
+        cached_profs: list[models.User],
+    ) -> models.User | None:
+        raise NotImplementedError()
+
+    async def list(
+        self,
+        user_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.User]:
+        """
+        Method to facilitate user import and list users based on an id list.
+
+        :param user_ids: array with user ids.
+        """
+        items = self._items
+        if user_ids:
+            items = [item for item in items if item.id in user_ids]
+        if customer_ids:
+            items = [item for item in items if item.customer_id in customer_ids]
+
+        return items
 
 
 class ListUsers(ports.ListUsers):

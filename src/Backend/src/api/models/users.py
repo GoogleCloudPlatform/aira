@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module used to build User structure.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -109,15 +97,19 @@ class User(db.Base, db.DefaultColumns):
         nullable=False,
     )
 
-    name: Mapped[db.Str50]
+    name: Mapped[db.Str100]
 
     email_address: Mapped[db.Str100] = mapped_column(sa.String(100), unique=True)
 
-    password: Mapped[str | None] = mapped_column(
-        sa.String(100), nullable=True, init=False
+    _password: Mapped[str | None] = mapped_column(
+        "password", sa.String(100), nullable=True, init=False
     )
 
     last_login: Mapped[db.DateTime] = mapped_column(init=False, nullable=True)
+
+    state: Mapped[str | None] = mapped_column(sa.String(2), nullable=True)
+    region: Mapped[str | None] = mapped_column(sa.String(50), nullable=True)
+    county: Mapped[str | None] = mapped_column(sa.String(50), nullable=True)
 
     groups: Mapped[list[groups.Group]] = relationship(
         groups.Group,
@@ -137,6 +129,19 @@ class User(db.Base, db.DefaultColumns):
         lazy="joined",
     )
 
+    reset_token: Mapped[str | None] = mapped_column(
+        sa.String(100), nullable=True, init=False
+    )
+
+    @property
+    def password(self) -> str | None:
+        """
+        Return the password.
+
+        :return: user hashed password.
+        """
+        return self._password
+
     def check_password(self, password: str, hash_ctx: context.CryptContext) -> bool:
         """
         Check if the password is valid.
@@ -146,5 +151,11 @@ class User(db.Base, db.DefaultColumns):
         """
         valid, new_password = hash_ctx.verify_and_update(password, self.password)
         if valid and new_password:
-            self.password = new_password
+            self._password = new_password
         return valid
+
+    def set_password(self, password: str, hash_ctx: context.CryptContext) -> None:
+        """
+        Set the password through hashing.
+        """
+        self._password = hash_ctx.hash(password)

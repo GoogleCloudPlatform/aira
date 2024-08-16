@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module related to looker.
 """
+
 import base64
 import hmac
 import json
@@ -24,6 +12,8 @@ import urllib.parse
 import uuid
 from hashlib import sha1
 
+import looker_sdk
+from looker_sdk.sdk.api40 import models as mdls
 from starlette import datastructures
 
 from api import ports
@@ -78,6 +68,7 @@ class LookerDashboard(ports.Dashboard):
     def __init__(self, looker_host: str, looker_secret: str):
         self.looker_host = looker_host
         self.looker_secret = looker_secret
+        self._looker = looker_sdk.init40()
 
     async def get_signed_url(
         self,
@@ -113,6 +104,9 @@ class LookerDashboard(ports.Dashboard):
                 "organization_ids": json.dumps(
                     [org.id for org in user.organizations], cls=UUIDEncoder
                 ),
+                "state": user.state,
+                "region": user.region,
+                "county": user.county,
             },
         )
         src = query.get("src", "")
@@ -175,3 +169,16 @@ class LookerDashboard(ports.Dashboard):
         )
 
         return f"{self.looker_host}{path}?{query_string}"
+
+    async def delete_looker_user(self, user_id: str) -> str:
+        """
+        Delete Looker User by user id
+        """
+        # pylint: disable=arguments-differ
+        return self._looker.delete_user(user_id)
+
+    async def get_all_looker_users(self) -> typing.Sequence[mdls.User]:
+        """
+        Get a list of all Looker Users.
+        """
+        return self._looker.search_users(embed_user=True)

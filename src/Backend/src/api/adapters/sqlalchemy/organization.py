@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all user related sqlalchemy queries.
 """
+
 from __future__ import annotations
 
 import logging
@@ -42,7 +30,7 @@ class OrganizationRepository(ports.OrganizationRepository):
         """
         Get organization by params.
 
-        :params organization_id: organization id on database.
+        :param organization_id: organization id on database.
         """
         stmt = sa.select(models.Organization).where(
             models.Organization.id == organization_id
@@ -82,6 +70,59 @@ class OrganizationRepository(ports.OrganizationRepository):
         :param organization_model: the organization model parameter.
         """
         await self._session.delete(organization_model)
+
+    async def create_or_update(
+        self,
+        sync_org: typings.CreateOrUpdateOrganization,
+        cached_orgs: list[models.Organization],
+    ) -> models.Organization:
+        """
+        Method to create or update a list of organization filtering by customer id.
+
+        :param sync_org: sync_org to insert or update.
+        """
+        organization = next(
+            (org for org in cached_orgs if org.customer_id == sync_org.customer_id),
+            None,
+        )
+
+        if organization:
+            organization.name = sync_org.name
+            organization.region = sync_org.region
+            organization.city = sync_org.city
+            organization.state = sync_org.state
+            organization.county = sync_org.county
+        else:
+            organization = models.Organization(
+                customer_id=sync_org.customer_id,
+                name=sync_org.name,
+                region=sync_org.region,
+                city=sync_org.city,
+                state=sync_org.state,
+                county=sync_org.county,
+            )
+            self._session.add(organization)
+
+        return organization
+
+    async def list(
+        self,
+        org_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Organization]:
+        """
+        Method to list orgs.
+
+        :param org_ids: parameter with array of ids.
+        """
+        stmt = sa.select(models.Organization)
+        if org_ids:
+            stmt = stmt.where(models.Organization.id.in_(org_ids))
+        if customer_ids:
+            stmt = stmt.where(models.Organization.customer_id.in_(customer_ids))
+        result = await self._session.execute(stmt)
+        orgs = list(result.scalars().unique())
+        return orgs
 
 
 class ListOrganizations(ports.ListOrganizations):
@@ -169,3 +210,28 @@ class GetOrganization(ports.GetOrganization):
             raise errors.NotFound()
 
         return organization
+
+
+class ListOrganizationUtils(ports.ListOrganizationUtils):
+    """
+    Query to list unique state/county/region from orgs.
+    """
+
+    def __init__(self, session_factory: typings.SessionFactory):
+        self._session_factory = session_factory
+
+    async def __call__(
+        self,
+    ) -> dict[str, list[str]]:
+        county = sa.select(sa.distinct(models.Organization.county))
+        state = sa.select(sa.distinct(models.Organization.state))
+        region = sa.select(sa.distinct(models.Organization.region))
+        async with self._session_factory() as session:
+            result_county = await session.execute(county)
+            result_state = await session.execute(state)
+            result_region = await session.execute(region)
+        return {
+            "county": list(result_county.scalars().all()),
+            "state": list(result_state.scalars().all()),
+            "region": list(result_region.scalars().all()),  # type: ignore[arg-type]
+        }

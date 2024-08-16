@@ -1,21 +1,10 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Unit tests for `process`
 """
+
 import base64
 import json
+import typing
 import unittest.mock
 import uuid
 
@@ -23,25 +12,28 @@ import fastapi
 import hypothesis
 import pytest
 import starlette
-from hypothesis import strategies as st
-
-from api import models
+from api import models, typings
+from api.adapters import google
 from api.adapters.memory import exam, result, unit_of_work
+from api.domain.service import process_result
 from api.helpers import UUIDEncoder
 from api.routers import processor
+from api.routers import schemas as routers_schemas
 from api.routers.processor import schemas
+from hypothesis import strategies as st
 
 
 @pytest.mark.asyncio
 @hypothesis.given(
     request=st.builds(
-        schemas.PubsubRequest,
+        routers_schemas.PubsubRequest,
         message=st.builds(
-            schemas.PubsubMessage,
+            routers_schemas.PubsubMessage,
             data=st.builds(
                 schemas.PubsubDataReprocessed,
                 audio=st.just("id/teste/lul"),
                 duration=st.integers(max_value=120),
+                words=st.lists(st.text(), min_size=1),
             ).map(
                 lambda x: base64.b64encode(
                     json.dumps(
@@ -58,10 +50,12 @@ from api.routers.processor import schemas
     suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture],
 )
 async def test_processor_process_succesfully(
-    request: schemas.PubsubRequest,
+    request: routers_schemas.PubsubRequest,
     fake_user: models.User,
     fake_group: models.Group,
     fake_exam: models.Exam,
+    fake_question: models.Question,
+    cloud_storage: google.CloudStorage,
 ) -> None:
     """
     tests if processor endpoint process correctly.
@@ -69,19 +63,21 @@ async def test_processor_process_succesfully(
     speech = unittest.mock.AsyncMock()
     analytical = unittest.mock.AsyncMock()
     analytical.save.return_value = True
-    speech.process.return_value = ["", "", ""]
+    speech.process.return_value = ""
     data = schemas.PubsubDataReprocessed.parse_raw(
         base64.b64decode(request.message.data).decode("utf-8")
     )
     exam_user_question = models.ExamUserQuestion(
         user_id=uuid.uuid4(),
         exam_id=uuid.uuid4(),
-        question_id=uuid.uuid4(),
+        question_id=fake_question.id,
         group_id=uuid.uuid4(),
         organization_id=uuid.uuid4(),
         result=[],
         right_count=0,
         audio_url="",
+        total_accuracy=0.0,
+        user_accuracy=0.0,
     )
     exam_user_question.group = fake_group
     exam_user_question.user = fake_user
@@ -89,6 +85,7 @@ async def test_processor_process_succesfully(
     exam_user_question.exam = fake_exam
     exam_user_question.id = data.result_id
     result_repository = result.ResultRepository([exam_user_question])
+    question_repository = exam.QuestionRepository([fake_question])
     get_exam_user = exam.GetExamUserStatus(
         [
             models.ExamUser(
@@ -98,11 +95,14 @@ async def test_processor_process_succesfully(
             )
         ]
     )
-    uow_builder = unit_of_work.UnitOfWorkBuilder(result_repository=result_repository)
+    settings = typing.cast(typings.Settings, {})
+    uow_builder = unit_of_work.UnitOfWorkBuilder(
+        result_repository=result_repository,
+        question_repository=question_repository,
+    )
     with unittest.mock.patch(
-        "api.routers.processor.endpoints.otel_pubsub_ctx", unittest.mock.MagicMock()
-    ) as otel_mock:
-        otel_mock.return_value.__aenter__.return_value = unittest.mock.AsyncMock()
+        "api.dependencies.get_speech_to_text", return_value=speech
+    ):
         response = await processor.process(
             request=fastapi.Request(
                 scope=dict(  # pylint: disable=use-dict-literal
@@ -118,7 +118,8 @@ async def test_processor_process_succesfully(
             ),
             body=request,
             uow_builder=uow_builder,
-            speech=speech,
+            settings=settings,
+            storage=cloud_storage,
             list_pending=exam.ListPendingQuestions(),
             get_exam_user=get_exam_user,
             analytical=analytical,
@@ -131,6 +132,7 @@ async def test_processor_process_succesfully(
         duration=data.duration,
         sample_rate=data.sample_rate,
         channels=data.channels,
+        model_type="latest_long",
     )
     assert response.status_code == 200
 
@@ -159,6 +161,7 @@ async def test_successful_signed_url_user(
     group = fake_user_session.user.groups[0]
     group_id = group.id
     organization_id = group.organization_id
+    request.user_id = fake_user_session.user_id
     file_path = (
         f"{organization_id}/{group_id}/{request.exam_id}"
         f"|{request.question_id}|{fake_user_session.user_id}.{request.file_type}"
@@ -170,3 +173,20 @@ async def test_successful_signed_url_user(
     )
     expected = schemas.SignedUrl(signed_url=desired_path)
     assert response == expected
+
+
+@pytest.mark.parametrize(
+    "actual_words, tts_words, amount", [(["sem"], "cem", 1), (["cela"], "sela", 1)]
+)
+def test_get_right_count_homophones(
+    actual_words: list[str], tts_words: str, amount: int
+) -> None:
+    with unittest.mock.patch(
+        "api.domain.service.phonemes.phonemize_data_list", unittest.mock.MagicMock()
+    ) as phonemize_data_list:
+        phonemize_data_list.return_value = ["word"]
+        right_count, _ = process_result.get_right_count_user_result(
+            actual_words, tts_words, "words"
+        )
+    assert right_count == amount
+    assert " ".join(actual_words) != tts_words

@@ -1,21 +1,12 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module related to the port of exam data.
 """
+
 import abc
+import typing
 import uuid
+
+from sqlalchemy.engine.row import Row
 
 from api import models, typings
 
@@ -68,6 +59,23 @@ class GetExam(abc.ABC):
         """
 
 
+class GetUsersExamDetails(abc.ABC):
+    """
+    Get exam by user and exam id.
+    """
+
+    @abc.abstractmethod
+    async def __call__(
+        self, exam_id: uuid.UUID, user_id: uuid.UUID
+    ) -> list[Row[typing.Any]]:
+        """
+        Method to get a specific user exam.
+
+        :param exam_id: the exam identifier.
+        :param user_id: the user identifier.
+        """
+
+
 class ListExams(abc.ABC):
     """
     Query to get all exams.
@@ -98,9 +106,27 @@ class ListPendingExams(abc.ABC):
         group_id: uuid.UUID,
         page_size: int = 10,
         page: int = 1,
-    ) -> tuple[list[models.Exam], typings.PaginationMetadata]:
+    ) -> tuple[
+        list[tuple[models.Exam, models.ExamStatus | None]], typings.PaginationMetadata
+    ]:
         """
         Method to list all exams.
+        """
+
+
+class ListExamsWithResults(abc.ABC):
+    """
+    Query to get all exams pending for a user.
+    """
+
+    @abc.abstractmethod
+    async def __call__(
+        self,
+        user_id: uuid.UUID,
+        group_id: uuid.UUID,
+    ) -> list[models.Exam]:
+        """
+        Method to list all exams with results.
         """
 
 

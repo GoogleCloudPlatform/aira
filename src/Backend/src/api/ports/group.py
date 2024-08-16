@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module related to the port of group repository.
 """
+
 import abc
 import uuid
 
@@ -50,6 +38,33 @@ class GroupRepository(abc.ABC):
         Method to delete a group.
 
         :param group_model: the group model parameter.
+        """
+
+    @abc.abstractmethod
+    async def create_or_update(
+        self,
+        sync_group: typings.CreateOrUpdateGroup,
+        org_customer_id: str,
+        updated_orgs: dict[str, models.Organization],
+        cached_groups: list[models.Group],
+    ) -> models.Group | None:
+        """
+        Method to create or update a list of group filtering by customer id.
+
+        :param sync_group: group to insert or update.
+        :param org_customer_id: org customer id search.
+        """
+
+    @abc.abstractmethod
+    async def list(
+        self,
+        group_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Group]:
+        """
+        Method to list groups.
+
+        :param group_ids: parameter with array of ids.
         """
 
 

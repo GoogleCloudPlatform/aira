@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Configurations for tests.
 """
+
 # pylint: disable=unused-argument,redefined-outer-name
 
 import asyncio
@@ -30,6 +18,9 @@ import pytest
 import pytest_asyncio
 import sqlalchemy as sa
 from alembic import config
+from api import models
+from api.adapters.google import BigQuery, CloudStorage, SpeechToText
+from api.helpers import time_now, util
 from google.cloud.speech_v1p1beta1.types import (
     SpeechRecognitionAlternative,
     SpeechRecognitionResult,
@@ -38,9 +29,6 @@ from google.cloud.speech_v1p1beta1.types import (
 from passlib import context
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
-from api import models
-from api.adapters.google import BigQuery, CloudStorage, SpeechToText
-from api.helpers import time_now, util
 from tests.helpers.database import create_test_container
 
 logger = logging.getLogger(__name__)
@@ -121,10 +109,8 @@ def storage_client() -> typing.Generator[unittest.mock.Mock, None, None]:
         client.return_value.bucket.return_value = unittest.mock.Mock()
         client.return_value.bucket.return_value.blob.return_value = unittest.mock.Mock()
         client.return_value.bucket.return_value.blob.return_value.id = "test/test/test"
-        # pylint: disable=line-too-long
-        client.return_value.bucket.return_value.blob.return_value.generate_signed_url.return_value = (
-            "https://storage.googleapis.com/test"
-        )
+        # ruff: noqa: E501
+        client.return_value.bucket.return_value.blob.return_value.generate_signed_url.return_value = "https://storage.googleapis.com/test"
         yield client
 
 
@@ -237,6 +223,7 @@ def fake_org() -> models.Organization:
         name="fake-org",
         customer_id="fake",
         region="fake-region",
+        county="fake-county",
     )
     org_model.created_at = org_model.updated_at = util.time_now()
     return org_model
@@ -250,7 +237,7 @@ def fake_group(fake_org: models.Organization) -> models.Group:
     group_model = models.Group(
         grade=models.Grades.FIRST_FUND,
         customer_id="fake",
-        shift="morning",
+        shift=models.Shifts.MORNING,
         name="fake-group",
         organization_id=fake_org.id,
     )
@@ -287,6 +274,9 @@ def fake_user(fake_role: models.Role, fake_group: models.Group) -> models.User:
         groups=[fake_group],
         role_id=fake_role.id,
         organizations=[],
+        state=None,
+        region=None,
+        county=None,
     )
     user_model.role = fake_role
     return user_model
@@ -323,6 +313,24 @@ def fake_exam() -> models.Exam:
 
 
 @pytest.fixture
+def fake_question(fake_exam: models.Exam) -> models.Question:
+    """
+    Instantiating a fake question
+    """
+    question_model = models.Question(
+        name="fake question",
+        type=models.QuestionType.PHRASES,
+        phrase_id="fake",
+        data="",
+        formatted_data="",
+        order=1,
+    )
+    question_model.exam_id = fake_exam.id
+    question_model.created_at = question_model.updated_at = util.time_now()
+    return question_model
+
+
+@pytest.fixture
 def fake_user_session(fake_user: models.User) -> models.Session:
     """
     Instantiating a fake user
@@ -351,12 +359,10 @@ def event_loop() -> typing.Generator[asyncio.AbstractEventLoop, None, None]:
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def prepare_db(request: pytest.FixtureRequest) -> None:
+async def prepare_db() -> None:
     """
     Run alembic to run migrations.
     """
-    if "disable_db" in request.keywords:
-        return
     container = create_test_container()
     engine = container.get(sqlalchemy_aio.AsyncEngine)
     alembic_config = config.Config(

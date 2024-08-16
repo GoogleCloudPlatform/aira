@@ -1,29 +1,17 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the organization repository.
 """
+
 import contextlib
 import math
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
 from api import errors, models, typings
 from api.adapters.sqlalchemy import organization
 from api.routers.organizations import schemas
+from hypothesis import strategies as st
+
 from tests.helpers import database, strats
 
 
@@ -35,14 +23,16 @@ def _create_org_from_schema(
             name=schema.name,
             city=schema.city,
             state=schema.state,
-            region=schema.region,  # type: ignore[arg-type]
-            customer_id=schema.customer_id,  # type: ignore[arg-type]
+            region=schema.region,
+            customer_id=schema.customer_id,
+            county=schema.county,
         )
         for schema in schema_list
     ]
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_org_query() -> None:
     """
     Test of adapter to get an org from query.
@@ -59,12 +49,15 @@ async def test_get_org_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     organization_schema=st.builds(
         schemas.OrganizationCreate,
         state=strats.safe_text(min_size=2, max_size=2),
         city=strats.safe_text(),
         name=strats.safe_text(),
+        county=strats.safe_text(),
+        region=strats.safe_text(),
     ),
     page_size=st.one_of(st.just(10), st.integers(min_value=1, max_value=5)),
     city=st.one_of(strats.safe_text(min_size=1, max_size=10), st.none()),
@@ -113,6 +106,7 @@ async def test_list_orgs_query(
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_org_repo_query() -> None:
     """
     Test of adapter to get org.
@@ -126,12 +120,14 @@ async def test_get_org_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     org_schema=st.builds(
         schemas.OrganizationCreate,
         state=strats.safe_text(min_size=1, max_size=2),
         city=strats.safe_text(),
         name=strats.safe_text(),
+        county=strats.safe_text(),
     )
 )
 async def test_create_org(org_schema: schemas.OrganizationCreate) -> None:
@@ -147,6 +143,7 @@ async def test_create_org(org_schema: schemas.OrganizationCreate) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create org.

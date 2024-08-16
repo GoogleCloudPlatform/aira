@@ -1,16 +1,3 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all user related sqlalchemy queries.
 """
@@ -41,7 +28,7 @@ class GroupRepository(ports.GroupRepository):
         """
         Get group by params.
 
-        :params group_id: group id on database.
+        :param group_id: group id on database.
         """
         stmt = (
             sa.select(models.Group)
@@ -83,6 +70,64 @@ class GroupRepository(ports.GroupRepository):
         :param group_model: the group model parameter.
         """
         await self._session.delete(group_model)
+
+    async def create_or_update(
+        self,
+        sync_group: typings.CreateOrUpdateGroup,
+        org_customer_id: str,
+        updated_orgs: dict[str, models.Organization],
+        cached_groups: list[models.Group],
+    ) -> models.Group | None:
+        organization = updated_orgs.get(org_customer_id)
+        if not organization:
+            org_stmt = sa.select(models.Organization).where(
+                models.Organization.customer_id == org_customer_id
+            )
+            org_result = await self._session.execute(org_stmt)
+
+            organization = org_result.scalars().one_or_none()
+            if not organization:
+                return None
+        org_id = organization.id
+        group = next(
+            (g for g in cached_groups if g.customer_id == sync_group.customer_id), None
+        )
+        if group:
+            group.name = sync_group.name
+            group.grade = sync_group.grade
+            group.shift = sync_group.shift
+            group.organization_id = org_id
+        else:
+            group = models.Group(
+                name=sync_group.name,
+                customer_id=sync_group.customer_id,
+                organization_id=org_id,
+                grade=sync_group.grade,
+                shift=sync_group.shift,
+            )
+            group.organization = organization
+            self._session.add(group)
+
+        return group
+
+    async def list(
+        self,
+        group_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Group]:
+        """
+        Method to list groups.
+
+        :param group_ids: parameter with array of ids.
+        """
+        stmt = sa.select(models.Group)
+        if group_ids:
+            stmt = stmt.where(models.Group.id.in_(group_ids))
+        if customer_ids:
+            stmt = stmt.where(models.Group.customer_id.in_(customer_ids))
+        result = await self._session.execute(stmt)
+        groups = list(result.scalars().unique())
+        return groups
 
 
 class ListGroups(ports.ListGroups):

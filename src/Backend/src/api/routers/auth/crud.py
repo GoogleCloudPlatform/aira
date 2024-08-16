@@ -1,30 +1,18 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing crud actions for auth
 """
+
 import datetime
 import functools
 import logging
+import secrets
 import uuid
 
 from passlib import context
 
 from api import errors, models, ports
-from api.helpers import auth
+from api.helpers import auth, time_now
 from api.helpers import schemas as helper_schema
-from api.helpers import time_now
 from api.typings import Settings
 
 from . import schemas
@@ -36,7 +24,6 @@ TOKEN_DURATION = datetime.timedelta(minutes=60)
 REFRESH_DURATION = datetime.timedelta(days=1)
 
 
-# pylint: disable=too-many-locals
 async def create_session(
     secret_manager: ports.SecretManager,
     db: ports.UnitOfWork,
@@ -55,7 +42,7 @@ async def create_session(
     token_duration = TOKEN_DURATION
     refresh_duration = REFRESH_DURATION
 
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     session_id = uuid.uuid4()
 
     if not session:
@@ -86,6 +73,7 @@ async def create_session(
         expires_in=token_duration,
         scopes=scopes,
         user_name=user_name,
+        user_id=user_id,
     )
     return session_data
 
@@ -155,3 +143,27 @@ async def refresh(
         scopes=user_session.user.role.scopes,
         session=user_session,
     )
+
+
+async def forgot_password(email: str, uow: ports.UnitOfWork) -> str:
+    """
+    Sends a forgot password email
+    """
+    user = await uow.user_repository.get(email=email)
+    user.reset_token = secrets.token_urlsafe(100)[:100]
+    return user.reset_token
+
+
+async def reset_password(
+    token: str, password: str, uow: ports.UnitOfWork, hash_ctx: context.CryptContext
+) -> bool:
+    """
+    Sends a forgot password email
+    """
+    try:
+        user = await uow.user_repository.get(reset_token=token)
+    except errors.NotFound as err:
+        raise errors.InvalidResetUrl() from err
+    user.reset_token = None
+    user.set_password(password, hash_ctx)
+    return True

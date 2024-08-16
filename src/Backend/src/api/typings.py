@@ -1,25 +1,16 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing custom typings
 """
+
 from __future__ import annotations
 
 import typing
+import uuid
 
 from pydantic import dataclasses
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
+
+from api import models
 
 Settings = typing.NewType("Settings", dict[str, str])
 
@@ -57,3 +48,44 @@ class Message:
     """
     Publisher abstract messages.
     """
+
+
+@dataclasses.dataclass
+class CreateOrUpdateOrganization:
+    """
+    Create or update Organization model.
+    """
+
+    customer_id: str | None
+    name: str
+    region: str | None
+    city: str
+    state: str
+    county: str
+
+
+@dataclasses.dataclass
+class CreateOrUpdateGroup:
+    name: str
+    customer_id: str | None
+    grade: models.Grades
+    shift: models.Shifts
+
+
+@dataclasses.dataclass
+class CreateOrUpdateUser:
+    """
+    User for create or update model.
+    """
+
+    external_id: str | None
+    customer_id: str | None
+    type: models.UserType
+    role_id: uuid.UUID
+    name: str
+    email_address: str
+    state: str | None
+    region: str | None
+    county: str | None
+    orgs_customer_id: list[str] | None
+    groups_customer_id: list[str] | None

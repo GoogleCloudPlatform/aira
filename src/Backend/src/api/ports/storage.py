@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing storage abstract.
 """
+
 import abc
 
 
@@ -41,7 +29,9 @@ class Storage(abc.ABC):
         """
 
     @abc.abstractmethod
-    async def generate_signed_url(self, path: str, mimetype: str) -> str:
+    async def generate_signed_url(
+        self, path: str, mimetype: str, method: str = "PUT"
+    ) -> str:
         """
         Method to generate a signed url
         """
@@ -50,4 +40,10 @@ class Storage(abc.ABC):
     async def get_blob_content_type(self, path: str) -> str | None:
         """
         Method to get blob metadata.
+        """
+
+    @abc.abstractmethod
+    async def get_blob_size(self, path: str) -> int | None:
+        """
+        Method to get blob size.
         """

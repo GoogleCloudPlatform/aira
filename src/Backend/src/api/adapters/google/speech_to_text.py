@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module with the implementation of speech to text
 """
+
 import datetime
 import logging
 import os
@@ -22,11 +10,11 @@ import uuid
 
 import ffmpeg
 import google.cloud.speech_v1p1beta1 as speech
-import unidecode
 from google.cloud.speech_v1p1beta1.types import cloud_speech
 from google.oauth2 import service_account
 
 from api import ports
+from api.helpers import util
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +24,13 @@ class SpeechToText(ports.SpeechToText):
     Implementation of google's speech to text.
     """
 
-    def __init__(self, project_id: str, creds_path: str, storage: ports.Storage):
+    def __init__(
+        self,
+        project_id: str,
+        creds_path: str,
+        storage: ports.Storage,
+        language: str = "pt-BR",
+    ):
         self.credentials = None
         if creds_path:
             self.credentials = service_account.Credentials.from_service_account_file(
@@ -46,8 +40,8 @@ class SpeechToText(ports.SpeechToText):
         self.storage: ports.Storage = storage
         self.project_id = project_id
         self.audio_tmp = "/tmp"
+        self.language = language
 
-    # pylint: disable=too-many-arguments,too-many-locals
     async def process(
         self,
         phrases_id: str,
@@ -58,13 +52,18 @@ class SpeechToText(ports.SpeechToText):
         depth: int = 0,
         sample_rate: int | None = None,
         channels: int | None = None,
-    ) -> tuple[str, str, int]:
+        model_type: str = "latest_short",
+    ) -> str:
         """
         Run speech to text.
         """
         total_time = datetime.timedelta(seconds=duration)
-        parent = f"projects/{self.project_id}/locations/global/phraseSets/{phrases_id}"
-        speech_adaptation = speech.SpeechAdaptation(phrase_set_references=[parent])
+        speech_adaptation = None
+        if phrases_id:
+            parent = (
+                f"projects/{self.project_id}/locations/global/phraseSets/{phrases_id}"
+            )
+            speech_adaptation = speech.SpeechAdaptation(phrase_set_references=[parent])
 
         metadata = speech.RecognitionMetadata()
         metadata.interaction_type = (
@@ -76,11 +75,11 @@ class SpeechToText(ports.SpeechToText):
 
         config_boosted = speech.RecognitionConfig(
             encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-            sample_rate_hertz=44100 if not sample_rate else sample_rate,
-            language_code="pt-BR",
-            audio_channel_count=2 if not channels else channels,
+            sample_rate_hertz=sample_rate if sample_rate else 48000,
+            audio_channel_count=channels if channels else 1,
+            language_code=self.language,
             adaptation=speech_adaptation,
-            model="latest_short",
+            model=model_type,
             enable_word_confidence=True,
             enable_word_time_offsets=True,
             metadata=metadata,
@@ -118,7 +117,14 @@ class SpeechToText(ports.SpeechToText):
                         transcript_arr.extend(new_transcript.split(" "))
                         i += 1
                     else:
-                        transcript_arr.append(word_obj.word)
+                        word_data = word_obj.word
+                        transcript_arr.extend(
+                            util.convert_number_to_written_text(
+                                word_data, self.language
+                            )
+                            if word_data.isdecimal()
+                            else [word_data]
+                        )
                 if depth < 2 and (total_time - last_time).total_seconds() >= 5.0:
                     new_transcript = await self._rerun_audio(
                         path,
@@ -136,25 +142,8 @@ class SpeechToText(ports.SpeechToText):
                     transcript_arr.extend(new_transcript.split(" "))
             result_transc = " ".join(transcript_arr)
         except IndexError:
-            return ("", "", 0)
-        amount = 0
-        transcripts = (
-            result_transc.replace(". ", " ")
-            .replace(", ", " ")
-            .replace(".", " ")
-            .replace(",", " ")
-            .split(" ")
-        )
-        for word in words:
-            for transcript in transcripts:
-                if (
-                    unidecode.unidecode(transcript).lower()
-                    == unidecode.unidecode(word).lower()
-                ):
-                    transcripts.remove(transcript)
-                    amount += 1
-                    break
-        return (desired, result_transc, amount)
+            return ""
+        return result_transc
 
     async def create_phrase_set(self, phrases: list[dict[str, typing.Any]]) -> str:
         """
@@ -208,8 +197,9 @@ class SpeechToText(ports.SpeechToText):
             depth=depth,
             sample_rate=sample_rate,
             channels=channels,
+            model_type="latest_short",
         )
-        return process_result[1]
+        return process_result
 
     async def _cut_audio(
         self, audio_path: str, file_name: str, start_time: float, end_time: float

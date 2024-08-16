@@ -1,29 +1,17 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the group repository.
 """
+
 import contextlib
 import math
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
 from api import errors, models, typings
 from api.adapters.sqlalchemy import group
 from api.routers.groups import schemas
+from hypothesis import strategies as st
+
 from tests.helpers import database, strats
 
 
@@ -36,13 +24,14 @@ def _create_group_from_schema(
             shift=schema.shift,
             grade=schema.grade,
             organization_id=schema.organization_id,
-            customer_id=schema.customer_id,  # type: ignore[arg-type]
+            customer_id=schema.customer_id,
         )
         for schema in schema_list
     ]
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_group_query() -> None:
     """
     Test of adapter to get an group from query.
@@ -60,24 +49,25 @@ async def test_get_group_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     group_schema=st.builds(
         schemas.GroupCreate,
         name=strats.safe_text(),
-        shift=strats.safe_text(),
+        shift=st.sampled_from(models.Shifts),
         grade=st.sampled_from(models.Grades),
     ),
     page_size=st.one_of(st.just(10), st.integers(min_value=1, max_value=5)),
-    shift=st.one_of(strats.safe_text(min_size=1, max_size=10), st.none()),
+    shift=st.one_of(st.none(), st.sampled_from(models.Shifts)),
     grade=st.one_of(st.none(), st.sampled_from(models.Grades)),
 )
 @hypothesis.settings(
     suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture],
 )
-async def test_list_groups_query(  # pylint: disable=too-many-locals
+async def test_list_groups_query(
     group_schema: schemas.GroupCreate,
     page_size: int,
-    shift: str | None,
+    shift: models.Shifts | None,
     grade: models.Grades | None,
 ) -> None:
     """
@@ -123,6 +113,7 @@ async def test_list_groups_query(  # pylint: disable=too-many-locals
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_group_repo_query() -> None:
     """
     Test of adapter to get group.
@@ -138,10 +129,11 @@ async def test_get_group_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     group_schema=st.builds(
         schemas.GroupCreate,
-        shift=strats.safe_text(),
+        shift=st.sampled_from(models.Shifts),
         grade=st.sampled_from(models.Grades),
         name=strats.safe_text(),
     )
@@ -162,6 +154,7 @@ async def test_create_group_adapter(group_schema: schemas.GroupCreate) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create group.

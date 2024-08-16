@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module related to the port of organization repository.
 """
+
 import abc
 import uuid
 
@@ -54,6 +42,31 @@ class OrganizationRepository(abc.ABC):
         :param organization_model: the organization model parameter.
         """
 
+    @abc.abstractmethod
+    async def create_or_update(
+        self,
+        sync_org: typings.CreateOrUpdateOrganization,
+        cached_orgs: list[models.Organization],
+    ) -> models.Organization:
+        """
+        Method to create or update a list of organization filtering by customer id.
+
+        :param sync_org: sync_org to insert or update.
+        """
+
+    @abc.abstractmethod
+    async def list(
+        self,
+        org_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Organization]:
+        """
+        Method to list orgs.
+
+        :param org_ids: parameter with array of ids.
+        :param customer_ids: parameter with array of customer ids.
+        """
+
 
 class GetOrganization(abc.ABC):
     """
@@ -85,4 +98,18 @@ class ListOrganizations(abc.ABC):
     ) -> tuple[list[models.Organization], typings.PaginationMetadata]:
         """
         Method to list all orgs.
+        """
+
+
+class ListOrganizationUtils(abc.ABC):
+    """
+    Query to list unique state/county/region from orgs.
+    """
+
+    @abc.abstractmethod
+    async def __call__(
+        self,
+    ) -> dict[str, list[str]]:
+        """
+        Method to list unique state/county/region from orgs.
         """

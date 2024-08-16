@@ -1,26 +1,16 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all exam related sqlalchemy queries.
 """
+
 import logging
+import typing
 import uuid
 
 import sqlalchemy as sa
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import exc
+from sqlalchemy.engine.row import Row
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
 from api import errors, helpers, models, ports, typings
@@ -40,8 +30,8 @@ class ExamRepository(ports.ExamRepository):
         """
         Get exam by params.
 
-        :params exam_id: exam id on database.
-        :params name: name on database.
+        :param exam_id: exam id on database.
+        :param name: name on database.
 
         :raises errors.NotFound: if the entity was not found.
         """
@@ -115,6 +105,88 @@ class GetExam(ports.GetExam):
         return exam
 
 
+class GetUsersExamDetails(ports.GetUsersExamDetails):
+    """
+    Get exam details by its id and user id.
+    """
+
+    def __init__(self, session_factory: typings.SessionFactory):
+        self._session_factory = session_factory
+
+    async def __call__(
+        self, exam_id: uuid.UUID, user_id: uuid.UUID
+    ) -> list[Row[typing.Any]]:
+        """
+        Method to get a specific user exam.
+
+        :param exam_id: the exam identifier.
+        :param user_id: the user identifier.
+        """
+        exam = models.Exam
+        euq = models.ExamUserQuestion
+        eu = models.ExamUser
+        question = models.Question
+        exam_stmt = (
+            sa.select(
+                exam,
+                sa.cast(
+                    sa.func.json_agg(
+                        sa.func.json_build_object(
+                            "id",
+                            question.id,
+                            "name",
+                            question.name,
+                            "data",
+                            question.data,
+                            "formatted_data",
+                            question.formatted_data,
+                            "type",
+                            question.type,
+                            "order",
+                            question.order,
+                            "response",
+                            sa.func.json_build_object(
+                                "result",
+                                euq.result,
+                                "right_count",
+                                euq.right_count,
+                                "status",
+                                euq.status,
+                                "created_at",
+                                euq.created_at,
+                                "updated_at",
+                                euq.updated_at,
+                                "audio_url",
+                                euq.audio_url,
+                                "user_rating",
+                                eu.user_rating,
+                                "user_accuracy",
+                                euq.user_accuracy,
+                                "total_accuracy",
+                                euq.total_accuracy,
+                            ),
+                        )
+                    ),
+                    type_=sa.String,
+                ).label("questions"),
+            )
+            .join(euq, sa.and_(euq.user_id == user_id, exam.id == euq.exam_id))
+            .join(eu, sa.and_(eu.exam_id == exam.id, eu.user_id == user_id))
+            .join(
+                question,
+                sa.and_(question.id == euq.question_id, question.exam_id == exam.id),
+            )
+            .where(exam.id == exam_id)
+            .group_by(exam.id)
+        )
+
+        async with self._session_factory() as session:
+            result = await session.execute(exam_stmt)
+        exam_result = list(result.unique().all())
+
+        return exam_result
+
+
 class ListExams(ports.ListExams):
     """
     Query to get all exams.
@@ -136,11 +208,12 @@ class ListExams(ports.ListExams):
         stmt = sa.select(models.Exam).order_by(models.Exam.start_date.desc())
 
         if groups is not None:
-            stmt = stmt.join(models.Group).where(
+            stmt = stmt.join(
+                models.Group,
                 sa.and_(
                     models.Group.id.in_(groups),
                     models.Group.grade == models.Exam.grade,
-                )
+                ),
             )
         if query:
             stmt = stmt.where(
@@ -175,46 +248,106 @@ class ListPendingExams(ports.ListPendingExams):
         group_id: uuid.UUID,
         page_size: int = 10,
         page: int = 1,
-    ) -> tuple[list[models.Exam], typings.PaginationMetadata]:
+    ) -> tuple[
+        list[tuple[models.Exam, models.ExamStatus | None]], typings.PaginationMetadata
+    ]:
         exam_user = models.ExamUser
         current_date = helpers.time_now()
+        group = models.Group
+        exam = models.Exam
         stmt = (
-            sa.select(models.Exam)
+            sa.select(exam, exam_user.status)
             .join(
-                models.Group,
+                group,
                 sa.and_(
-                    models.Group.grade == models.Exam.grade,
-                    models.Group.id == group_id,
+                    group.grade == exam.grade,
+                    group.id == group_id,
                 ),
             )
             .outerjoin(
                 exam_user,
-                sa.and_(
-                    exam_user.exam_id == models.Exam.id, exam_user.user_id == user_id
-                ),
+                sa.and_(exam_user.exam_id == exam.id, exam_user.user_id == user_id),
             )
+            .where(
+                exam.start_date <= current_date,
+            )
+            .where(exam.end_date > current_date)
             .where(
                 sa.or_(
                     exam_user.status != models.ExamStatus.FINISHED,
                     exam_user.exam_id.is_(None),
                 )
             )
-            .where(
-                models.Exam.start_date <= current_date,
-            )
-            .where(models.Exam.end_date > current_date)
         )
-        params = Params(page=page, size=page_size)
 
         async with self._session_factory() as session:
-            result: typings.Paginated = await paginate(session, stmt, params=params)
+            if page_size >= 0:
+                params = Params(page=page, size=page_size)
+                result: typings.Paginated = await paginate(session, stmt, params=params)
+                result_items = result.items
+                current_page = result.page
+                total_pages = result.pages
+                total_items = result.total
+                page_size = result.size
+            else:
+                result_all = await session.execute(stmt)
+                result_items = list(result_all.scalars().unique())
+                current_page = 1
+                total_pages = 1
+                total_items = len(result_items)
+                page_size = len(result_items)
 
-        return result.items, typings.PaginationMetadata(
-            current_page=result.page,
-            total_pages=result.pages,
-            total_items=result.total,
-            page_size=result.size,
+        return result_items, typings.PaginationMetadata(
+            current_page=current_page,
+            total_pages=total_pages,
+            total_items=total_items,
+            page_size=page_size,
         )
+
+
+class ListExamsWithResults(ports.ListExamsWithResults):
+    """
+    Query to get all exams.
+    """
+
+    def __init__(self, session_factory: typings.SessionFactory):
+        self._session_factory = session_factory
+
+    async def __call__(
+        self,
+        user_id: uuid.UUID,
+        group_id: uuid.UUID,
+    ) -> list[models.Exam]:
+        exam_user = models.ExamUser
+        current_date = helpers.time_now()
+        group = models.Group
+        exam = models.Exam
+        stmt = (
+            sa.select(exam)
+            .join(
+                group,
+                sa.and_(
+                    group.grade == exam.grade,
+                    group.id == group_id,
+                ),
+            )
+            .join(
+                exam_user,
+                sa.and_(
+                    exam_user.exam_id == exam.id,
+                    exam_user.user_id == user_id,
+                    exam_user.status == models.ExamStatus.FINISHED,
+                ),
+            )
+            .where(
+                exam.start_date <= current_date,
+            )
+        )
+
+        async with self._session_factory() as session:
+            result_all = await session.execute(stmt)
+
+        return list(result_all.scalars().unique())
 
 
 class ListPendingQuestions(ports.ListPendingQuestions):
@@ -247,9 +380,7 @@ class ListPendingQuestions(ports.ListPendingQuestions):
                 ),
             )
             .where(
-                sa.or_(
-                    Euq.user_id.is_(None), Euq.status == models.ExamStatus.NOT_STARTED
-                )
+                sa.or_(Euq.user_id.is_(None), Euq.status != models.ExamStatus.FINISHED)
             )
             .where(Question.exam_id == exam_id)
             .where(models.Group.id == group_id)
@@ -346,6 +477,7 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
                 models.Exam.start_date <= current_date,
             )
             .where(models.Exam.end_date > current_date)
+            .order_by(Question.order.asc())
         )
 
         async with self._session_factory() as session:
@@ -366,8 +498,8 @@ class QuestionRepository(ports.QuestionRepository):
         """
         Get question by params.
 
-        :params question_id: question id on database.
-        :params name: name on database.
+        :param question_id: question id on database.
+        :param name: name on database.
 
         :raises errors.NotFound: if the entity was not found.
         """

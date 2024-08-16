@@ -1,25 +1,13 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module with the implementation of cloud storage
 """
+
 import asyncio
 import datetime
 import functools
 import os
 
-import google.cloud.storage as storage  # type: ignore[import]
+from google.cloud import storage  # type: ignore[attr-defined]
 from google.oauth2 import service_account
 
 from api import ports
@@ -79,15 +67,17 @@ class CloudStorage(ports.Storage):
         os.remove(audio_path)
         return end_path
 
-    async def generate_signed_url(self, path: str, mimetype: str) -> str:
+    async def generate_signed_url(
+        self, path: str, mimetype: str, method: str = "PUT"
+    ) -> str:
         blob = self.client.bucket(self.storage_path).blob(path)
         response: str = await asyncio.to_thread(
             functools.partial(
                 blob.generate_signed_url,
-                method="PUT",
+                method=method,
                 expiration=datetime.timedelta(hours=1),
                 version="v4",
-                content_type=mimetype,
+                content_type=mimetype if method != "GET" else None,
             )
         )
         return response
@@ -96,3 +86,8 @@ class CloudStorage(ports.Storage):
         blob = self.client.bucket(self.storage_path).get_blob(path)
         content_type: str | None = blob.content_type
         return content_type
+
+    async def get_blob_size(self, path: str) -> int | None:
+        blob = self.client.bucket(self.storage_path).get_blob(path)
+        size: int | None = blob.size
+        return size

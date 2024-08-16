@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all group related sqlalchemy memory implementation queries.
 """
+
 import uuid
 
 from api import errors, models, ports, typings
@@ -35,7 +23,7 @@ class GroupRepository(ports.GroupRepository):
         """
         Get group by params.
 
-        :params group_id: group id on database.
+        :param group_id: group id on database.
         """
         if self._items:
             items = self._items
@@ -61,6 +49,7 @@ class GroupRepository(ports.GroupRepository):
             state="fk",
             customer_id="fake",
             region="fake",
+            county="fake",
         )
         org.id = group_model.organization_id
         group_model.organization = org
@@ -74,6 +63,37 @@ class GroupRepository(ports.GroupRepository):
         :param group_model: the group model parameter.
         """
         self._items = [item for item in self._items if item.id != group_model.id]
+
+    async def create_or_update(
+        self,
+        sync_group: typings.CreateOrUpdateGroup,
+        org_customer_id: str,
+        updated_orgs: dict[str, models.Organization],
+        cached_groups: list[models.Group],
+    ) -> models.Group:
+        """
+        Method to create or update a list of group filtering by customer id.
+
+        :param sync_group: sync_group to insert or update.
+        """
+        raise NotImplementedError()
+
+    async def list(
+        self,
+        group_ids: list[uuid.UUID] | None = None,
+        customer_ids: list[str] | None = None,
+    ) -> list[models.Group]:
+        """
+        List groups by group_ids.
+
+        :param group_ids: group id on database.
+        """
+        items = self._items
+        if group_ids:
+            items = [item for item in items if item.id in group_ids]
+        if customer_ids:
+            items = [item for item in items if item.customer_id in customer_ids]
+        return items
 
 
 class GetGroup(ports.GetGroup):

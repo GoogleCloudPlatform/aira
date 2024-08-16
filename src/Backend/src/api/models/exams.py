@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for the groups model, aka classes.
 """
+
 import datetime
 import enum
 
@@ -38,13 +26,44 @@ class ExamStatus(enum.StrEnum):
     FINISHED = "finished"
 
 
+class UserRating(enum.StrEnum):
+    """
+    User rating.
+    """
+
+    NO_RATING = "Sem Classificação"
+    FLUENT = "Leitor Fluente"
+    READER = "Leitor Iniciante"
+    PRE_READER_ONE = "Pré-leitor 1"
+    PRE_READER_TWO = "Pré-leitor 2"
+    PRE_READER_THREE = "Pré-leitor 3"
+    PRE_READER_FOUR = "Pré-leitor 4"
+
+    @classmethod
+    def _missing_(cls, value):  # type: ignore[no-untyped-def]
+        # Em determinado momento, o READER trocou de Leitor para Leitor Iniciante
+        # Este if conserta as entradas antigas salvas
+        if value == "Leitor":
+            return cls.READER
+        return cls.NO_RATING
+
+
 class QuestionType(enum.StrEnum):
     """
     Exam status.
     """
 
     WORDS = "words"
+    COMPLEX_WORDS = "complex_words"
     PHRASES = "phrases"
+
+    @classmethod
+    def _missing_(cls, value: object) -> enum.StrEnum | None:
+        value = str(value).lower()
+        for member in cls:
+            if member.lower() == value:
+                return member
+        return None
 
 
 class Question(db.Base, db.DefaultColumns):
@@ -64,6 +83,8 @@ class Question(db.Base, db.DefaultColumns):
     type: Mapped[QuestionType] = mapped_column(psql.ENUM(QuestionType))
     phrase_id: Mapped[db.Str100]
     data: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    formatted_data: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    order: Mapped[int] = mapped_column(sa.SmallInteger, nullable=False)
 
 
 class ExamUser(db.Base):
@@ -81,6 +102,9 @@ class ExamUser(db.Base):
     )
     status: Mapped[ExamStatus] = mapped_column(
         psql.ENUM(ExamStatus), default=ExamStatus.NOT_STARTED
+    )
+    user_rating: Mapped[UserRating] = mapped_column(
+        psql.ENUM(UserRating), default=UserRating.NO_RATING
     )
     created_at: Mapped[db.DateTime] = mapped_column(
         init=False, default=datetime.datetime.now(tz=datetime.UTC)
@@ -112,6 +136,7 @@ class Exam(db.Base, db.DefaultColumns):
         Question,
         lazy="joined",
         cascade="all, delete-orphan, save-update",
+        order_by=Question.order.asc(),
     )
 
 
@@ -136,6 +161,10 @@ class ExamUserQuestion(db.Base, db.DefaultColumns):
     result: Mapped[db.ListJSON]
 
     right_count: Mapped[int] = mapped_column(sa.Integer)
+
+    user_accuracy: Mapped[float] = mapped_column(sa.FLOAT, nullable=False)
+    total_accuracy: Mapped[float] = mapped_column(sa.FLOAT, nullable=False)
+
     audio_url: Mapped[str] = mapped_column(sa.String(400))
 
     status: Mapped[ExamStatus] = mapped_column(

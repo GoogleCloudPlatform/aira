@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Configurations for tests.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -21,16 +9,15 @@ import datetime
 import typing
 import uuid
 
+import api
 import injector
 import sqlalchemy as sa
+from api import dependencies, models, ports, typings
+from api.helpers import time_now
 from httpx import AsyncClient
 from passlib import context
 from sqlalchemy import event, orm
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
-
-import api
-from api import dependencies, models, ports, typings
-from api.helpers import time_now
 
 _container: injector.Injector | None = None
 
@@ -39,7 +26,8 @@ def create_test_container() -> injector.Injector:
     """
     Creating test container.
     """
-    global _container  # pylint: disable=global-statement
+    # ruff: noqa: PLW0603
+    global _container
     if _container:
         return _container
     modules = (
@@ -47,6 +35,7 @@ def create_test_container() -> injector.Injector:
         dependencies.EngineTestSQLAlchemy(),
         dependencies.SQLAlchemyModule(),
         dependencies.MemoryModule(),
+        dependencies.TracingModule(),
     )
     _container = injector.Injector(modules)
     return _container
@@ -141,6 +130,7 @@ async def organization() -> typing.AsyncGenerator[models.Organization, None]:
         name="Test Org",
         city="Niterói",
         state="RJ",
+        county="Rio de Janeiro",
         created_at=time_now(),
         updated_at=time_now(),
     )
@@ -211,9 +201,11 @@ async def question(
         type=models.QuestionType.WORDS,
         phrase_id="",
         data="",
+        formatted_data="",
         exam_id=exam_model.id,
         created_at=time_now(),
         updated_at=time_now(),
+        order=1,
     )
     select_stmt = sa.select(models.Question).where(models.Question.id == question_id)
     async with session_factory() as session:
@@ -406,7 +398,7 @@ async def user_with_password(
         type=models.UserType.PASSWORD,
         name="test-user",
         email_address="test@example.com",
-        password=hash_ctx.hash("test"),
+        _password=hash_ctx.hash("test"),
         created_at=time_now(),
         updated_at=time_now(),
     )

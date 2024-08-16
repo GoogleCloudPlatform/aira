@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing known errors.
 """
+
 import typing
 
 
@@ -33,10 +21,38 @@ class NotFound(BaseError):
     def __init__(self, entity: str | None = None) -> None:
         self.output = {
             "status_code": 404,
-            "message": "The entity was not found."
-            if not entity
-            else f"The entity {entity.capitalize()} was not found.",
+            "message": (
+                "The entity was not found."
+                if not entity
+                else f"The entity {entity.capitalize()} was not found."
+            ),
             "code": "not_found" if not entity else f"{entity}_not_found",
+        }
+
+
+class NotSupported(BaseError):
+    """
+    Error to be returned when this type is not supported.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 400,
+            "message": "This extension is not supported.",
+            "code": "not_supported",
+        }
+
+
+class InvalidResetUrl(BaseError):
+    """
+    Error to be returned when this type is not supported.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 400,
+            "message": "This is an invalid reset link.",
+            "code": "invalid_reset_link",
         }
 
 
@@ -130,9 +146,11 @@ class FieldNotNullable(BaseError):
     def __init__(self, field: str | None = None) -> None:
         self.output = {
             "status_code": 422,
-            "message": "One or more fields sent are null and aren't nullable."
-            if not field
-            else f"The field {field} cannot be null.",
+            "message": (
+                "One or more fields sent are null and aren't nullable."
+                if not field
+                else f"The field {field} cannot be null."
+            ),
             "code": "field_not_nullable",
         }
 
@@ -165,6 +183,19 @@ class InvalidGroupOrg(BaseError):
         }
 
 
+class InvalidModelId(BaseError):
+    """
+    Field cannot be null.
+    """
+
+    def __init__(self, model: str) -> None:
+        self.output = {
+            "status_code": 400,
+            "message": f"Invalid identifier for {model}.",
+            "code": f"invalid_{model}_id",
+        }
+
+
 class InvalidChosenGroup(BaseError):
     """
     Field cannot be null.
@@ -188,9 +219,11 @@ class InvalidField(BaseError):
     def __init__(self, field: str | None = None) -> None:
         self.output = {
             "status_code": 422,
-            "message": "One or more fields sent are invalids."
-            if not field
-            else f"The field {field} is invalid.",
+            "message": (
+                "One or more fields sent are invalids."
+                if not field
+                else f"The field {field} is invalid."
+            ),
             "code": "invalid_field",
         }
 
@@ -205,6 +238,19 @@ class InvalidCredentials(BaseError):
             "status_code": 401,
             "message": "Your email and/or password are invalid.",
             "code": "email_or_password_invalid",
+        }
+
+
+class Forbidden(BaseError):
+    """
+    Invalid credentials.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 403,
+            "message": "You don't have permission to perform this action.",
+            "code": "forbidden",
         }
 
 
@@ -231,4 +277,17 @@ class StartDateError(BaseError):
             "status_code": 400,
             "message": "Start date must be before the end date.",
             "code": "start_date_error",
+        }
+
+
+class CantEditExam(BaseError):
+    """
+    Error raised when editing an exam that is already in progress.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 400,
+            "message": "Can't edit exam after start date.",
+            "code": "cant_edit_after_start_date",
         }
