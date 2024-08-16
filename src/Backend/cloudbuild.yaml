@@ -36,7 +36,7 @@ steps:
         "run",
         "deploy",
         "backend",
-        "--project=$_PROJECT_ID",
+        "--project=$PROJECT_ID",
         "--image",
         "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest",
         "--region",
