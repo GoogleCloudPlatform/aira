@@ -1,27 +1,15 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the role repository.
 """
+
 import contextlib
 import typing
 
 import hypothesis
 import pytest
-
 from api import errors, models
 from api.adapters.sqlalchemy import role
+
 from tests.helpers import database, strats
 
 
@@ -40,6 +28,7 @@ def _create_role_from_dict(
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_role_query() -> None:
     """
     Test of adapter to get an role from query.
@@ -56,6 +45,7 @@ async def test_get_role_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_role_repo_query() -> None:
     """
     Test of adapter to get role.
@@ -69,6 +59,7 @@ async def test_get_role_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(role_schema=strats.create_role)
 async def test_create_role(role_schema: dict[str, typing.Any]) -> None:
     """
@@ -83,6 +74,7 @@ async def test_create_role(role_schema: dict[str, typing.Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create role.

@@ -1,36 +1,26 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing all endpoints related to auth services
 """
+
 from __future__ import annotations
 
+import base64
 import logging
 
 import fastapi
 import fastapi_injector
 from passlib import context
 
-from api import dependencies, ports
+from api import dependencies, errors, ports, typings
 from api.helpers import auth
 from api.helpers import schemas as helper_schema
 from api.helpers import session_manager as sess_mg
+from api.routers.schemas import PubsubRequest
 from api.typings import Settings
 
 from . import crud, schemas
 
-router = fastapi.APIRouter()
+router = fastapi.APIRouter(tags=["auth"])
 
 logger = logging.getLogger(__name__)
 
@@ -119,3 +109,86 @@ async def dashboard_signed_url(
         user=session.user, query=request.query_params
     )
     return {"url": response}
+
+
+@router.post("/forgot")
+async def forgot_password(
+    body: schemas.ForgotPassword = fastapi.Body(...),
+    notification: ports.Notification = fastapi_injector.Injected(ports.Notification),
+    setts: typings.Settings = fastapi_injector.Injected(typings.Settings),
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+) -> fastapi.Response:
+    """
+    Sends a forgot password email
+    """
+    async with uow_builder() as uow:
+        try:
+            token = await crud.forgot_password(body.email, uow)
+            url = f"{setts['front_base_url']}/reset?token={token}"
+            await notification.send(
+                body.email,
+                setts["forgot_pw_template"],
+                reset_url=url,
+            )
+            await uow.commit()
+        except errors.NotFound:
+            pass
+    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)
+
+
+@router.post("/reset")
+async def reset_password(
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+    body: schemas.ResetPassword = fastapi.Body(...),
+    hash_ctx: context.CryptContext = fastapi_injector.Injected(context.CryptContext),
+) -> fastapi.Response:
+    """
+    Sends a forgot password email
+    """
+    async with uow_builder() as uow:
+        await crud.reset_password(body.token, body.password, uow, hash_ctx)
+        await uow.commit()
+    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)
+
+
+@router.get(
+    "/users/looker",
+    dependencies=[fastapi.Security(auth.validate_scheduler_token)],
+)
+async def set_delete_users_pubsub(
+    provide_looker: ports.Dashboard = fastapi_injector.Injected(ports.Dashboard),
+    publisher: ports.MessagePublisher = fastapi_injector.Injected(
+        ports.MessagePublisher
+    ),
+    settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
+) -> fastapi.Response:
+    """
+    Set pubsub to delete each user
+    """
+    users = await provide_looker.get_all_looker_users()
+
+    for user in users:
+        await publisher.publish(
+            schemas.DeleteLookerUserMessage(user_id=user.id),
+            topic=settings.get("pubsub_delete_user_topic"),
+        )
+    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)
+
+
+@router.post("/user/looker/_handle")
+async def handle_delete_users_pubsub(
+    provide_looker: ports.Dashboard = fastapi_injector.Injected(ports.Dashboard),
+    body: PubsubRequest = fastapi.Body(...),
+) -> fastapi.Response:
+    """
+    Handle delete looker user
+    """
+    data = schemas.PubsubDeleteUserData.parse_raw(
+        base64.b64decode(body.message.data.decode("utf-8"))
+    )
+    await provide_looker.delete_looker_user(data.user_id)
+    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)

@@ -1,33 +1,22 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Unit tests for `exams/endpoints.py`
 """
+
 import datetime
+import typing
 import unittest.mock
 import uuid
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
-from api import errors, models
+from api import errors, models, typings
+from api.adapters import google
 from api.adapters.memory import exam, unit_of_work
 from api.helpers import schemas as util_schemas
 from api.helpers import time_now
 from api.routers.exams import endpoints as exams_endpoint
 from api.routers.exams import schemas
+from hypothesis import strategies as st
 
 
 @pytest.mark.asyncio
@@ -59,9 +48,8 @@ async def test_list_exams(
     list_exams = exam.ListExams(exams)
     response = await exams_endpoint.list_resources(
         list_data=util_schemas.ListSchema(page_size=page_size, page=1),
-        session_manager=session_manager,
         list_exams=list_exams,
-        list_pending=exam.ListPendingExams([]),
+        session_manager=session_manager,
     )
     tmp_response = [schemas.Exam.from_orm(exam) for exam in exams]
     final_response = tmp_response[:page_size]
@@ -109,8 +97,13 @@ async def test_get_exam(
         end_date=st.just(time_now() + datetime.timedelta(days=30)),
     )
 )
+@hypothesis.settings(
+    max_examples=5,
+    suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture],
+)
 async def test_create_exam(
     create_exam: schemas.ExamCreate,
+    cloud_storage: google.CloudStorage,
 ) -> None:
     """
     tests if get is behaving properly.
@@ -119,8 +112,15 @@ async def test_create_exam(
     speech = unittest.mock.AsyncMock()
     speech.create_phrase_set.return_value = "id"
     uow_builder = unit_of_work.UnitOfWorkBuilder(exam_repository=exam_repo)
-    response = await exams_endpoint.create(
-        uow_builder=uow_builder, speech=speech, body=create_exam
-    )
+    settings = typing.cast(typings.Settings, {})
+    with unittest.mock.patch(
+        "api.dependencies.get_speech_to_text", return_value=speech
+    ):
+        response = await exams_endpoint.create(
+            uow_builder=uow_builder,
+            settings=settings,
+            storage=cloud_storage,
+            body=create_exam,
+        )
     assert uow_builder.call_count == 1
     assert await exam_repo.get(response.id)

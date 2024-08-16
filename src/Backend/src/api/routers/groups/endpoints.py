@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing all endpoints related to group services
 """
+
 from __future__ import annotations
 
 import logging
@@ -22,33 +10,62 @@ import uuid
 import fastapi
 import fastapi_injector
 
-from api import errors, models, ports
-from api.helpers import auth
+from api import dependencies, errors, models, ports
+from api.helpers import auth, data
 from api.helpers import schemas as util_schemas
+from api.helpers import session_manager as sess_mg
 
-from . import schemas
+from . import crud, schemas
 
-router = fastapi.APIRouter()
+router = fastapi.APIRouter(tags=["groups"])
 
 logger = logging.getLogger(__name__)
 
 
-@router.get("", dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])])
+@router.get(
+    "", dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "group.list"])]
+)
 async def list_resources(
     shift: str | None = fastapi.Query(default=None),
     grade: models.Grades | None = fastapi.Query(default=None),
     organizations: list[uuid.UUID] | None = fastapi.Query(default=None),
     list_data: util_schemas.ListSchema = fastapi.Depends(),
     list_groups: ports.ListGroups = fastapi_injector.Injected(ports.ListGroups),
+    session_manager: sess_mg.SessionManager = fastapi.Depends(
+        dependencies.get_session_manager
+    ),
 ) -> schemas.GroupsList:
     """
     List groups.
 
     Handles requests related to groups being listed.
 
+    :param shift: shift filter for query.
+    :param grade: grade filter for query.
+    :param organizations: organizations filter for query.
+    :param list_data: common list schema.
     :param list_groups: implementation of groups list.
+    :param session_manager: implementation of session to get current user.
     """
+    current_session = await session_manager.get_current_session()
+    group_ids = None
+    if "admin" not in current_session.user.role.scopes:
+        group_ids = (
+            [gp.id for gp in current_session.user.groups]
+            if current_session.user.groups
+            else None
+        )
+        organizations = (
+            [
+                org.id
+                for org in current_session.user.organizations
+                if not organizations or org.id in organizations
+            ]
+            if current_session.user.organizations
+            else None
+        )
     result, pagination_metadata = await list_groups(
+        groups=group_ids,
         shift=shift,
         grade=grade,
         organizations=organizations,
@@ -63,6 +80,45 @@ async def list_resources(
         total=pagination_metadata.total_items,
         pages=pagination_metadata.total_pages,
     )
+
+
+@router.get(
+    "/export",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
+)
+async def export_groups(
+    session_manager: sess_mg.SessionManager = fastapi.Depends(
+        dependencies.get_session_manager
+    ),
+    list_groups: ports.ListGroups = fastapi_injector.Injected(ports.ListGroups),
+    organizations: list[uuid.UUID] | None = fastapi.Query(default=None),
+    storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    page_size: int = fastapi.Query(default=-1),
+) -> fastapi.Response:
+    """
+    Export groups as csv.
+
+    :param session_manager: implementation of session to get current user.
+    :param list_groups: implementation of groups list.
+    :param storage: implementation of storage.
+    """
+    current_session = await session_manager.get_current_session()
+    groups, _ = await list_groups(organizations=organizations, page_size=page_size)
+    url = await data.handle_export(
+        objs=groups,
+        export_keys=[
+            "id",
+            "customer_id",
+            "name",
+            "organization_id",
+            "grade",
+            "shift",
+        ],
+        user_id=current_session.user.id,
+        exp_type="groups",
+        storage=storage,
+    )
+    return fastapi.responses.JSONResponse(content={"url": url})
 
 
 @router.get(
@@ -165,3 +221,61 @@ async def update(
         await uow.commit()
 
     return schemas.GroupGet.from_orm(group)
+
+
+@router.put(
+    "/batch",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
+)
+async def import_groups_batch(
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+    storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    body: util_schemas.ImportData = fastapi.Body(...),
+) -> fastapi.Response:
+    """
+    Import groups.
+
+    Handles requests related to importing a specific groups.
+
+    :param session_factory: implementation of session factory.
+    :param body: parsed data for user import.
+    """
+
+    group_ids, customer_ids, result = await data.handle_import(
+        body.url, body.key_relation, storage
+    )
+    async with uow_builder() as uow:
+        group_list = await uow.group_repository.list(
+            group_ids=group_ids, customer_ids=customer_ids
+        )
+        for group_tmp in group_list:
+            if group_tmp.id in result:
+                group_data = result.pop(group_tmp.id)[0]
+            elif group_tmp.customer_id and group_tmp.customer_id in result:
+                group_data = result.pop(group_tmp.customer_id)[0]
+            else:
+                continue
+            group_data["organization_id"] = uuid.UUID(
+                group_data.get("organization", group_data.get("organization_id"))
+            )
+            await crud.update_group(group_tmp, schemas.GroupPatch.parse_obj(group_data))
+        new_groups = []
+        for group_result in result.values():
+            for group in group_result:
+                try:
+                    organization_id = uuid.UUID(
+                        group.get("organization", group.get("organization_id"))
+                    )
+                except ValueError as exc:
+                    raise errors.InvalidModelId("organization") from exc
+                group_obj = schemas.GroupCreate.parse_obj(
+                    {**group, "organization_id": organization_id}
+                )
+                new_groups.append(models.Group(**group_obj.dict()))
+        await uow.add_all(new_groups)
+        await uow.commit()
+    return fastapi.responses.JSONResponse(
+        {}, status_code=fastapi.status.HTTP_201_CREATED
+    )

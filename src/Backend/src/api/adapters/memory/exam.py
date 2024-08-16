@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for all exam related sqlalchemy memory implementation queries.
 """
+
 import uuid
 
 from api import errors, models, ports, typings
@@ -32,8 +20,8 @@ class ExamRepository(ports.ExamRepository):
         """
         Get exam by params.
 
-        :params exam_id: exam id on database.
-        :params name: name on database.
+        :param exam_id: exam id on database.
+        :param name: name on database.
         """
         if self._items:
             items = self._items
@@ -137,8 +125,8 @@ class QuestionRepository(ports.QuestionRepository):
         """
         Get question by params.
 
-        :params question_id: question id on database.
-        :params name: name on database.
+        :param question_id: question id on database.
+        :param name: name on database.
         """
         if self._items:
             items = self._items
@@ -228,8 +216,13 @@ class ListPendingExams(ports.ListPendingExams):
     Query to get a specific exam.
     """
 
-    def __init__(self, exams: list[models.Exam] | None = None) -> None:
-        self._items = exams if exams else []
+    def __init__(
+        self,
+        exams_with_status: (
+            list[tuple[models.Exam, models.ExamStatus | None]] | None
+        ) = None,
+    ) -> None:
+        self._items = exams_with_status if exams_with_status else []
 
     async def __call__(
         self,
@@ -237,7 +230,9 @@ class ListPendingExams(ports.ListPendingExams):
         group_id: uuid.UUID,
         page_size: int = 10,
         page: int = 1,
-    ) -> tuple[list[models.Exam], typings.PaginationMetadata]:
+    ) -> tuple[
+        list[tuple[models.Exam, models.ExamStatus | None]], typings.PaginationMetadata
+    ]:
         """
         Method to list all exams.
         """
@@ -250,3 +245,26 @@ class ListPendingExams(ports.ListPendingExams):
             page_size=page_size,
             total_items=len(self._items),
         )
+
+
+class ListExamsWithResults(ports.ListExamsWithResults):
+    """
+    Query to get a specific exam.
+    """
+
+    def __init__(
+        self,
+        exams: list[models.Exam] | None = None,
+    ) -> None:
+        self._items = exams or []
+
+    async def __call__(
+        self,
+        user_id: uuid.UUID,
+        group_id: uuid.UUID,
+    ) -> list[models.Exam]:
+        """
+        Method to list all exams.
+        """
+        items = self._items
+        return items

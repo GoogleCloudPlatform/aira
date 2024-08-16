@@ -1,24 +1,15 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module containing schemas for all auth endpoints
 """
+
+import dataclasses
 import datetime
 import typing
 import uuid
 
 import pydantic
+
+from api import typings
 
 
 class FirebaseLogin(pydantic.BaseModel):
@@ -35,7 +26,7 @@ class EmailPasswordLogin(pydantic.BaseModel):
     """
 
     email_address: str
-    password: str
+    password: pydantic.StrictStr
 
 
 class Session(pydantic.BaseModel):
@@ -44,9 +35,44 @@ class Session(pydantic.BaseModel):
     """
 
     id: uuid.UUID
+    user_id: uuid.UUID
     user_name: str
     token_type: typing.Literal["bearer"] = "bearer"
     access_token: str
     refresh_token: str
     expires_in: datetime.timedelta
     scopes: list[str]
+
+
+class ForgotPassword(pydantic.BaseModel):
+    """
+    Schema related to forgotten passwords.
+    """
+
+    email: pydantic.EmailStr
+
+
+class ResetPassword(pydantic.BaseModel):
+    """
+    Schema related to resetting passwords.
+    """
+
+    token: str
+    password: pydantic.StrictStr
+
+
+@dataclasses.dataclass
+class DeleteLookerUserMessage(typings.Message):
+    """
+    Dataclass to delete looker user.
+    """
+
+    user_id: str
+
+
+class PubsubDeleteUserData(pydantic.BaseModel, extra=pydantic.Extra.allow):
+    """
+    Defines only needed data that will be converted from pubsub.
+    """
+
+    user_id: str

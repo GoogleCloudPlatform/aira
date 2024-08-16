@@ -1,19 +1,7 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for utility functions.
 """
+
 import datetime
 import json
 import math
@@ -98,13 +86,91 @@ def words_recursion(phrase: str) -> list[str]:
     if len(phrase) < 100:
         return [phrase]
     phrase_calc = phrase[:100]
-    if "," in phrase_calc:
-        delimiter = ", " if ", " in phrase_calc else ","
-    else:
-        delimiter = " "
+    delimiter = (", " if ", " in phrase_calc else ",") if "," in phrase_calc else " "
     phrase_1 = phrase_calc.rsplit(delimiter, 1)[0]
     phrase_list = [phrase_1, phrase[len(phrase_1) + len(delimiter) :]]
     result = []
     for phrase_new in phrase_list:
         result.extend(words_recursion(phrase_new))
     return result
+
+
+word_dict = {
+    "pt-BR": {
+        "0": "zero",
+        "1": "um",
+        "2": "dois",
+        "3": "três",
+        "4": "quatro",
+        "5": "cinco",
+        "6": "seis",
+        "7": "sete",
+        "8": "oito",
+        "9": "nove",
+    },
+    "en-US": {
+        "0": "zero",
+        "1": "one",
+        "2": "two",
+        "3": "three",
+        "4": "four",
+        "5": "five",
+        "6": "six",
+        "7": "seven",
+        "8": "eight",
+        "9": "nine",
+    },
+    "es-ES": {
+        "0": "cero",
+        "1": "uno",
+        "2": "dos",
+        "3": "tres",
+        "4": "cuatro",
+        "5": "cinco",
+        "6": "seis",
+        "7": "siete",
+        "8": "ocho",
+        "9": "nueve",
+    },
+}
+
+
+def convert_number_to_written_text(word: str, language: str = "pt-BR") -> list[str]:
+    """
+    Convert decimal numbers to written text.
+
+    :param word: the word that is in decimal format.
+    :param language: the language that should be used to convert.
+
+    :returns: the word in written format.
+    """
+    return [word_dict[language][letter] for letter in word]
+
+
+def check_spelling_or_syllables(sentence: list[str]) -> int:
+    """
+    Checks if the sentence is being spelled or if it is just syllables
+    """
+    qty_spelling = 0
+    qty_syllables = 0
+    for word in sentence:
+        if len(word) == 1:
+            qty_spelling += 1
+        elif len(word) <= 4:
+            qty_syllables += 1
+    if len(sentence) == 0:
+        return 0
+    if qty_syllables / len(sentence) >= 0.7:
+        return 1  # Silabou
+    if qty_spelling / len(sentence) >= 0.7:
+        return -1  # Soletrou
+    return 0  # Normal
+
+
+def clear_spelling_words(sentence: list[str]) -> list[str]:
+    articles = {"os", "as"}
+    match check_spelling_or_syllables(sentence):
+        case -1:
+            return [word for word in sentence if len(word) > 1 and word not in articles]
+        case _:
+            return sentence

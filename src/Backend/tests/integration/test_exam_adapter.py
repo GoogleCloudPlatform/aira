@@ -1,31 +1,19 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
 Module for testing the exam repository.
 """
+
 import contextlib
 import datetime
 import math
 
 import hypothesis
 import pytest
-from hypothesis import strategies as st
-
 from api import errors, models, typings
 from api.adapters.sqlalchemy import exam
 from api.helpers import time_now
 from api.routers.exams import schemas
+from hypothesis import strategies as st
+
 from tests.helpers import database, strats
 
 
@@ -48,6 +36,7 @@ def _create_exam_model_from_schema(
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_exam_model_query() -> None:
     """
     Test of adapter to get an exam_model from query.
@@ -64,6 +53,7 @@ async def test_get_exam_model_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     exam_schema=st.builds(
         schemas.ExamCreate,
@@ -74,9 +64,13 @@ async def test_get_exam_model_query() -> None:
             st.builds(
                 schemas.Question,
                 name=strats.safe_text(max_size=50),
+                formatted_data=strats.safe_text(),
                 data=strats.safe_text(),
-            )
+                type=st.sampled_from(models.QuestionType),
+                order=st.integers(min_value=0, max_value=20),
+            ),
         ),
+        grade=st.sampled_from(models.Grades),
     ),
     page_size=st.one_of(st.just(10), st.integers(min_value=1, max_value=5)),
 )
@@ -102,22 +96,23 @@ async def test_list_exam_models_query(
             session.add_all(schema_models)
             await session.commit()
 
-        expected = sorted(
-            schema_models[:page_size], key=lambda x: x.start_date, reverse=True
-        )
+        expected = sorted(schema_models, key=lambda x: x.start_date, reverse=True)
         expected_metadata = typings.PaginationMetadata(
             current_page=1,
             total_pages=math.ceil(len(expected) / page_size),
             total_items=len(expected),
             page_size=page_size,
         )
+        expected_paginated = expected[:page_size]
 
         items, params = await list_exam_models(page_size=page_size)
-        assert items == expected
+        assert len(items) == len(expected_paginated)
+        assert items == expected_paginated
         assert params == expected_metadata
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_exam_model_repo_query() -> None:
     """
     Test of adapter to get exam_model.
@@ -131,6 +126,7 @@ async def test_get_exam_model_repo_query() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 @hypothesis.given(
     exam_model_schema=st.builds(
         schemas.ExamCreate,
@@ -141,9 +137,12 @@ async def test_get_exam_model_repo_query() -> None:
             st.builds(
                 schemas.Question,
                 name=strats.safe_text(max_size=50),
+                formatted_data=strats.safe_text(),
                 data=strats.safe_text(),
+                order=st.integers(min_value=0, max_value=20),
             )
         ),
+        grade=st.sampled_from(models.Grades),
     )
 )
 async def test_create_exam_model(exam_model_schema: schemas.ExamCreate) -> None:
@@ -159,6 +158,7 @@ async def test_create_exam_model(exam_model_schema: schemas.ExamCreate) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_should_raise_already_exists() -> None:
     """
     Test of adapter to create exam_model.
@@ -175,6 +175,7 @@ async def test_should_raise_already_exists() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_list_pending_exams() -> None:
     """
     Test of adapter to list pending exams.
@@ -195,10 +196,11 @@ async def test_list_pending_exams() -> None:
         pending_result, _ = await list_pending(
             user_id=user_model.id, group_id=user_model.groups[0].id
         )
-        assert pending_result == [exam_model]
+        assert pending_result == [(exam_model, None)]
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_list_pending_questions() -> None:
     """
     Test of adapter to list pending questions.
@@ -224,6 +226,7 @@ async def test_list_pending_questions() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_pending_question() -> None:
     """
     Test of adapter to get pending questions.
@@ -252,6 +255,7 @@ async def test_get_pending_question() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_question_repo_get() -> None:
     """
     Test of adapter to get pending questions.
@@ -268,6 +272,7 @@ async def test_question_repo_get() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_get_question_result() -> None:
     """
     Test of adapter to get exams_users.
