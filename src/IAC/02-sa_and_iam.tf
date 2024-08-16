@@ -15,7 +15,7 @@
 ## Creating the Service Accounts ##
 
 resource "google_service_account" "service_account_backend" {
-  account_id   = "${var.project_id}-backend-engine"
+  account_id   = "sa-${var.project_number}-back-engine"
   display_name = "Service Account for the backend engine in Cloud Run"
   project = var.project_id
   depends_on = [
@@ -24,7 +24,7 @@ resource "google_service_account" "service_account_backend" {
 }
 
 resource "google_service_account" "service_account_frontend" {
-  account_id   = "${var.project_id}-frontend-engine"
+  account_id   = "sa-${var.project_number}-front-engine"
   display_name = "Service Account for the frontend engine in Cloud Run"
   project = var.project_id
   depends_on = [
@@ -34,7 +34,7 @@ resource "google_service_account" "service_account_frontend" {
 
 
 resource "google_service_account" "service_account_gcs" {
-  account_id   = "${var.project_id}-backend-gcs"
+  account_id   = "sa-${var.project_number}-back-gcs"
   display_name = "Service Account for backend call GCS"
   project = var.project_id
   depends_on = [
@@ -50,14 +50,13 @@ resource "google_service_account_key" "service_account_gcs" {
 
 
 resource "google_service_account" "service_account_looker" {
-  account_id   = "${var.project_id}-looker"
+  account_id   = "sa-${var.project_number}-looker"
   display_name = "Service Account for looker conection"
   project = var.project_id
   depends_on = [
     google_project_service.project
   ]
 }
-
 
 
 ## Giving IAM Roles for the Service Accounts ##
