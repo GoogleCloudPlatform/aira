@@ -28,6 +28,7 @@ variable "project_number" {
 
 ### The variables below need to be changed after uploading Frontend and Backend in Cloud Run. ###
 
+
 variable "backend_url" {
   type = string
   default = "https://backend_url"
@@ -36,4 +37,14 @@ variable "backend_url" {
 variable "frontend_url" {
   type = string
   default = "https://frontend_url"
+}
+
+variable "dev_local_url" {
+  type = string
+  default =  "http://dev.localhost"
+}
+
+variable "localhost_url" {
+  type = string
+  default = "http://localhost:3000"
 }

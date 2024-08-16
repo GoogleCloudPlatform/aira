@@ -1,16 +1,3 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 ### Declaring SA private Key as secret ###
 
@@ -350,5 +337,123 @@ resource "google_secret_manager_secret_version" "api_url" {
 
 resource "google_secret_manager_secret_version" "front_url" {
   secret = google_secret_manager_secret.front_url.name
-  secret_data = var.frontend_url
+  secret_data = "${var.frontend_url}"
+  }
+
+
+### Declaring Looker Secrets ###
+
+#Base URL
+
+resource "google_secret_manager_secret" "lookersdk_base_url" {
+  secret_id = "lookersdk_base_url"
+  project = var.project_id
+  replication {
+    user_managed {
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+resource "google_secret_manager_secret_version" "lookersdk_base_url" {
+  secret = google_secret_manager_secret.lookersdk_base_url.name
+  secret_data = "https://update-here.cloud.looker.com" 
+  }
+
+
+#Client ID
+
+  resource "google_secret_manager_secret" "lookersdk_client_id" {
+  secret_id = "lookersdk_client_id"
+  project = var.project_id
+  replication {
+    user_managed {
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+resource "google_secret_manager_secret_version" "lookersdk_client_id" {
+  secret = google_secret_manager_secret.lookersdk_client_id.name
+  secret_data = "update-here"
+  }
+
+
+#Client Secret
+
+  resource "google_secret_manager_secret" "lookersdk_client_secret" {
+  secret_id = "lookersdk_client_secret"
+  project = var.project_id
+  replication {
+    user_managed {
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+  resource "google_secret_manager_secret_version" "lookersdk_client_secret" {
+    secret = google_secret_manager_secret.lookersdk_client_secret.name
+    secret_data = "update-here"
+    }
+
+
+#Looker Secret
+
+  resource "google_secret_manager_secret" "looker_secret" {
+  secret_id = "looker_secret"
+  project = var.project_id
+  replication {
+    user_managed {
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+  resource "google_secret_manager_secret_version" "looker_secret" {
+    secret = google_secret_manager_secret.looker_secret.name
+    secret_data = "update-here"
+    }
+
+### Declaring SERE API Key Secrets ###
+
+#API Key
+
+resource "google_secret_manager_secret" "sere_api_key" {
+  secret_id = "sere_api_key"
+  project   = var.project_id
+  replication {
+    user_managed {
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+resource "google_secret_manager_secret_version" "sere_api_key" {
+  secret      = google_secret_manager_secret.sere_api_key.name
+  secret_data = "update-here" 
   }
