@@ -2,17 +2,17 @@ import { Metadata } from "next";
 
 export const costumer = process.env.NEXT_PUBLIC_DEFAULT_THEME
 
-const APP_NAME = costumer === 'SABER' ? 'LEIA' : "LIA";
+const APP_NAME = 'AIRA';
 const APP_DESCRIPTION = `${APP_NAME} Application`
 
-export const signinLogoLight = costumer === 'SABER' ? '/assets/images/logo-saber-light.svg' : '/assets/images/logo-parana-blue.png'
-export const signinLogoDark = costumer === 'SABER' ? '/assets/images/logo-saber-dark.svg' : '/assets/images/logo-parana.png'
-export const sidebarLogoLight = costumer === 'SABER' ? '/assets/images/logo-saber.svg' : '/assets/images/logo-parana.png'
-export const sidebarLogoDark = costumer === 'SABER' ? '/assets/images/logo-saber-dark.svg' : '/assets/images/logo-parana.png'
+export const signinLogoLight = '/assets/images/logo.png'
+export const signinLogoDark = '/assets/images/logo.png'
+export const sidebarLogoLight = '/assets/images/logo.png'
+export const sidebarLogoDark = '/assets/images/logo.png'
 
-export const signinImage = costumer === 'SABER' ? '/assets/images/signin-saber.png' : '/assets/images/signin-books.png'
+export const signinImage = '/assets/images/intro.png'
 
-export const sidebarLogoSize = costumer === 'SABER' ? 'w-[120px]' : 'w-[200px]'
+export const sidebarLogoSize = 'w-[200px]'
 
 export const appMetadata : Metadata = {
     title: APP_NAME,
@@ -31,9 +31,9 @@ export const appMetadata : Metadata = {
     //manifest: "/manifest.json",
     icons: [
         // { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
-        { rel: "shortcut icon", url: `${costumer === 'SABER' ? '/saber-favicon.ico' : "/favicon.ico"}` },
+        { rel: "shortcut icon", url: `favicon.ico` },
     ],
-    keywords: [`${costumer === 'SABER' ? 'saber' : "lia"}`],
+    keywords: [`aira`],
 };
 
 export const homeMetadata : Metadata = {
