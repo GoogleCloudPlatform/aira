@@ -3,7 +3,6 @@
         "messages": {
             "hello_message": "Hello",
             "welcome__message": "Welcome to AIRA, our platform for assessing reading proficiency in Portuguese.",
-            "welcome__message_saber": "Welcome to Le.ia, your artificial intelligence platform for assessing reading and pronunciation in Portuguese.",
             "lia_message": "AIRA is a Google Cloud proof-of-concept experiment designed to deliver reading fluency results to students of all ages at scale using real-time data analytics and artificial intelligence."
         },
         "profiles": {
