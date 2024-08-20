@@ -63,7 +63,7 @@ availableSecrets:
           env: 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'
         - versionName: projects/${PROJECT_ID}/secrets/appId/versions/latest
           env: 'NEXT_PUBLIC_FIREBASE_APP_ID'
-        - versionName: projects/{$PROJECT_ID}/secrets/api_url/versions/latest
+        - versionName: projects/${PROJECT_ID}/secrets/api_url/versions/latest
           env: 'NEXT_PUBLIC_API_URL'
 
 options:
