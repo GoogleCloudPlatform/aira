@@ -10,7 +10,7 @@ const useTheme = () => {
     const ThemeProvider = nextTheme.ThemeProvider;
 
     useEffect(() => {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.theme === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
             setTheme('dark');
         } else {
             setTheme('light');
