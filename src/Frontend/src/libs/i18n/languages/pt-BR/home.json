@@ -2,10 +2,9 @@
     "home" : {      
         "messages": {
             "hello_message": "Olá",
-            "welcome__message" : "Bem-vindo ao LIA, nossa plataforma para avaliação da proficiência de leitura em Português.",
+            "welcome__message" : "Bem-vindo ao AIRA, nossa plataforma para avaliação da proficiência de leitura em Português.",
             "welcome__message_saber" : "Boas-vindas ao Le.ia, sua plataforma de inteligência artificial na avaliação de leitura e pronúncia em português.",
-            "lia_message": "O LIA é uma iniciativa da Secretaria de Estado da Educação do Paraná, destinada a fornecer resultados em tempo real dos níveis de fluência dos alunos na rede municipal de ensino.",
-            "saber_message": "O Le.ia é uma ferramenta destinada a avaliar e apresentar resultados sobre o nível de leitura e pronúncia de estudantes, informando em qual nível de fluência estão categorizados."
+            "lia_message": "O AIRA é um experimento (prova de conceito) do Google Cloud, projetado para fornecer resultados de fluência de leitura a estudantes de todas as idades em escala, utilizando recursos de análise de dados em tempo real e inteligência artificial.",
         },
         "profiles": {
             "profile__type": "Seu usuário tem um perfil de",

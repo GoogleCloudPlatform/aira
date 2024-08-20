@@ -2,10 +2,9 @@
     "home": {
         "messages": {
             "hello_message": "Hello",
-            "welcome__message": "Welcome to LIA, our platform for assessing reading proficiency in Portuguese.",
+            "welcome__message": "Welcome to AIRA, our platform for assessing reading proficiency in Portuguese.",
             "welcome__message_saber": "Welcome to Le.ia, your artificial intelligence platform for assessing reading and pronunciation in Portuguese.",
-            "lia_message": "LIA is an initiative of the State Department of Education of Paraná, aimed at providing real-time fluency levels of students in the municipal education network.",
-            "saber_message": "Le.ia is a tool designed to assess and provide results on students' reading and pronunciation levels, informing which fluency level they are categorized in."
+            "lia_message": "AIRA is a Google Cloud proof-of-concept experiment designed to deliver reading fluency results to students of all ages at scale using real-time data analytics and artificial intelligence."
         },
         "profiles": {
             "profile__type": "Your user has a profile of",

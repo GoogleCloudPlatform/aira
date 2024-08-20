@@ -2,10 +2,9 @@
     "home": {
         "messages": {
             "hello_message": "Hola",
-            "welcome__message": "Bienvenido a LIA, nuestra plataforma para evaluar la competencia lectora en portugués.",
+            "welcome__message": "Bienvenido a AIRA, nuestra plataforma para evaluar la competencia lectora en portugués.",
             "welcome__message_saber": "Bienvenido a Le.ia, tu plataforma de inteligencia artificial para evaluar la lectura y pronunciación en portugués.",
-            "lia_message": "LIA es una iniciativa de la Secretaría de Educación del Estado de Paraná, destinada a proporcionar niveles de fluidez en tiempo real de los estudiantes en la red de educación municipal.",
-            "saber_message": "Le.ia es una herramienta diseñada para evaluar y presentar resultados sobre los niveles de lectura y pronunciación de los estudiantes, informando en qué nivel de fluidez están categorizados."
+            "lia_message": "AIRA es un experimento de prueba de concepto de Google Cloud diseñado para ofrecer resultados de fluidez lectora a estudiantes de todas las edades a escala mediante análisis de datos en tiempo real e inteligencia artificial."
         },
         "profiles": {
             "profile__type": "Tu usuario tiene un perfil de",
