@@ -1,0 +1,124 @@
+{
+    "toast": {
+        "success": {
+            "exam": {
+                "success_sent_record": "Record sent successfully"
+            },
+            "auth": {
+                "reset_password_email_sent": "Password recovery email sent successfully",
+                "success_reset_password": "Password reset successfully"
+            },
+            "form": {
+                "exam_created": "Evaluation created successfully",
+                "exam_updated": "Evaluation updated successfully",
+                "exam_deleted": "Evaluation deleted successfully",
+                "group_created": "Class created successfully",
+                "group_updated": "Class updated successfully",
+                "group_deleted": "Class deleted successfully",
+                "organization_created": "School created successfully",
+                "organization_updated": "School updated successfully",
+                "organization_deleted": "School deleted successfully",
+                "role_created": "Role created successfully",
+                "role_updated": "Role updated successfully",
+                "role_deleted": "Role deleted successfully",
+                "user_created": "User created successfully",
+                "user_updated": "User updated successfully",
+                "user_deleted": "User deleted successfully",
+                "import_organization": "School(s) imported successfully.",
+                "import_group": "Class(es) imported successfully.",
+                "import_user": "User(s) imported successfully."
+            }
+        },
+        "errors": {
+            "page_not_found": {
+                "page_not_found": "Page not found",
+                "button_back_home": "Back to home"
+            },
+            "auth": {
+                "error_api": "Error in request",
+                "error_no_data": "Data not found",
+                "error_auth": "Failed to authenticate",
+                "error_google_auth": "Error logging in with Google",
+                "reset_password_email_sent_error": "An error occurred while sending password recovery. Please try again",
+                "failed_reset_password": "An error occurred while resetting the password. Please try again",
+                "error_missing_reset_token": "Password reset token not found"
+            },
+            "loading": {
+                "error_loading_organizations": "Error loading Schools",
+                "error_loading_organization_utils": "Error loading School utilities",
+                "error_loading_roles": "Error loading roles",
+                "error_loading_groups": "Error loading classes",
+                "error_loading_users": "Error loading users",
+                "error_loading_exams": "Error loading Evaluations",
+                "error_loading_looker": "Error loading Looker",
+                "error_loading_user_exams": "Error loading user's Evaluations"
+            },
+            "form": {
+                "email_or_password_invalid": "Invalid email or password",
+                "user_must_have_a_group": "User must belong to a class",
+                "start_date_error": "Start date error",
+                "error_loading_form": "Error loading form",
+                "error_fill_form": "Error filling out the form",
+                "required_field": "This field is required.",
+                "cant_be_empty": "Cannot be empty!",
+                "invalid_email": "This is not a valid email.",
+                "invalid_password": "This is not a valid password.",
+                "min_password": "Password must be at least 5 characters long.",
+                "max_password": "Password must be no more than 50 characters long.",
+                "password_didnt_match": "Passwords do not match.",
+                "end_date_cannot_be_earlier": "End date cannot be earlier than start date.",
+                "empty_questions": "There are empty questions.",
+                "invalid_state": "Invalid state.",
+                "invalid_key": "Invalid key.",
+                "file_required": "File is required.",
+                "file_csv": "File must be a csv file.",
+                "already_exists": "User already registered.",
+                "file_max_size_5": "Maximum file size is 5MB.",
+                "create_organization": "Error creating School, please try again.",
+                "create_exam": "Error creating Evaluation, please try again.",
+                "create_user": "Error creating User, please try again.",
+                "create_group": "Error creating Class, please try again.",
+                "edit_organization": "Error editing School, please try again.",
+                "edit_exam": "Error editing Evaluation, please try again.",
+                "edit_user": "Error editing User, please try again.",
+                "edit_group": "Error editing Class, please try again.",
+                "import_organization": "Error importing school(s), please try again.",
+                "import_group": "Error importing class(es), please try again.",
+                "import_user": "Error importing user(s), please try again.",
+                "empty_question": "Please fill out all details of the last question to add a new one.",
+                "max_answers": "Maximum number of answers reached.",
+                "answer_is_required": "Please fill in the answer.",
+                "empty_answers": "Add at least 2 options for unanswered questions.",
+                "question_one_max_size": "El límite para la primera pregunta es de 60 palabras.",
+                "question_two_max_size": "El límite para la segunda pregunta es de 40 palabras.",
+                "answer_already_exists": "Answer already exists, please add a different answer."
+            },
+            "exam": {
+                "error_record": "Failed to record",
+                "error_sending_record": "Error sending record",
+                "error_stop_record": "Recording was stopped.",
+                "required_answer": "Please select at least one option."
+            }
+        },
+        "warnings": {
+            "search": {
+                "warning_fill_search": "At least 3 characters required",
+                "warning_no_organizations": "No schools found",
+                "warning_no_groups": "No classes found",
+                "warning_no_roles": "No roles found",
+                "warning_no_users": "No users found",
+                "warning_no_states": "No states found",
+                "warning_no_regions": "No regions found",
+                "warning_no_counties": "No counties found"
+            },
+            "exam": {
+                "record_exceeded_time": "Recording time exceeded",
+                "warning_recovering_record": "Could not recover the record",
+                "warning_microphone_permission": "Microphone permission required",
+                "user_not_found": "User not found",
+                "warning_no_exams": "No Evaluations found",
+                "warning_send_audio": "Could not send the record"
+            }
+        }
+    }
+}

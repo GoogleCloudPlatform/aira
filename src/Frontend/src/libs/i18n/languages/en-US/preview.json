@@ -1,0 +1,20 @@
+{
+    "preview": {
+        "titles": {
+            "preview_title_start": "This is a preview of how the question of",
+            "preview_title_end": "will be displayed."
+        },
+        "questions": {
+            "words": "Words",
+            "complex_words": "Complex Words",
+            "phrases": "Narrative Text",
+            "multiple_choice": "Multiple Choice"
+        },
+        "buttons": {
+            "preview": "Preview",
+            "previous": "Previous",
+            "next": "Next",
+            "close": "Close"
+        }
+    }
+}

@@ -1,0 +1,87 @@
+{
+    "loading": "Loading",
+    "sidebar": {
+        "theme": "Theme",
+        "language": "Language",
+        "exit": "Exit",
+        "languages": {
+            "en-US": "English",
+            "pt-BR": "Portuguese",
+            "es-ES": "Spanish"
+        },
+        "options": {
+            "home": "Home",
+            "reports": "Reports",
+            "learners": "Learners",
+            "tutorials": "Tutorials",
+            "educators": "Educators",
+            "exams": "Exams",
+            "dashboard": "Dashboard",
+            "admin": "Administration",
+            "users": "Users",
+            "roles": "Roles",
+            "groups": "Classes",
+            "organizations": "Organizations",
+            "apply_exams": "Apply Exams",
+            "results": "Results"
+        }
+    },
+    "search": {
+        "search": "Search",
+        "no_data": "No data found",
+        "select_a_group": "Select a group...",
+        "groups": "Classes"
+    },
+    "table": {
+        "headers":{
+            "actions": "Actions",
+            "name": "Name",
+            "email": "Email",
+            "grade": "Grade",
+            "shift": "Shift",
+            "organization": "Organization",
+            "created_at": "Created at",
+            "updated_at": "Updated at",
+            "start_date":  "Start Date",
+            "end_date":  "End Date",
+            "region":  "Region",
+            "county":  "County",
+            "city":  "City"
+        },
+        "buttons":{
+            "import": "Import",
+            "export": "Export",
+            "create": "Create",
+            "edit": "Edit",
+            "go_to_exams": "Go to Exams",
+            "go_to_results": "Go to Results",
+            "go_to_group": "Go to Groups",
+            "go_to_users": "Go to Users",
+            "start_exam": "Start Exam",
+            "delete": "Delete",
+            "preview": "Preview"
+        },
+        "shifts": {
+            "morning": "Morning",
+            "evening": "Evening",
+            "night": "Night",
+            "allday": "Full-time"
+        },
+        "messages": {
+            "open": "Open menu",
+            "no_results": "No results."
+        },
+        "pagination": {
+            "showing": "Showing",
+            "to": "to",
+            "of": "of",
+            "results": "results",
+            "previous": "Previous",
+            "next": "Next"
+        }
+    },
+    "pagination": {
+        "previous": "Previous",
+        "next": "Next"
+    }
+}

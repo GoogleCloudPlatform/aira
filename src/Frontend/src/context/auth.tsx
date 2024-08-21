@@ -1,29 +1,14 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { createContext, useContext, useEffect, useState, PropsWithChildren, ReactNode } from "react";
-import { useRouter } from "next/router";
-import { IAuthContext, IAuthSigninResponse, IUser } from '@/interfaces/auth';
-import { api } from "@/pages/api/api";
-import * as auth from '@/services/auth';
-import * as NextError from "next/error";
-import { SplashScreen } from "@/components";
-import { ISettingsStore } from "@/interfaces/store";
-import { useSettingsStore } from "@/store/settings";
-import { ROUTES_ALLOWED_PATHS, ROUTES_SIGNED_PATHS, ROUTES_SIGNED_PATHS_PARAMS } from "@/constants/routes";
-import { Auth } from "firebase/auth";
-import { getProfile } from "@/services/users";
+'use client';
 
+import { Auth } from "firebase/auth";
+import { createContext, useContext, useEffect, useState, PropsWithChildren, ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { IAuthContext, IAuthSigninResponse, IUser } from '@/interfaces/auth';
+import { api } from "@/api/api";
+import * as auth from '@/services/auth';
+import { clearCookie, getCookie, setCookie } from "@/utils/auth";
+import { useLoading } from "./loading";
+import { ROUTES_ALLOWED_PATHS } from "@/constants/routes";
 
 type TAuthProvider = {
     children: ReactNode
@@ -33,9 +18,7 @@ const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
 const AuthProvider: React.FC<TAuthProvider> = ({ children } : PropsWithChildren<{}>) => {
     const router = useRouter();   
-
-    const settingsStore : ISettingsStore = useSettingsStore();
-    const { loading, setSettings } = settingsStore;
+    const { loading, setLoading } = useLoading();
 
     const [user, setUser] = useState<IUser | null>(null);
     const [mounted, setMounted] = useState<boolean>(false);
@@ -44,84 +27,92 @@ const AuthProvider: React.FC<TAuthProvider> = ({ children } : PropsWithChildren<
         setMounted(true);
         return () => {
             setMounted(false);
-            setSettings("loading", false);
+            setLoading(false);
         }
-    }, [setSettings]);
+    }, [setLoading]);
 
     useEffect(() => {               
         const loadStorageData = async () => {    
-            const storageUser = await localStorage.getItem('user');
-            const storageToken = await localStorage.getItem("token");
+            const cookiedUser = getCookie('user');
+            const cookiedToken = getCookie('token');
     
-            if (storageUser && storageToken) {
-                setUser(JSON.parse(storageUser));
-                api.defaults.headers.common['Authorization'] = `Bearer ${storageToken}`;
+            if (cookiedUser && cookiedToken) {
+                setUser(JSON.parse(cookiedUser));
+                api.defaults.headers.common['Authorization'] = `Bearer ${cookiedToken}`;
             }
         }
 
         loadStorageData();
     }, []);
 
+    /**
+     * Handles authentication based on the response from a sign-in request.
+     * Extracts necessary information from the response, sets cookies, updates user state,
+     * and redirects the user to the home page upon successful authentication.
+     * @param {IAuthSigninResponse} response - The response object received from the sign-in request.
+     * @returns {Promise<void>} - A promise resolving when authentication handling is complete.
+     */
     const handleAuthentication = async (response : IAuthSigninResponse) => {
-        const { id, access_token, refresh_token, scopes, email, user_name } = response;
+        const { id, access_token, refresh_token, scopes, email, user_name, user_id } = response;
 
         if (!id) return;        
 
-        // const profile = await getProfile();
-        // if (!profile) return;
+        const user : IUser = { id: id, scopes, email, user_name, user_id };
 
-        const user : IUser = { id: id, scopes, email, user_name };
+        setCookie('user', JSON.stringify(user)); 
+        setCookie('token', access_token); 
+        setCookie('refresh_token', refresh_token); 
 
-        await localStorage.setItem('user', JSON.stringify(user));
-        await localStorage.setItem('token', access_token); 
-        await localStorage.setItem('refresh_token', refresh_token); 
-        
-        setUser(user);     
+        setUser(user);
                 
         return router.push("/home");
     }
 
     const signIn = async (email: string, password: string) => {
         try {
-            settingsStore.toggleLoading?.();
+            setLoading(true);
 
             const response = await auth.signIn(email, password);
 
-            if (!response) return settingsStore.toggleLoading?.();
+            if (!response) return;
 
-            handleAuthentication(response).then(() => settingsStore.toggleLoading?.());
+            handleAuthentication(response);
         } catch (error) {
             if (process.env.NODE_ENV === 'development') console.error(error);
-            settingsStore.toggleLoading?.();
+        } finally {
+            setLoading(false)
         }
     } 
 
     const signInWithGoogle = async (firebaseAuth : Auth) => {
         try {
-            settingsStore.toggleLoading?.();
-            
+            setLoading(true);
             const response = await auth.googleSignIn(firebaseAuth);          
 
-            if (!response) return settingsStore.toggleLoading?.();
+            if (!response) return;
 
-            handleAuthentication(response).then(() => settingsStore.toggleLoading?.());
+            handleAuthentication(response);
         } catch (error) {
             if (process.env.NODE_ENV === 'development') console.error(error);
-            settingsStore.toggleLoading?.();
+        } finally {
+            setLoading(false)
         }
     }
 
     const signOut = async () => {
-        router.push('/signin');
-        await localStorage.clear();
+        router.push('/')
+        localStorage.clear();
+        clearCookie("user");
+        clearCookie("token");
+        clearCookie("refresh_token");
         setUser(null);
     }
   
 
-    if (!mounted) return <SplashScreen />;
+    if (!mounted) return null;
 
     return (
-        <AuthContext.Provider value={{ authenticated: !!user, user, loading, signIn, signOut, signInWithGoogle }}>
+        <AuthContext.Provider value={{ authenticated: !!user, user, signIn, signOut, signInWithGoogle }}>
             {children}
         </AuthContext.Provider>
     );
@@ -137,39 +128,29 @@ const useAuth = () => {
     return context;
 }
 
-const ProtectRoute = ({ children } : any) => {
-    const { authenticated } = useAuth();
+const PrivateRoute : React.FC<PropsWithChildren> = ({ children }) => {
+    const { authenticated, user } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
+    const params = useSearchParams();
     
-    const allowedPaths = [...ROUTES_ALLOWED_PATHS];
+    const isAllowed = ROUTES_ALLOWED_PATHS.includes(pathname);
+    const isResetRoute = pathname.includes('/reset');
+    const hasResetToken = params.get("token");
+    const isResetPassword = isResetRoute && hasResetToken
 
-    // new routes should be added here
-    const signedPaths = [...ROUTES_SIGNED_PATHS];
+    useEffect(() => {
+        if ((!authenticated || !user) && !isResetPassword) {
+            console.warn("[AUTH]: unauthorized. Redirecting...");
+            router.push("/");
+        }
+    }, [authenticated, user, router, isResetPassword]);
 
-    const signedPathsWithParams = [...ROUTES_SIGNED_PATHS_PARAMS];
+    // allowed paths should render page anyway
+    if (isResetPassword) return children;
+    if (isAllowed) return children;
 
-    let checkPaths = false;    
-    let checkAllowedPaths = false;
-    let checkSignedPaths = false;
-    
-    if (typeof window !== "undefined") {
-        
-        const containsWildcard = signedPathsWithParams.some(path => {
-            const regexPattern = new RegExp('^' + path.replace(/:[^/]+/g, '[^/]+') + '$');
-            return regexPattern.test(window.location.pathname);
-        });
-
-        if (allowedPaths.includes(window.location.pathname) || signedPaths.includes(window.location.pathname) || containsWildcard) checkPaths = true;
-        if (allowedPaths.includes(window.location.pathname)) checkAllowedPaths = true;
-        if (signedPaths.includes(window.location.pathname) || containsWildcard) checkSignedPaths = true;        
-
-        if (!checkPaths) return <NextError.default statusCode={404} title={"Page Not Found"} />
-    
-        if (!authenticated && checkSignedPaths) return <NextError.default statusCode={403} title={"Unauthorized"} />
-
-        return children;
-    }
-
-    return null;    
+    return authenticated ? children : null;
 };
 
-export { AuthProvider, useAuth, ProtectRoute };
+export { PrivateRoute, AuthProvider, useAuth };

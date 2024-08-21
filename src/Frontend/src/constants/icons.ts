@@ -1,16 +1,3 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 export const ICON_MICROPHONE = 'microphone';
 export const ICON_STOP = 'stop';
 export const ICON_ARROW_LEFT = 'arrow-left';
@@ -26,6 +13,7 @@ export const ICON_EXCLAMATION_TRIANGLE = 'exclamation-triangle';
 export const ICON_CHEVRON_LEFT = 'chevron-left';
 export const ICON_CHEVRON_RIGHT = 'chevron-right';
 export const ICON_CHEVRON_DOWN = 'chevron-down';
+export const ICON_CHEVRON_UP = 'chevron-up';
 export const ICON_USER = 'user';
 export const ICON_USER_CIRCLE = 'user-circle';
 export const ICON_PENCIL_SQUARE = 'pencil-square';
@@ -44,3 +32,13 @@ export const ICON_CHART_PIE = 'chart-pie';
 export const ICON_ARROWS_POINTING_OUT = 'arrows-pointing-out';
 export const ICON_ARROWS_POINTING_IN = 'arrows-pointing-in';
 export const ICON_MAGNIFYING_GLASS = 'magnifying-glass';
+export const ICON_CLOUD_ARROW_UP = 'cloud-arrow-up';
+export const ICON_CLOUD_ARROW_DOWN = 'cloud-arrow-down';
+export const ICON_ARROW_TOP_RIGHT_ON_SQUARE = 'arrow-top-right-on-square';
+export const ICON_PLAY = 'play';
+export const ICON_PAUSE = 'pause';
+export const ICON_BOOK_OPEN = 'book-open';
+export const ICON_INFORMATION_CIRCLE = 'information-circle';
+export const ICON_QUESTION_MARK_CIRCLE = 'question-mark-circle';
+export const ICON_NOTEPAD_TEXT = 'notepad_text';
+export const ICON_CLIPBOARD_CHECK = 'cliboard_check';

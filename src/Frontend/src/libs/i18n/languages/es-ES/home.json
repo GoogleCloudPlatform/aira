@@ -1,0 +1,57 @@
+{
+    "home": {
+        "messages": {
+            "hello_message": "Hola",
+            "welcome__message": "Bienvenido a AIRA, nuestra plataforma para evaluar la competencia lectora en portugués.",
+            "lia_message": "AIRA es un experimento de prueba de concepto de Google Cloud diseñado para ofrecer resultados de fluidez lectora a estudiantes de todas las edades a escala mediante análisis de datos en tiempo real e inteligencia artificial."
+        },
+        "profiles": {
+            "profile__type": "Tu usuario tiene un perfil de",
+            "profile__user__admin": "Administrador",
+            "profile__user__impersonate_saber": "Profesor",
+            "profile__user__impersonate": "Examinador",
+            "profile__user__student": "Estudiante"
+        },
+        "permissions": {
+            "view_permissions": "Puede realizar las siguientes acciones en nuestra plataforma:",
+            "permission__user_groups": "Verifique qué grupos están asociados a su usuario.",
+            "permission__studants_groups": "Consulte los estudiantes que están vinculados a estos grupos.",
+            "permission__apply_exams": "Administre exámenes a sus estudiantes.",
+            "permission__analyze_performance": "Analice el rendimiento de sus estudiantes.",
+            "permission__url": "Consulte la documentación tutorial de la plataforma.",
+            "permission__actions": "Realizar la visualización, edición, creación o eliminación de los siguientes recursos de la plataforma: Escuelas, Grupos, Usuarios, Exámenes.",
+            "permission__reports": "Acceda a informes y vea los resultados de todos los estudiantes en la plataforma.",
+            "permission__docs": "Consulte la documentación tutorial de la plataforma.",
+            "permission__exams": "Consulte exámenes y aplíquelos."
+        },
+        "cards": {
+            "titles": {
+                "exams": "Exámenes",
+                "group": "Grupo",
+                "groups": "Grupos",
+                "users": "Usuarios",
+                "organizations": "Escuelas"
+            },
+            "descriptions": {
+                "group": "Administre exámenes y vea los resultados de sus estudiantes.",
+                "organizations": "Panel para gestionar escuelas.",
+                "users": "Panel para gestionar usuarios.",
+                "groups": "Panel para gestionar grupos."
+            },
+            "buttons": {
+                "view_group": "Ver grupo",
+                "view_groups": "Ver grupos",
+                "view_users": "Ver usuarios",
+                "view_organizations": "Ver escuelas"
+            }
+        },
+        "home_table": {
+            "title": "Exámenes",
+            "button": "Ver todo",
+            "name": "Nombre",
+            "grade": "Grado",
+            "start_date": "Fecha de inicio",
+            "end_date": "Fecha de término"
+        }
+    }
+}

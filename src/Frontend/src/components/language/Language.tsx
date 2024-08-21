@@ -1,111 +1,101 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { ICON_LANGUAGE } from "@/constants/icons";
-import useIcon from "@/hooks/useIcon/useIcon";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import Image from "next/image";
+'use client'
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useRef } from 'react';
+import Image from 'next/image';
+import { ISettingsStore } from '@/interfaces/store';
+import { useSettingsStore } from '@/store/settings';
+import { useTranslations } from 'next-intl';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
+import { LanguagesIcon } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 type TProps = {
-    type?: string;
-}
+  type?: string;
+};
 
-const Language : React.FC<TProps> = ({ type = "MENU" }) => {
-    const [show, setShow] = useState<boolean>(false);
-
+const Language: React.FC<TProps> = ({ type = 'MENU' }) => {
+    const { locale } = useParams();
+    const pathname = usePathname();
+    const t = useTranslations();
+    const { menu } : ISettingsStore = useSettingsStore();
     const router = useRouter();
-    const { t } = useTranslation();
-    const { getIcon } = useIcon();
-    const { locale, asPath, pathname, query } = router;
-
+    
     const languages = [
-        { name: "pt-BR", label: "pt-BR" },
-        { name: "en-US", label: "en-US" },
-        { name: "es-ES", label: "es-ES" },
+        { name: 'pt-BR', label: 'pt-BR' },
+        { name: 'en-US', label: 'en-US' },
+        { name: 'es-ES', label: 'es-ES' },
     ];
 
-    const renderFlag = (flag : string) => {
+    const renderFlag = (flag: string) => {
         if (!flag) return null;
 
-        const src = `/assets/icons/${flag.split("-")[1]}.svg`;
-        
+        const src = `/assets/icons/${flag.split('-')[1]}.svg`;
+
         return (
             <>
-                {/* <span className={`fi fis inline-block fi-br fi-circle`} /> */}
-                <div className="h-6 w-6 relative">
-                    <Image
-                        src={src}
-                        alt={flag}
-                        fill
-                        className="rounded-full"
-                    />
+                <div className='h-5 w-5 relative'>
+                    <Image src={src} alt={flag} fill className='rounded-full' />
                 </div>
             </>
         );
-    }
+    };
 
-        
+    const changeLanguage = (language: string) => {
+        const goTo = pathname.replace(locale as string, language) ;
+        router.push(goTo);
+    }
 
     return (
         <>
-            <div className={`flex items-center sm:order-2 relative ${type === "MENU" ? '': ' bg-blue-500'} rounded-lg`}>
-                <button 
-                    type="button"
-                    data-dropdown-toggle="language-dropdown-menu" 
-                    className="inline-flex items-center font-medium justify-center px-4 py-2 text-sm text-white rounded-lg cursor-pointer bg-white/10 hover:bg-white/20"
-                    onMouseEnter={() => setShow(true)}
-                    onClick={() => setShow(!show)}
-                >
-                    <div className="w-5 h-5">
-                        {getIcon({ icon: ICON_LANGUAGE, classes: "" })}
-                    </div>
-                </button>
-                {show ?
-                    <div 
-                        id="language-dropdown-menu"
-                        className={`z-50 my-4 text-sm list-none ${type === "MENU" ? 'bg-blue-800/90 sm:bg-blue-600': 'bg-blue-500 '}  rounded-lg shadow absolute 
-                                    ${type === "MENU" ? '-left-16' : '-left-[80px]'}  flex flex-col
-                                    bottom-8 
-                                    ${type === "MENU" ? 'sm:bottom-auto sm:left-[75px]': 'sm:-left-[80px]'}`}
-                        onMouseLeave={() => setShow(false)}
-                    >
-                        {languages.map(language => {
+            {type === 'MENU' ? (
+                <Collapsible className={`${menu ? 'w-full flex flex-col justify-center ' : ''}`}>
+                    <CollapsibleTrigger asChild>
+                        <Button className={`w-full ${!menu ? ' md:justify-center md:p-1' : ''} flex items-center justify-start px-2 gap-4 text-white hover:bg-white/5 rounded-lg mt-2 bg-transparent dark:bg-transparent dark:hover:bg-white/5 shadow-none h-10`}>
+                            <div className='w-6 h-6'>
+                                <LanguagesIcon /> 
+                            </div>
+                            <span className={`text-xs font-normal ${!menu ? 'md:hidden' : ''}`}>
+                                {t(`sidebar.language`)}
+                            </span>  
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className='flex flex-col items-center gap-1'>
+                        {languages.map((language) => {
                             return (
-                                <button
-                                    key={language.name}
-                                    className={`px-4 py-2 flex gap-3 ${
-                                        locale === language.name ? 'bg-white/5 sm:bg-white/20 ' : 'hover:bg-white/10'
-                                    }`}
-                                    onClick={() => router.push({ pathname, query }, asPath, { locale: language.name })}
-                                >
-                                    <div className="flex flex-shrink">
-                                        {renderFlag(language.name)}
-                                    </div>
-                                    <span className="flex flex-grow text-white">
-                                        {t(language.label, { ns: "common" })}
+                                <Button  key={language.name} className={`bg-transparent dark:bg-transparent shadow-none ${!menu ? 'md:justify-center' : 'ml-1'} w-full flex items-center justify-start gap-4 text-white hover:bg-white/5 dark:hover:bg-white/5 px-2 rounded-lg first-of-type:mt-1 h-10`} onClick={() => changeLanguage(language.name)}>
+                                    {renderFlag(language.name)}
+                                    <span className={`text-xs font-normal ${!menu ? 'md:hidden' : ''}`}>
+                                        {t(`sidebar.languages.${language.label}`)}
                                     </span>
-                                </button>
-                            )
+                                </Button>
+                            );
                         })}
-                    </div>
-                    :
-                    null
-                }
-            </div>
+                    </CollapsibleContent>
+                </Collapsible>
+            ) : (
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button className='bg-background dark:bg-darkBackground text-primary dark:text-white hover:bg-background/80 dark:hover:bg-darkBackground/80'>  
+                            <LanguagesIcon />                              
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-max flex flex-col gap-2 mr-5'>
+                        {languages.map((language) => {
+                            return (
+                                <Button variant={'outline'} key={language.name} className='justify-start w-full gap-2' onClick={() => changeLanguage(language.name)}>
+                                    {renderFlag(language.name)}
+                                    <span>
+                                        {t(`sidebar.languages.${language.label}`)}
+                                    </span>
+                                </Button>
+                            );
+                        })}
+                    </PopoverContent>
+                </Popover> 
+            )}
         </>
     );
-}
+};
 
 export default Language;
