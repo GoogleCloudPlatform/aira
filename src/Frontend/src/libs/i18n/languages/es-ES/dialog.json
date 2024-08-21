@@ -1,0 +1,12 @@
+{
+    "dialog": {
+        "warning": "Atención",
+        "leave_page_message_1": "¡Ups! Parece que estás intentando salir de la pantalla de la aplicación de prueba.",
+        "leave_page_message_2": "Por favor, recuerda que salir de la pantalla durante la prueba puede resultar en la interrupción de tu sesión de evaluación.",
+        "leave_page_message_3": "¿Estás seguro/a de que quieres salir?",
+        "buttons": {
+            "confirm": "Salir del examen",
+            "close": "Cancelar"
+        }
+    }
+}

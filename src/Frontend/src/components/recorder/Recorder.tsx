@@ -1,60 +1,70 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 import { useCallback, useEffect, useRef } from "react";
-import Button from "../button/Button";
-import { IButton } from "@/interfaces/button";
 import { IExamsStore, IRecordStore } from "@/interfaces/store";
 import { useExamsStore } from "@/store/exams";
 import { toast } from 'react-toastify';
-import { i18n, useTranslation } from 'next-i18next';
-import { useRouter } from "next/router";
-import { ICON_ARROW_RIGHT, ICON_MICROPHONE, ICON_STOP } from "@/constants/icons";
+import { useParams, useRouter } from "next/navigation";
 import { getProcessorSignedLink } from "@/services/processor";
 import { useRecordStore } from "@/store/record";
 import { uploadToGCS } from "@/services/gcs";
-import { sendGCSUrl } from "@/services/exams";
-import { mutate } from "swr";
-import { ENDPOINT_EXAMS } from "@/constants/endpoint";
-import { useSettingsStore } from "@/store/settings";
-import { IQuestion } from "@/interfaces/question";
-import { ParsedUrlQuery } from "querystring";
-import { MAX_RECORD_SECONDS } from "@/constants/exam";
+import { sendGCSUrl } from "@/services/exam";
+import { BUTTON_NEXT, BUTTON_RECORD, BUTTON_STOP, MAX_RECORD_SECONDS, RECORD_STATE_INACTIVE, RECORD_STATE_RECORDING } from "@/constants/exams";
+import { useAuth } from "@/context/auth";
+import { STEP_EXAM_RECORD_BUTTON_NEXT, STEP_EXAM_RECORD_BUTTON_START, STEP_EXAM_RECORD_BUTTON_STOP } from "@/constants/tour";
+import { useTranslations } from "next-intl";
+import { Button } from "../ui/button";
+import { cn } from "@/libs/shadcn/utils";
 import { getMimeTypeFromBase64 } from "@/utils";
+import { useLoading } from "@/context/loading";
+import { isEmpty } from "lodash";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRBAC } from "@/context/rbac";
+import { SCOPE_USER, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
+import { ChevronRightIcon, MicIcon, SquareIcon } from "lucide-react";
 
-const Recorder : React.FC = () => {
+type TRecorderProps = {
+    questions: any;
+}
+
+const Recorder : React.FC<TRecorderProps> = ({ questions }) => {    
     const MAX_RECORD_TIMEOUT = MAX_RECORD_SECONDS * 1000;
     
     // check browser mimetype 'audio/wav' or 'audio/x-wav'
-    const mime = ['audio/wav', 'audio/mpeg', 'audio/webm', 'audio/ogg'].filter(MediaRecorder.isTypeSupported)[0];
+    // const mime = ['audio/wav', 'audio/mpeg', 'audio/webm', 'audio/ogg', "avc1"].filter(MediaRecorder.isTypeSupported)[0];
+    const mimeTypes = ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/webm', 'audio/ogg', 'audio/mp4'];
+    const supportedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
     
-    const mediabuttons : MediaRecorderOptions | any = { type: mime };
-    const buttons : Array<IButton> = [
-        { name: "stop", action: () => stop(), size: 100, icon: ICON_STOP, classes: "row-start-2 col-start-1 col-end-2 sm:row-start-1 sm:col-start-1 sm:col-end-1" },
-        { name: "record", action: () => record(), size: 150, icon: ICON_MICROPHONE, classes: "row-start-1 col-start-2 col-end-3 sm:row-start-1 sm:col-start-2 sm:col-end-2" },
-        { name: "next", action: () => next(), size: 100, icon: ICON_ARROW_RIGHT, classes: "row-start-2 col-start-3 col-end-3 sm:row-start-1 sm:col-start-3 sm:col-start-3" },
-    ];
+    const mediabuttons : MediaRecorderOptions | any = { type: supportedMimeType };
 
-    const router = useRouter();
-    const { id } : ParsedUrlQuery = router.query;
-
-    const { t } = useTranslation();
-    const { setSettings } = useSettingsStore();
-    const { exam, questionIndex, setExams } : IExamsStore = useExamsStore();
+    const queryClient = useQueryClient();
+    const router = useRouter();    
+    const { user } = useAuth();
+    const params = useParams();
+    const t = useTranslations();
+    const { hasScopePermission } = useRBAC();
+    const { setLoading } = useLoading();
+    const { questionIndex, setExams } : IExamsStore = useExamsStore();
     const { audioChunks, audioURL, microphonePermission, stream, state, canStop, setRecord, setBlobData, getRecord } : IRecordStore = useRecordStore();
     
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const hasTimeout = useRef<any | null>(null);
+
+    const isEducator = hasScopePermission([SCOPE_USER_IMPERSONATE]);
+    const isStudent = hasScopePermission([SCOPE_USER]);
+
+    const exam_id = params.id;
+    const user_id = isEducator ? params.user_id : user?.user_id;
+
+    const clear = useCallback(() => {
+        localStorage.setItem("audioData", ""); // clear backup audio on storage to avoid unwanted behavior/saving on api post
+        setRecord("examID", "");
+        setExams("expanded", false);
+        setRecord("audioURL", "");
+        setRecord("audioChunks", []);
+        setRecord("canStop", false);
+        setRecord("state", RECORD_STATE_INACTIVE);
+        setRecord("seconds", MAX_RECORD_SECONDS);
+        setLoading(false);
+    }, [setExams, setRecord, setLoading]);
 
     const getMicrophonePermission = useCallback(async () => {
         if ("MediaRecorder" in window) {
@@ -76,28 +86,28 @@ const Recorder : React.FC = () => {
 
     useEffect(() => {
         getMicrophonePermission();
-    }, [getMicrophonePermission, setRecord]);
+    }, [getMicrophonePermission]);
 
     useEffect(() => {
-        if (state === "recording") {
+        if (state === RECORD_STATE_RECORDING) {
             hasTimeout.current = setTimeout(() => {
                 if (mediaRecorder && mediaRecorder.current) {
                     //stops the recording instance
                     mediaRecorder.current.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: mime });
+                        const audioBlob = new Blob(audioChunks, { type: supportedMimeType });
                         const audioUrl = URL.createObjectURL(audioBlob);
 
                         setRecord("audioURL", audioUrl);
                         setRecord('audioChunks', audioBlob);
                         setBlobData(audioBlob);
-                        setRecord("state", "inactive");
+                        setRecord("state", RECORD_STATE_INACTIVE);
                         setExams("expanded", false);
 
                         clearTimeout(hasTimeout.current);
                     };
                     
                     mediaRecorder.current.stop();
-                    toast.warn(i18n?.t('record_exceeded_time', { ns: "toast" }));
+                    toast.warn(t("toast.warnings.exam.record_exceeded_time"));
                 }
                 
             }, MAX_RECORD_TIMEOUT)
@@ -106,7 +116,7 @@ const Recorder : React.FC = () => {
                 clearTimeout(hasTimeout.current);
             }
         }
-    }, [state, mediaRecorder, MAX_RECORD_TIMEOUT, audioChunks, audioURL, mime, setBlobData, setRecord, setExams]);
+    }, [t, state, mediaRecorder, MAX_RECORD_TIMEOUT, audioChunks, audioURL, supportedMimeType, setBlobData, setRecord, setExams]);
 
 
     const record = () => {
@@ -118,9 +128,10 @@ const Recorder : React.FC = () => {
             mediaRecorder.current = media;
             mediaRecorder.current.start();
 
-            setRecord("state", "recording");
+            setRecord("state", RECORD_STATE_RECORDING);
             setRecord("canStop", true);
             setRecord("seconds", MAX_RECORD_SECONDS - 1);
+            setRecord("examID", exam_id); // store the examID to possible reset audio - only apply to student record flow (in case there are recorded backup data and the user change the exam)
 
             let localAudioChunks : Array<Blob> = [];
             mediaRecorder.current.ondataavailable = (event : BlobEvent) => {
@@ -130,16 +141,9 @@ const Recorder : React.FC = () => {
             };
 
             setRecord("audioChunks", localAudioChunks);
-
-            // //stop audio after max record time
-            // hasTimeout.current = setTimeout(() => {
-            //     toast.warn(i18n?.t('record_exceeded_time', { ns: "toast" }))
-            //     stop();
-            // }, MAX_RECORD_TIMEOUT);
-
         } catch (error) {
-            if (!microphonePermission) return toast.warn(i18n?.t('warning_microphone_permission'));        
-            toast.error(i18n?.t('error_record'));
+            if (!microphonePermission) return toast.warn(t("toast.warnings.exam.warning_microphone_permission"));        
+            toast.error(t("toast.errors.exam.error_record"));
             console.error(error)
         }
     };
@@ -153,13 +157,13 @@ const Recorder : React.FC = () => {
             mediaRecorder.current.stop();
             //stops the recording instance
             mediaRecorder.current.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: mime });
+                const audioBlob = new Blob(audioChunks, { type: supportedMimeType });
                 const audioUrl = URL.createObjectURL(audioBlob);
 
                 setRecord("audioURL", audioUrl);
                 setRecord('audioChunks', audioBlob);
                 setBlobData(audioBlob);
-                setRecord("state", "inactive");
+                setRecord("state", RECORD_STATE_INACTIVE);
                 setExams("expanded", false);
 
                 clearTimeout(hasTimeout.current);
@@ -168,7 +172,8 @@ const Recorder : React.FC = () => {
             
             
         } catch (error) {
-            toast.error(i18n?.t('error_stop_record'));  
+            toast.error(t("toast.errors.exam.error_stop_record"));  
+            clear();
             console.error(error);
         }
     };
@@ -178,10 +183,10 @@ const Recorder : React.FC = () => {
             if (!audioChunks || !mediaRecorder || !mediaRecorder.current) {
                 try {
                     const base64Data: string | null = localStorage.getItem('audioData');
-                    
+ 
                     if (!base64Data) {
                         console.error("Error - could not recover audio");
-                        toast.warning(i18n?.t('warning_recovering_record', { ns: "toast" }));   
+                        toast.warning(t("toast.warnings.exam.warning_recovering_record"));   
                         return clear();
                     }
                     
@@ -206,20 +211,21 @@ const Recorder : React.FC = () => {
                     }
                     
                 } catch (error) {
+                    clear();
                     throw new Error("no_media_recorder");
                 }
             }
 
-            setSettings("loading", true);
+            setLoading(true);
 
-            if (questionIndex === undefined || !exam || !(exam as Array<IQuestion>).length || !(exam as Array<IQuestion>)[questionIndex]) throw new Error("no_data");
+            if (questionIndex === undefined || !questions || isEmpty(questions) || !questions[questionIndex]) throw new Error("no_data");
 
-            const hasNextQuestion = questionIndex! < (exam as Array<IQuestion>).length! - 1;
-            const question_id = (exam as Array<IQuestion>)[questionIndex].id;
+            const hasNextQuestion = questionIndex < questions.length - 1;
+            const question_id = questions[questionIndex].id;
 
-            const processor = await getProcessorSignedLink(id as string, question_id, mime).catch(() => {
-                toast.error(t("error_sending_record", { ns: "toast" }))
-                setSettings("loading", false)
+            const processor = await getProcessorSignedLink(exam_id as string, user_id as string, question_id, supportedMimeType as string).catch(() => {
+                toast.error(t("toast.errors.exam.error_sending_record"))
+                setLoading(false)
             });
             if (!processor) return;
             
@@ -227,87 +233,70 @@ const Recorder : React.FC = () => {
 
             // asure to get localStorage blob if thats the case
             const audioToSend = getRecord().audioChunks;
-            
-            const upload = await uploadToGCS(signed_url, audioToSend, mime).catch(() => {
-                toast.error(t("error_sending_record", { ns: "toast" }))
-                setSettings("loading", false)
+            const upload = await uploadToGCS(signed_url, audioToSend, supportedMimeType as string).catch(() => {
+                toast.error(t("toast.errors.exam.error_sending_record"))
+                setLoading(false)
             });
 
             if (!upload) return;
 
-            await sendGCSUrl(id as string, question_id, signed_url).then(response => {
-                if (!hasNextQuestion) return endExam();
-                
-                // reset audio url and chunks
+            try {
+                await sendGCSUrl(user_id as string, exam_id as string, question_id, signed_url)
+                if (!hasNextQuestion) return endExam()
+
                 setRecord("audioURL", "");
                 setRecord("audioChunks", []);
                 setRecord("canStop", false);
                 setRecord("seconds", MAX_RECORD_SECONDS);
 
-                mutate(`${ENDPOINT_EXAMS}/${router.query.id}/questions`)
-            }).catch(() => setSettings("loading", false));
+                setExams("questionIndex", questionIndex + 1)
+                queryClient.invalidateQueries({ queryKey: ['questions'] });
+                setLoading(false)
+            } catch (error) {
+                console.error(error)
+                setLoading(false)
+            }
 
             clearTimeout(hasTimeout.current);
 
-            setSettings("loading", false);
+            setLoading(false);
         } catch (error) {
-            toast.error(i18n?.t('error_send_record'));    
             clearTimeout(hasTimeout.current);   
-            setSettings("loading", false);
             console.error(error)
+            toast.error(t("toast.errors.exam.error_sending_record"));    
+            setLoading(false);
         }
     }
 
-    const endExam = () => {
+    const endExam = useCallback(() => {
+        setLoading(true)
         setExams("questionIndex", 0);
-        setExams("exam", null);
         setExams("expanded", false);
         setRecord("audioURL", "");
         setRecord("audioChunks", []);
         setRecord("canStop", false);
         setRecord("seconds", MAX_RECORD_SECONDS);
-        setExams("finished", true);
-        setSettings("loading", false);
+        
         clearTimeout(hasTimeout.current);
-        router.push("/finish");
-    }
-
-    const clear = () => {
-        setExams("expanded", false);
-        setRecord("audioURL", "");
-        setRecord("audioChunks", []);
-        setRecord("canStop", false);
-        setRecord("state", "inactive");
-        setRecord("seconds", MAX_RECORD_SECONDS);
-        setSettings("loading", false);
-    }
-
-    const isLoading = useCallback((button : IButton) => {
-        switch (button.name) {
-            case 'record':
-                if (state === "recording" && !audioURL) return true;
-                return false;
-            case 'stop':
-                return false;
-            case 'next':
-                return false;
-            default:
-                return false;
+        if (isStudent) {
+            router.push(`/exams/${exam_id}/finish`);
+            return; 
         }
-    }, [state, audioURL]);
+        router.push(`/users/${user_id}/exams/${exam_id}/finish`);
+    }, [setExams, setRecord, setLoading, isStudent, router, exam_id, user_id]);
 
-    const isDisabled = useCallback((button : IButton) => {
-        switch (button.name) {
-            case 'record':
-                if (state === "recording") return true;
+    const isDisabled = useCallback((name : typeof BUTTON_STOP | typeof BUTTON_RECORD | typeof BUTTON_NEXT) => {
+        switch (name) {
+            case BUTTON_RECORD:
+                if (state === RECORD_STATE_RECORDING) return true;
                 if (audioURL) return true;
                 return false;
-            case 'stop':
+            case BUTTON_STOP:
                 if (!canStop) return true;
-                if (state === "recording") return false;
+                if (state === RECORD_STATE_RECORDING) return false;
                 return true;
-            case 'next':
-                if (state === "recording") return true;
+            case BUTTON_NEXT:
+                if (state === RECORD_STATE_RECORDING) return true;
                 if (audioURL) return false;
                 return true;
             default:
@@ -315,74 +304,88 @@ const Recorder : React.FC = () => {
         }
     }, [state, audioURL, canStop]);
 
-    const getMessage = (button : IButton) => {
-        if (!mediaRecorder || !mediaRecorder.current) return button.name;
+    const getMessage = (name: typeof BUTTON_STOP | typeof BUTTON_RECORD | typeof BUTTON_NEXT ) => {
+        if (!mediaRecorder || !mediaRecorder.current) return name;
 
-        switch (button.name) {
-            case 'record':
-                if (mediaRecorder.current.state === "recording") return "recording_state";
-            case 'stop':
-                if (mediaRecorder.current.state === "recording") return "stop_recording_state";
+        switch (name) {
+            case BUTTON_RECORD:
+                if (mediaRecorder.current.state === RECORD_STATE_RECORDING) return "recording_state";
+            case BUTTON_STOP:
+                if (mediaRecorder.current.state === RECORD_STATE_RECORDING) return "stop_recording_state";
             // case 'next':
             //     if (mediaRecorder.current.state === "recording") return "";
             default:
-                return button.name;
+                return name;
         }
     }
 
-    const getClasses = (button : IButton) => {
-        const disabled = isDisabled(button);
-        const baseClass = ['rounded-full border sm:border-gray-300 sm:shadow-lg flex items-center justify-center w-14 h-14 sm:w-[100px] sm:h-[100px]'];
-        const disabledColor = 'bg-gray-300 sm:bg-gray-200';
-        
-        let customClass = [`${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`];
-
-        switch (button.name) {
-            case 'record':
-                customClass.push(`w-20 h-20 md:w-[150px] md:h-[150px] ${!disabled ? 'bg-blue-500 sm:bg-gray-200 hover:bg-gray-200/80' : disabledColor}`);
-                break;
-            case 'stop':
-                if (state === "recording" && canStop) customClass.push("bg-red-500 sm:bg-red-200 sm:hover:bg-red-200/80");
-                customClass.push(`${!disabled ? 'sm:bg-gray-100 sm:hover:bg-gray-50' : disabledColor}`)
-                break;
-            case 'next':
-                if (audioURL) customClass.push('bg-blue-500 sm:bg-blue-200 sm:hover:bg-blue-200/80');
-                else customClass.push(`${!disabled ? 'sm:bg-gray-100 sm:hover:bg-gray-50' : disabledColor}`)
-                break;
-            default:
-                break;
-        }
-
-        return baseClass.concat(customClass).join(" ")
-    }   
-
     return (
         <>
-            <div className="w-full h-full grid grid-cols-3 grid-rows-2 sm:grid-cols-3 sm:grid-rows-none justify-center justify-items-center items-center">
-                {buttons.map((button : IButton, index: number) => (
-                    <div key={index} className={`grid gap-2 justify-center min-w-[100px] max-w-[100px] md:min-w-[200px] md:max-w-[200px] col-span-1 items-stretch ${button.classes}`}>
-                        <div className="relative justify-center flex -mb-1">
-                            <Button 
-                                action={button.action} 
-                                icon={button.icon}
-                                name={button.name}
-                                disabled={isDisabled(button)}
-                                classes={getClasses(button)}
-                                size={button.size}
-                                loading={isLoading(button)}
-                            />
-                            {isLoading(button) && <div className="absolute right-0 top-1/4">
+            <div className="w-full flex justify-center gap-10 md:gap-20 lg:gap-20 items-center h-fit">
+                <div className="flex flex-col gap-2 justify-center items-center">
+                    <Button 
+                        data-step={STEP_EXAM_RECORD_BUTTON_STOP}
+                        className={cn(
+                            'rounded-full dark:bg-darkPrimary bg-primary text-white',
+                            'w-14 h-14 sm:w-[80px] sm:h-[80px]',
+                            isDisabled(BUTTON_STOP) && 'cursor-not-allowed',
+                        )}
+                        disabled={isDisabled(BUTTON_STOP)}
+                        onClick={stop}
+                    >
+                        <SquareIcon fill="#fff" color="white" size={28}/>
+                    </Button>
+                    <span className="hidden sm:block text-sm">
+                        {t(`exam.buttons.${getMessage(BUTTON_STOP)}`)}
+                    </span>
+                </div>
+
+                <div className="flex flex-col gap-2 justify-center items-center">
+                    <Button 
+                        data-step={STEP_EXAM_RECORD_BUTTON_START}
+                        className={cn(
+                            'relative rounded-full dark:bg-darkPrimary bg-primary text-white',
+                            'w-20 h-20 sm:w-[140px] sm:h-[140px]',
+                            state === RECORD_STATE_RECORDING ? 'animate-pulse ' : '',
+                            isDisabled(BUTTON_RECORD) && 'cursor-not-allowed',
+                        )}
+                        disabled={isDisabled(BUTTON_RECORD)}
+                        onClick={record}
+                    >
+                        <MicIcon color="white" size={48} />
+                        {state === "recording" && !audioURL ? 
+                            <div className="absolute right-0 top-1/4">
                                 <span className="relative flex h-3 w-3">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-400"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
                                 </span>
-                            </div>}
-                        </div>
-                        <span className="hidden md:flex w-full items-center justify-center break-all">
-                            {t(getMessage(button), { ns: "exam" })}
-                        </span>
-                    </div>   
-                ))}
+                            </div>
+                            : 
+                            null
+                        }
+                    </Button>
+                    <span className="hidden sm:block text-sm">
+                        {t(`exam.buttons.${getMessage(BUTTON_RECORD)}`)}
+                    </span>
+                </div>
+
+                <div className="flex flex-col gap-2 justify-center items-center">
+                    <Button 
+                        data-step={STEP_EXAM_RECORD_BUTTON_NEXT}
+                        className={cn(
+                            'rounded-full dark:bg-darkPrimary bg-primary text-white',
+                            'w-14 h-14 sm:w-[80px] sm:h-[80px]',
+                            isDisabled(BUTTON_NEXT) && 'cursor-not-allowed',
+                        )}
+                        disabled={isDisabled(BUTTON_NEXT)}
+                        onClick={next}
+                    >
+                        <ChevronRightIcon size={36} color="white" />
+                    </Button>
+                    <span className="hidden sm:block text-sm">
+                        {t(`exam.buttons.${getMessage(BUTTON_NEXT)}`)}
+                    </span>
+                </div>
             </div>
         </>
     )

@@ -1,0 +1,35 @@
+{
+    "results": {
+        "exam": "Exam",
+        "learner_response": "Learner Response",
+        "question": "Question",
+        "correct_words": "Correct Words",
+        "status": "Status",
+        "status_suficient": "Sufficient",
+        "status_insuficient": "Insufficient",
+        "created_at": "Created At",
+        "no_browser_support": "Your browser does not support the audio element",
+        "learner_audio": "Learner Audio",
+        "total_accuracy": "Accuracy",
+        "words_accuracy": "Words Accuracy",
+        "phrases_accuracy": "Narrative Text Accuracy",
+        "student_accuracy": "Student Accuracy",
+        "item_word_total": "Total Words of the Item",
+        "words_read_total": "Total Words Read",
+        "correctly_read_total": "Total Words Read Correctly",
+        "true": "Right",
+        "false": "Wrong",
+        "buttons": {
+            "show_results": "Show Results"
+        },
+        "classification": {
+            "no_classification": "No Classification",
+            "pre_reader_one": "Pre-reader One",
+            "pre_reader_two": "Pre-reader Two",
+            "pre_reader_three": "Pre-reader Three",
+            "pre_reader_four": "Pre-reader Four",
+            "reader": "Beggining Reader",
+            "fluent": "Fluent Reader"
+        }
+    }
+}

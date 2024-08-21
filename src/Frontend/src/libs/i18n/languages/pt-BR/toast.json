@@ -1,0 +1,130 @@
+{
+    "toast": {   
+        "success": {
+            "exam": {
+                "success_sent_record": "Registro enviado com sucesso"
+            },
+            "auth": {
+                "reset_password_email_sent": "Recuperação de senha enviada com sucesso",
+                "success_reset_password": "Senha redefinida com sucesso"
+            },
+            "form": {
+                "exam_created": "Avaliação criada com sucesso",
+                "exam_updated": "Avaliação atualizada com sucesso",
+                "exam_deleted": "Avaliação excluído com sucesso",
+            
+                "group_created": "Turma criada com sucesso",
+                "group_updated": "Turma atualizada com sucesso",
+                "group_deleted": "Turma excluída com sucesso",
+            
+                "organization_created": "Escola criada com sucesso",
+                "organization_updated": "Escola atualizada com sucesso",
+                "organization_deleted": "Escola excluída com sucesso",
+            
+                "role_created": "Função criada com sucesso",
+                "role_updated": "Função atualizada com sucesso",
+                "role_deleted": "Função excluída com sucesso",
+            
+                "user_created": "Usuário criado com sucesso",
+                "user_updated": "Usuário atualizado com sucesso",
+                "user_deleted": "Usuário excluído com sucesso",
+
+                "import_organization":"Escola(s) importada(s) com sucesso.",
+                "import_group":"Turma(s) importada(s) com sucesso.",
+                "import_user":"Usuários(s) importado(s) com sucesso."
+            }
+        },
+        "errors": {
+            "page_not_found":{
+                "page_not_found": "Página não encontrada",
+                "button_back_home": "Voltar para o início"
+            },
+            "auth": {
+                "error_api": "Erro ao solicitar",
+                "error_no_data": "Não foi possível encontrar dados",
+                "error_auth": "Não foi possível autenticar",
+                "error_google_auth": "Erro ao entrar com o Google",
+                "reset_password_email_sent_error": "Ocorreu um erro ao enviar a recuperação de senha. Por favor tente novamente",
+                "failed_reset_password": "Ocorreu um erro ao recuperar a senha. Por favor tente novamente",
+                "error_missing_reset_token": "Token para recuperar senha não encontrado"
+            },
+            "loading": {
+                "error_loading_organizations": "Erro ao carregar Escolas",
+                "error_loading_organization_utils": "Erro ao carregar utilitários de Escolas",
+                "error_loading_roles": "Erro ao carregar funções",
+                "error_loading_groups": "Erro ao carregar turmas",
+                "error_loading_users": "Erro ao carregar usuários",
+                "error_loading_exams": "Erro ao carregar Avaliações",
+                "error_loading_looker": "Erro ao carregar Looker",
+                "error_loading_user_exams": "Erro ao carregar Avaliações do usuário"
+            },
+            "form": {
+                "email_or_password_invalid": "E-mail ou senha inválidos",
+                "user_must_have_a_group": "Usuário deve ter uma turma",
+                "start_date_error": "Erro na data de início",
+                "error_loading_form": "Erro ao carregar formulário",
+                "error_fill_form": "Erro ao preencher o formulário",
+                "required_field": "Este campo precisa ser preenchido.",
+                "cant_be_empty": "Não pode ficar vazio!",
+                "invalid_email": "Este não é um email válido.",
+                "invalid_password": "Esta não é uma senha válida.",
+                "min_password": "A senha deve conter pelo menos 5 caracteres.",
+                "max_password": "A senha deve conter no máximo 50 caracteres.",
+                "password_didnt_match": "As senhas não coincidem.",
+                "end_date_cannot_be_earlier": "A data final não pode ser anterior à data de início.",
+                "empty_questions": "Existem questões vazias.",
+                "invalid_state": "Estado inválido.",
+                "invalid_key": "Chave inválida.",
+                "file_required": "Arquivo é obrigatório.",
+                "file_csv": "O arquivo deve ser um arquivo csv.",
+                "already_exists": "Usuário já cadastrado.",
+                "file_max_size_5": "O tamanho máximo do arquivo é 5MB.",
+                "create_organization":"Erro ao criar Escola, por favor tente novamente.",
+                "create_exam":"Erro ao criar Avaliação, por favor tente novamente.",
+                "create_user":"Erro ao criar Usuário, por favor tente novamente.",
+                "create_group":"Erro ao criar Turma, por favor tente novamente.",
+                "edit_organization":"Erro ao alterar Escola, por favor tente novamente.",
+                "edit_exam":"Erro ao alterar Avaliação, por favor tente novamente.",
+                "edit_user":"Erro ao alterar Usuário, por favor tente novamente.",
+                "edit_group":"Erro ao alterar Turma, por favor tente novamente.",
+                "import_organization":"Erro ao importar escola(s), por favor tente novamente.",
+                "import_group":"Erro ao importar turma(s), por favor tente novamente.",
+                "import_user":"Erro ao importar usuário(s), por favor tente novamente.",
+                "empty_question":"Por favor, preencha todos os dados da última questão para adicionar uma nova.",
+                "max_answers":"Limite de questões atingido.",
+                "answer_is_required":"Por favor, preencha a resposta.",
+                "empty_answers":"Adicione ao menos duas opções para as questões sem resposta.",
+                "missing_true": "Adicione ao menos uma resposta correta para a última questão.",
+                "question_one_max_size":"O Limite para a primeira questão é de 60 palavras.",
+                "question_two_max_size":"O Limite para a segunta questão é de 40 palavras.",
+                "answer_already_exists":"Resposta já existente, por favor adicione uma resposta diferente."
+            },
+            "exam": {
+                "error_record": "Não foi possível gravar",
+                "error_sending_record": "Erro ao enviar registro",
+                "error_stop_record": "A gravação foi paralisada.",
+                "required_answer": "Assinale ao menos uma opcão."
+            }
+        },
+        "warnings": {
+            "search": {
+                "warning_fill_search": "Necessário pelo menos 3 caracteres",
+                "warning_no_organizations": "Nenhuma escola encontrada",
+                "warning_no_groups": "Nenhuma turma encontrada",
+                "warning_no_roles": "Nenhuma função encontrada",
+                "warning_no_users": "Nenhum usuário encontrado",
+                "warning_no_states": "Nenhum estado encontrado",
+                "warning_no_regions": "Nenhuma região encontrada",
+                "warning_no_counties": "Nenhum município encontrado"
+            },
+            "exam": {
+                "record_exceeded_time": "Tempo de gravação excedido",
+                "warning_recovering_record": "Não foi possível recuperar o registro",
+                "warning_microphone_permission": "Necessita de permissão de microfone",
+                "user_not_found": "Usuário não encontrado",
+                "warning_no_exams": "Nenhum Avaliação encontrado",
+                "warning_send_audio": "Não foi possível enviar o registro"
+            }
+        }
+    }
+}

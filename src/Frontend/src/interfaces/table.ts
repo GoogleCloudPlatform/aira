@@ -1,30 +1,25 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { IAction } from "./actions";
-import { IIcon } from "./icons";
+import { ColumnDef } from "@tanstack/react-table";
+import { IAction } from "./action";
+import { IIcon } from "./icon";
+import { IUsersResponse } from "./user";
 
-export interface IActionTable {
-    data: any;
-    fields?: Array<string>;
-    actions: Array<IAction>;
-    pagination: boolean;
+export type TTableHeader = {
+    id: string;
+    accessorKey: string
+    header: string   
 }
+
+export interface ActionTableProps {
+    columns: ColumnDef<TTableHeader>[],
+    data: IUsersResponse | any,
+    pagination: boolean
+  }
 
 export interface IActionTableInfoData {
     create: IActionTableInfoObject;
     edit: IActionTableInfoObject;
     delete: IActionTableInfoObject;
+    _import: IActionTableInfoObject;
 }
 
 export interface IActionTableInfoObject {

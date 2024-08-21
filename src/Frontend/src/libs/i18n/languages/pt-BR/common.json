@@ -1,0 +1,88 @@
+{
+    "loading": "Carregando",
+    "sidebar": {
+        "theme": "Tema",
+        "language": "Idioma",
+        "exit": "Sair",
+        "languages": {
+            "en-US": "Inglês",
+            "pt-BR": "Português",
+            "es-ES": "Espanhol"
+        },
+        "options": {
+            "home": "Início",
+            "reports": "Relatórios",
+            "learners": "Alunos",
+            "tutorials": "Tutoriais",
+            "educators": "Educadores",
+            "exams": "Avaliações",
+            "dashboard": "Painel",
+            "admin": "Administração",
+            "users": "Usuários",
+            "roles": "Funções",
+            "groups": "Turmas",
+            "organizations": "Escolas",
+            "apply_exams": "Aplicar Avaliação",
+            "results": "Resultados"
+        }
+    },
+    "search": {
+        "search": "Buscar",
+        "no_data": "Não foi possível encontrar dados",
+        "select_a_group": "Selecione uma turma...",
+        "groups": "Turmas"
+    },
+    "table": {
+        "headers":{
+            "actions": "Ações",
+            "name": "Nome",
+            "email": "E-mail",
+            "grade": "Série",
+            "shift": "Turno",
+            "organization": "Escola",
+            "created_at": "Criado em",
+            "updated_at": "Atualizado em",
+            "start_date":  "Data de Início",
+            "end_date":  "Data de Término",
+            "region":  "Região",
+            "county":  "Município",
+            "city":  "Cidade"
+        },
+        "buttons":{
+            "import": "Importar",
+            "export": "Exportar",
+            "create": "Criar",
+            "edit": "Editar",
+            "go_to_exams": "Ver Avaliações",
+            "go_to_results": "Ver Resultados",
+            "go_to_group": "Ver Turma",
+            "go_to_users": "Ver Usuários",
+            "start_exam": "Iniciar Avaliação",
+            "delete": "Excluir",
+            "preview": "Visualizar"
+        },
+        "shifts": {
+            "morning": "Manhã",
+            "evening": "Tarde",
+            "night": "Noite",
+            "allday": "Integral"
+        },
+        "messages": {
+            "open": "Abrir menu",
+            "no_results": "Sem resultados."
+
+        },
+        "pagination": {
+            "showing": "Mostrando",
+            "to": "para",
+            "of": "de",
+            "results": "resultados",
+            "previous": "Anterior",
+            "next": "Próximo"
+        }
+    },
+    "pagination": {
+        "previous": "Anterior",
+        "next": "Próximo"
+    }
+}

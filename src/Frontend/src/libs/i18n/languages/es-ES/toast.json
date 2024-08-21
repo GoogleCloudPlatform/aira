@@ -1,0 +1,124 @@
+{
+    "toast": {
+        "success": {
+            "exam": {
+                "success_sent_record": "Registro enviado con éxito"
+            },
+            "auth": {
+                "reset_password_email_sent": "Recuperación de contraseña enviada con éxito",
+                "success_reset_password": "Contraseña restablecida con éxito"
+            },
+            "form": {
+                "exam_created": "Evaluación creada con éxito",
+                "exam_updated": "Evaluación actualizada con éxito",
+                "exam_deleted": "Evaluación eliminada con éxito",
+                "group_created": "Clase creada con éxito",
+                "group_updated": "Clase actualizada con éxito",
+                "group_deleted": "Clase eliminada con éxito",
+                "organization_created": "Escuela creada con éxito",
+                "organization_updated": "Escuela actualizada con éxito",
+                "organization_deleted": "Escuela eliminada con éxito",
+                "role_created": "Función creada con éxito",
+                "role_updated": "Función actualizada con éxito",
+                "role_deleted": "Función eliminada con éxito",
+                "user_created": "Usuario creado con éxito",
+                "user_updated": "Usuario actualizado con éxito",
+                "user_deleted": "Usuario eliminado con éxito",
+                "import_organization": "Escuela(s) importada(s) con éxito.",
+                "import_group": "Clase(s) importada(s) con éxito.",
+                "import_user": "Usuario(s) importado(s) con éxito."
+            }
+        },
+        "errors": {    
+            "page_not_found": {
+                "page_not_found": "Página no encontrada",
+                "button_back_home": "Volver al inicio"
+            },
+            "auth": {
+                "error_api": "Error al solicitar",
+                "error_no_data": "No se pudieron encontrar datos",
+                "error_auth": "No se pudo autenticar",
+                "error_google_auth": "Error al iniciar sesión con Google",
+                "reset_password_email_sent_error": "Ocurrió un error al enviar la recuperación de contraseña. Por favor intente nuevamente",
+                "failed_reset_password": "Ocurrió un error al recuperar la contraseña. Por favor intente nuevamente",
+                "error_missing_reset_token": "Token para recuperar la contraseña no encontrado"
+            },
+            "loading": {
+                "error_loading_organizations": "Error al cargar Escuelas",
+                "error_loading_organization_utils": "Error al cargar utilitarios de Escuelas",
+                "error_loading_roles": "Error al cargar funciones",
+                "error_loading_groups": "Error al cargar clases",
+                "error_loading_users": "Error al cargar usuarios",
+                "error_loading_exams": "Error al cargar Evaluaciones",
+                "error_loading_looker": "Error al cargar Looker",
+                "error_loading_user_exams": "Error al cargar Evaluaciones del usuario"
+            },
+            "form": {
+                "email_or_password_invalid": "Correo electrónico o contraseña inválidos",
+                "user_must_have_a_group": "El usuario debe tener una clase",
+                "start_date_error": "Error en la fecha de inicio",
+                "error_loading_form": "Error al cargar formulario",
+                "error_fill_form": "Error al completar el formulario",
+                "required_field": "Este campo es obligatorio.",
+                "cant_be_empty": "¡No puede estar vacío!",
+                "invalid_email": "Este no es un correo electrónico válido.",
+                "invalid_password": "Esta no es una contraseña válida.",
+                "min_password": "La contraseña debe contener al menos 5 caracteres.",
+                "max_password": "La contraseña debe contener como máximo 50 caracteres.",
+                "password_didnt_match": "Las contraseñas no coinciden.",
+                "end_date_cannot_be_earlier": "La fecha final no puede ser anterior a la fecha de inicio.",
+                "empty_questions": "Hay preguntas vacías.",
+                "invalid_state": "Estado inválido.",
+                "invalid_key": "Clave inválida.",
+                "file_required": "Archivo obligatorio.",
+                "file_csv": "El archivo debe ser un archivo csv.",
+                "already_exists": "Usuario ya registrado.",
+                "file_max_size_5": "El tamaño máximo del archivo es 5MB.",
+                "create_organization": "Error al crear Escuela, por favor intente nuevamente.",
+                "create_exam": "Error al crear Evaluación, por favor intente nuevamente.",
+                "create_user": "Error al crear Usuario, por favor intente nuevamente.",
+                "create_group": "Error al crear Clase, por favor intente nuevamente.",
+                "edit_organization": "Error al editar Escuela, por favor intente nuevamente.",
+                "edit_exam": "Error al editar Evaluación, por favor intente nuevamente.",
+                "edit_user": "Error al editar Usuario, por favor intente nuevamente.",
+                "edit_group": "Error al editar Clase, por favor intente nuevamente.",
+                "import_organization": "Error al importar escuela(s), por favor intente nuevamente.",
+                "import_group": "Error al importar clase(s), por favor intente nuevamente.",
+                "import_user": "Error al importar usuario(s), por favor intente nuevamente.",
+                "empty_question": "Por favor, complete todos los datos de la última pregunta para agregar una nueva.",
+                "max_answers": "Se ha alcanzado el límite máximo de respuestas.",
+                "answer_is_required": "Por favor, complete la respuesta.",
+                "empty_answers": "Agregue al menos 2 opciones para las preguntas sin respuesta.",
+                "question_one_max_size": "The limit for the first question is 60 words.",
+                "question_two_max_size": "The limit for the second question is 40 words.",
+                "answer_already_exists": "La respuesta ya existe, por favor añade una respuesta diferente."
+            },
+            "exam": {
+                "error_record": "No se pudo grabar",
+                "error_sending_record": "Error al enviar registro",
+                "error_stop_record": "La grabación fue detenida.",
+                "required_answer": "Por favor, selecciona al menos una opción."
+            }
+        },
+        "warnings": {
+            "search": {
+                "warning_fill_search": "Se requiere al menos 3 caracteres",
+                "warning_no_organizations": "No se encontraron escuelas",
+                "warning_no_groups": "No se encontraron clases",
+                "warning_no_roles": "No se encontraron funciones",
+                "warning_no_users": "No se encontraron usuarios",
+                "warning_no_states": "No se encontraron estados",
+                "warning_no_regions": "No se encontraron regiones",
+                "warning_no_counties": "No se encontraron municipios"
+            },
+            "exam": {
+                "record_exceeded_time": "Tiempo de grabación excedido",
+                "warning_recovering_record": "No se pudo recuperar el registro",
+                "warning_microphone_permission": "Se requiere permiso para el micrófono",
+                "user_not_found": "Usuario no encontrado",
+                "warning_no_exams": "No se encontraron Evaluaciones",
+                "warning_send_audio": "No se pudo enviar el registro"
+            }
+        }
+    }
+}

@@ -1,16 +1,5 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+'use client'
+
 import { IRBACContext, IRBACProvider, IRBACWrapper } from "@/interfaces/rbac";
 import { PropsWithChildren, createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./auth";
@@ -54,7 +43,12 @@ const RBACWrapper : React.FC<IRBACWrapper> = ({ children, requiredRoles, require
     const { user } = useAuth();
 
     if (!user || !user.scopes) return <div>403 - Unauthorized</div>;
-
+    
+    /**
+     * Checks if the user has all the required scopes.
+     * Iterates over the required scopes array and checks if each scope is included in the user's scopes.
+     * @type {boolean} - A boolean indicating whether the user has all the required scopes.
+     */
     const hasRequiredScopes : boolean = requiredScopes.some((element : string) => user.scopes && user?.scopes.includes(element));
 
     if (hasRequiredScopes) {

@@ -1,0 +1,37 @@
+{
+    "text-editor": {
+        "editor": {
+            "write": "Escriba su texto aquí...",
+            "title": "Título",
+            "words": "Palabras",
+            "complex_words": "Palabras Complejas",
+            "phrases": "Texto Narrativo",
+            "multiple_choice": "Opción multiple",
+            "total": "Total"
+        },
+        "heading": {
+            "size": "Tamaño",
+            "p": "Párrafo",
+            "h1": "Título 1",
+            "h2": "Título 2",
+            "h3": "Título 3",
+            "quote": "Cita",
+            "quote-description": "Cita (Ctrl+⇧+.)",
+            "ul": "Lista con viñetas",
+            "ol": "Lista numerada"
+        },
+        "toolbar": {
+            "bold": "Negrita (Ctrl+B)",
+            "italic": "Cursiva (Ctrl+I)",
+            "underline": "Subrayado (Ctrl+U)",
+            "align": "Alinear",
+            "viewing": "Visualizando",
+            "editing": "Editando",
+            "editor-mode": "Modo de Editor"
+        },
+        "placeholder": {
+            "write": "Escriba su texto aquí...",
+            "title": "Título"
+        }
+    }
+}

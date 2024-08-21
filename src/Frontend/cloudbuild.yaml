@@ -1,33 +1,34 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 steps:
-  # Build the container image
-  - name: "gcr.io/cloud-builders/docker"
+  # Build the Docker image and inject secrets
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
     args:
-      [
-        "build",
-        "-t",
-        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
-        ".",
-      ]
-
+      - '-c'
+      - |
+        echo "NEXT_PUBLIC_FIREBASE_API_KEY environment variable: $$NEXT_PUBLIC_FIREBASE_API_KEY"
+        echo "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN environment variable: $$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+        echo "NEXT_PUBLIC_FIREBASE_APP_ID environment variable: $$NEXT_PUBLIC_FIREBASE_APP_ID"
+        echo "NEXT_PUBLIC_API_URL environment variable: $$NEXT_PUBLIC_API_URL"
+        echo "NEXT_PUBLIC_TUTORIAL_BUCKET environment variable: $PROJECT_ID-store-public-files"
+        docker build -t us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/frontend:latest \
+          --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=$$NEXT_PUBLIC_FIREBASE_API_KEY \
+          --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN \
+          --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=$$NEXT_PUBLIC_FIREBASE_APP_ID \
+          --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=$PROJECT_ID \
+          --build-arg NEXT_PUBLIC_API_URL=$$NEXT_PUBLIC_API_URL \
+          --build-arg NEXT_PUBLIC_LOOKER=liabi.cloud.looker.com \
+          --build-arg NEXT_PUBLIC_LOOKER_GENERAL_DASHBOARD_ID=1 \
+          --build-arg NEXT_PUBLIC_LOOKER_LEARNERS_DASHBOARD_ID=2 \
+          --build-arg NEXT_PUBLIC_TUTORIAL_BUCKET=$PROJECT_ID-store-public-files \
+          .
+    secretEnv: ['NEXT_PUBLIC_FIREBASE_API_KEY', 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN', 'NEXT_PUBLIC_FIREBASE_APP_ID','NEXT_PUBLIC_API_URL']
+    
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "push",
-        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
+        "us-east1-docker.pkg.dev/${PROJECT_ID}/app-stt/frontend:latest",
       ]
 
   # Deploy container image to Cloud Run
@@ -37,21 +38,33 @@ steps:
       [
         "run",
         "deploy",
-        "frontend",
-        '--project=$_PROJECT_ID',
+        "frontend-v2",
+        "--project=${PROJECT_ID}",
         "--image",
-        "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA",
+        "us-east1-docker.pkg.dev/${PROJECT_ID}/app-stt/frontend:latest",
         "--region",
         "us-east1",
         "--service-account",
-        "$_PROJECT_ID-frontend-engine@$_PROJECT_ID.iam.gserviceaccount.com",
-        "--update-secrets=FIREBASE_API_KEY=apiKey:latest,FIREBASE_APP_ID=appId:latest,FIREBASE_AUTH_DOMAIN=authDomain:latest,API_URL=api_url:latest",
-        "--set-env-vars=FIREBASE_PROJECT_ID=$_PROJECT_ID,LOOKER=your_looker_url,LOOKER_GENERAL_DASHBOARD_ID=your_general_dash_id,LOOKER_LEARNERS_DASHBOARD_ID=your_general_learnears_dash_id",
+        "sa-${PROJECT_NUMBER}-front-engine@${PROJECT_ID}.iam.gserviceaccount.com",
+        "--update-secrets=NEXT_PUBLIC_FIREBASE_API_KEY=apiKey:latest,NEXT_PUBLIC_FIREBASE_APP_ID=appId:latest,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=authDomain:latest,API_URL=api_url:latest",
+        "--set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=${PROJECT_ID},NEXT_PUBLIC_LOOKER=liabi.cloud.looker.com,NEXT_PUBLIC_LOOKER_GENERAL_DASHBOARD_ID=1,NEXT_PUBLIC_LOOKER_LEARNERS_DASHBOARD_ID=2,NEXT_PUBLIC_TUTORIAL_BUCKET=rad-stt-dev-store-public-files",
         "--allow-unauthenticated",
         "--vpc-connector=vpc-con",
       ]
+
 images:
-  - "us-east1-docker.pkg.dev/$_PROJECT_ID/app-stt/frontend:$SHORT_SHA"
+  - "us-east1-docker.pkg.dev/${PROJECT_ID}/app-stt/frontend:latest"
+
+availableSecrets:
+      secretManager:
+        - versionName: projects/${PROJECT_ID}/secrets/apiKey/versions/latest
+          env: 'NEXT_PUBLIC_FIREBASE_API_KEY'
+        - versionName: projects/${PROJECT_ID}/secrets/authDomain/versions/latest
+          env: 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'
+        - versionName: projects/${PROJECT_ID}/secrets/appId/versions/latest
+          env: 'NEXT_PUBLIC_FIREBASE_APP_ID'
+        - versionName: projects/${PROJECT_ID}/secrets/api_url/versions/latest
+          env: 'NEXT_PUBLIC_API_URL'
 
 options:
   logging: CLOUD_LOGGING_ONLY

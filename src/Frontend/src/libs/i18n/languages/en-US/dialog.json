@@ -1,0 +1,12 @@
+{
+    "dialog": {
+        "warning": "Warning",
+        "leave_page_message_1": "Oops! It looks like you are trying to exit the exam application screen.",
+        "leave_page_message_2": "Please remember that leaving the screen during the exam may result in the interruption of your assessment session.",
+        "leave_page_message_3": "Are you sure you want to exit?",
+        "buttons":{
+            "confirm": "Leave the test",
+            "close": "Cancel"
+        }
+    }
+}

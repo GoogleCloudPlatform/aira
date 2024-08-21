@@ -1,0 +1,19 @@
+{
+    "preview": {
+        "titles": {
+            "preview_title_start": "Esta es una vista previa de cómo se mostrará la pregunta de",
+            "preview_title_end": "será mostrada."
+        },
+        "questions": {
+            "words": "Palabras",
+            "complex_words": "Palabras Complejas",
+            "phrases": "Texto Narrativo"
+        },
+        "buttons": {
+            "preview": "Vista previa",
+            "previous": "Anterior",
+            "next": "Siguiente",
+            "close": "Cerrar"
+        }
+    }
+}

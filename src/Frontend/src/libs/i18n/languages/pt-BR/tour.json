@@ -1,0 +1,14 @@
+{
+  "tour": {
+    "step_exam__mic__tester": "",
+    "step__exam__question__info": "Observe as instruções referente a questão.",
+    "step__exam__visor": "Aqui você vai encontrar as palavras ou o texto que devem ser lido.",
+    "step__exam__visor__expand": "Clique aqui para expandir o quadro com as palavras ou o texto",
+    "step__exam__timer": "Atenção ao tempo! Assim que você clicar em gravar vai começar a contar o tempo de 60 segundos. Caso não consiga finalizar a leitura dentro deste intervalo de tempo, avance para a próxima questão normalmente.",
+    "step__exam__record__button__stop": "Clique aqui para interromper a gravação caso tenha terminado a leitura antes do término dos 60 segundos.",
+    "step__exam__record__button__start": "Clique aqui para começar a gravação, assim que você clicar o cronômetro de 60 segundos vai começar a contar.",
+    "step__exam__record__button__pause": "Clique aqui para interromper a gravação caso tenha terminado a leitura antes do término dos 60 segundos.",
+    "step__exam__record__button__next": "Ao clicar no botão de avançar você irá para a próxima questão ou se não tiver mais nenhuma questão o Avaliação será finalizado.",
+    "step__tour__button": "Este é o botão de ajuda, ao ativar será mostrado um guia virtual de como realizar o Avaliação. Esse botão ficará disponível sempre que necessário."
+  } 
+} 

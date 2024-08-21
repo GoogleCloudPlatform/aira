@@ -1,146 +1,267 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-import { SCOPE_ADMIN, SCOPE_LEARNER, SCOPE_USER } from "@/constants/rbac";
-import { RBACWrapper, useRBAC } from "@/context/rbac";
-import { useRouter } from "next/router";
-import { api } from "@/pages/api/api";
-import { ENDPOINT_EXAMS } from "@/constants/endpoint";
-import useSWR, { SWRResponse, mutate } from 'swr'
-import { useEffect, useState } from "react";
-import { IExamsStore, IFormStore, IModalStore, IPaginationStore, ISettingsStore } from "@/interfaces/store";
-import { useExamsStore } from "@/store/exams";
-import { usePaginationStore } from "@/store/pagination";
-import { IExam, IExamsResponse } from "@/interfaces/exams";
-import { getURL } from "@/utils";
-import { IAction } from "@/interfaces/actions";
-import { ACTION_CREATE, ACTION_GET_BY_ID, ACTION_GET_BY_ID_REDIRECT } from "@/constants/actions";
-import { ICON_EYE, ICON_PENCIL_SQUARE, ICON_PLUS } from "@/constants/icons";
-import ActionTable from "../action-table/ActionTable";
-import useForm from "@/hooks/useForm/useForm";
-import { useFormStore } from "@/store/form";
-import { useModalStore } from "@/store/modal";
-import { createExam, getExamById } from "@/services/exams";
-import NoData from "../no-data/NoData";
-import { useSettingsStore } from "@/store/settings";
-import { ShimmerActionTable } from "../shimmer";
-import { isEmpty } from "lodash";
-import { toast } from "react-toastify";
-import { i18n } from "next-i18next";
+'use client'
 
-const fetcher = (url: string) => api.get(url).then((res) => res.data);
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { isEmpty } from "lodash";
+import { RBACWrapper } from "@/context/rbac";
+import { 
+    ColumnDef 
+} from "@tanstack/react-table"; 
+import { getExams, getExamById } from "@/services/exam";
+import { usePaginationStore } from "@/store/pagination";
+import { getFormattedDate } from "@/utils";
+
+import { IAction } from "@/interfaces/action";
+import { TTableHeader } from "@/interfaces/table";
+import { TActionSheetOptions } from "@/interfaces/component";
+import { IPaginationStore } from "@/interfaces/store";
+import { SchemaCreateExam, SchemaCreateExamDefaultValues, SchemaEditExam } from "@/forms/exam/schema";
+
+import Search from "../search/Search";
+import SkeletonExams from "../skeletons/SkeletonExams";
+import FormCreateExam from "@/forms/exam/FormCreateExam";
+import FormEditExam from "@/forms/exam/FormEditExam";
+import { ActionTable  } from "@/components";
+import { Button } from "../ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
+
+import { SCOPE_ADMIN, SCOPE_EXAM_LIST, SCOPE_USER } from "@/constants/rbac";
+import { ICON_EYE, ICON_PENCIL, ICON_PENCIL_SQUARE } from "@/constants/icons";
+import { ACTION_EDIT, ACTION_GET_BY_ID, ACTION_GET_BY_ID_REDIRECT } from "@/constants/actions";
+import { CATEGORY_EXAMS, MODE_CREATE, MODE_EDIT, MODE_VIEW } from "@/constants";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { LucideEdit, LucideEye, MoreHorizontal } from "lucide-react";
 
 const Exams : React.FC = () => {
     const [mounted, setMounted] = useState<boolean>(false);
-    
-    const router = useRouter();
-    const { setSettings } : ISettingsStore = useSettingsStore();
-    const { exams, setExams } : IExamsStore = useExamsStore();
-    const { setModal } : IModalStore = useModalStore();
-    const { getForm } : IFormStore = useFormStore();
-    const { query, page, page_size, setPagination } : IPaginationStore = usePaginationStore();
-    const { setForm, checkFormSubmit } = useForm();
-    const { hasScopePermission } = useRBAC();
+    const [openSheet, setOpenSheet] = useState<boolean>(false);
+    const [options, setOptions] = useState<TActionSheetOptions>({} as TActionSheetOptions);
 
+    const t = useTranslations();
+    const queryClient = useQueryClient();
+    const { locale } = useParams()
+    const router = useRouter();
+    const { page, query, page_size, setPagination } : IPaginationStore = usePaginationStore();
+
+
+    useEffect(() => {
+        if (mounted) {
+            queryClient.invalidateQueries({ queryKey: [CATEGORY_EXAMS] });
+        }
+    }, [mounted, page_size, query, queryClient]);
+    
     useEffect(() => {
         setMounted(true);
         return () => {
-            setModal("open", false);
-            setForm("inputs", []);
-            setPagination("page", 1);
-            setSettings("loading", false);
-            setExams("exams", null);
-            setPagination("query", "");
-            mutate(null);
+            setPagination('page_size', 10)
             setMounted(false);
         }
-    }, [setModal, setForm, setPagination, setSettings, setExams]);
+    }, [mounted, setPagination]);
 
-    const url = getURL(ENDPOINT_EXAMS, { page: page, page_size: page_size, q: query });
-    const { data, error, isLoading } : SWRResponse = useSWR<IExamsResponse, Error>(
-        mounted ? url : null, 
-        fetcher,
-        { revalidateIfStale: false, revalidateOnFocus: false, shouldRetryOnError: false, revalidateOnMount: true }
-    );
+    const { data, isLoading } = useQuery({ 
+        queryKey: [CATEGORY_EXAMS, page], 
+        queryFn: () => getExams(), 
+        retryOnMount: false, retry: false,
+        enabled: mounted
+    });
 
-    useEffect(() => {
-        if (data) {
-            if (isEmpty(data.items)) toast.warn(i18n?.t('warning_no_exams', { ns: "toast" }));
-            setExams("exams", data);
-        }
-    }, [mounted, data, setExams]);
-    
+    if (isLoading) return <SkeletonExams />;
+    if (!data) return null;
 
-    useEffect(() => {
-        const queryString = `page=${page}&page_size=${page_size}&q=${query}`;
-    
-        const shouldMutate = () => {    
-            const hasQueryString = url.includes(queryString);
-            return hasQueryString;
-        };        
-
-        if (mounted) {
-            if (shouldMutate() && exams && data && exams.current_page !== page && exams.current_page !== data.current_page) {
-                mutate(`${ENDPOINT_EXAMS}?${queryString}`);
-            }            
-        }
-
-        return () => {
-            mutate(null); // Clear SWR cache keys
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mounted, query, page, page_size, url, exams]);
-
-    if (!mounted || !exams) return null;
-    if (isLoading) return <ShimmerActionTable />;
-    if (error) return <NoData />;
-    
-    const clean = () => {
-        setModal("open", false);
-        setForm("inputs", []);
-        setExams("finished", false);
-        setSettings("loading", false);
-    }
-
-    const create = () => {
-        if (checkFormSubmit()) return;
-        const { inputs } = getForm();
-        setSettings("loading", true);
-        createExam(inputs).then(response => {
-            mutate(url);
-            clean();
-        }).finally(() => setSettings("loading", false));
+    const create = async () => {
+        setOptions({
+            mode: MODE_CREATE,
+            title: "form.exam.create.title",
+            subtitle: "form.exam.create.subtitle",
+            formData: {
+                schema: SchemaCreateExam,
+                defaultValues: SchemaCreateExamDefaultValues,
+                category: CATEGORY_EXAMS,
+            }
+        });
+        setOpenSheet(true);
     };
 
-    const { items } = exams as IExamsResponse;
-    const object : IExam | [] = items && items.length ? items[0] : [];
-    const fields  = Object.keys(object).filter(k => !["id"].includes(k));;
+    const viewById = async (id: string) => {
+        setOptions({
+            mode: MODE_VIEW,
+            title: "form.exam.preview.title",
+            subtitle: "form.exam.preview.subtitle",
+            formData: {
+                schema: SchemaEditExam,
+                defaultValues: () => getExamById(id),
+                category: CATEGORY_EXAMS,
+            }
+        });
+        setOpenSheet(true);
+    };
+
+    const editById = async (id: string) => {
+        setOptions({
+            mode: MODE_EDIT,
+            title: "form.exam.edit.title",
+            subtitle: "form.exam.edit.subtitle",
+            formData: {
+                schema: SchemaEditExam,
+                defaultValues: () => getExamById(id),
+                category: CATEGORY_EXAMS,
+            }
+        });
+        setOpenSheet(true);
+    };
+
+    // const deleteById = (id: string) => {
+    //     setOptions({
+    //         mode: MODE_DELETE,
+    //         title: "title",
+    //         subtitle: "subtitle",
+    //         formData: {
+    //             confirm: async () => await deleteExamById(id),
+    //             category: CATEGORY_EXAMS
+    //         }
+    //     });
+    // };
+
+    const makeExam = (id : string) => router.push(`/exams/${id}`);
+
+    const calculateDisabledEdit = (item: any) => {
+        const today = new Date();
+        const start_date = new Date(item.start_date);
+        start_date.setMinutes(start_date.getMinutes() - 30); // to allow a quick edition until 30 minutes before exam start date
+
+        if (today <= start_date) return false; // allow edition
+        return true;
+    }
+
     const actions : Array<IAction> = [
-        { name: ACTION_GET_BY_ID, icon: ICON_EYE, classes: 'text-green-500', action: (id : string) => getExamById(id), render: true , scopes: [SCOPE_ADMIN] }, 
-        { name: ACTION_GET_BY_ID_REDIRECT, icon: ICON_PENCIL_SQUARE, classes: 'text-green-500', action: (id : string) => router.push(`/exams/${id}`), render: hasScopePermission([SCOPE_LEARNER]) , scopes: [SCOPE_LEARNER], text: "start_exam" }, 
-        { name: ACTION_CREATE, icon: ICON_PLUS, classes: 'text-white', action: () => create(), render: false, scopes: [SCOPE_ADMIN] }, 
+        { 
+            name: ACTION_EDIT, icon: ICON_PENCIL, classes: 'bg-blue-500', action: (id : string) => editById(id), 
+            scopes: [SCOPE_ADMIN],
+            disabled: (item) => calculateDisabledEdit(item),
+            render: true,
+        }, 
+        { name: ACTION_GET_BY_ID_REDIRECT, icon: ICON_PENCIL_SQUARE, classes: 'text-green-500', action: (id : string) => makeExam(id), disabled: () => false, scopes: [SCOPE_USER, SCOPE_EXAM_LIST], text: "start_exam", render: true, }, 
+        { name: ACTION_GET_BY_ID, icon: ICON_EYE, classes: 'bg-green-500', action: (id : string) => viewById(id), disabled: () => false , scopes: [SCOPE_ADMIN], render: true, }, 
+        // { name: ACTION_DELETE, icon: ICON_TRASH, classes: 'bg-red-500', action: (id : string) => deleteById(id), scopes: [SCOPE_ADMIN], disabled: () => false, render: true }
+    ];
+
+    const columns: ColumnDef<TTableHeader>[] = [
+        {
+            accessorKey: "name",
+            header: t("table.headers.name"),
+        },
+        {
+            accessorKey: "start_date",
+            header: t("table.headers.start_date"),
+            cell: ({ row }) => {
+                const date : string = row.getValue('start_date');
+                const formattedDate = getFormattedDate(locale as string, new Date(date))
+                return formattedDate;
+            }
+        },
+        {
+            accessorKey: "end_date",
+            header: t("table.headers.end_date"),
+            cell: ({ row }) => {
+                const date : string = row.getValue('end_date');
+                const formattedDate = getFormattedDate(locale as string, new Date(date))
+                return formattedDate;
+            }
+        },
+        {
+            accessorKey: "actions",
+            header: t("table.headers.actions"),
+            cell: ({ row }) => {
+                const exam = row.original
+
+                return (
+                    <div className="flex justify-center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">{t('table.messages.open')}</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {/* <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
+                                <DropdownMenuItem
+                                    className="cursor-pointer flex justify-between text-xs"
+                                    onClick={() => editById(exam.id)}
+                                    disabled={calculateDisabledEdit(exam)}
+                                >
+                                    {t('table.buttons.edit')}
+                                    <LucideEdit className="w-4 h-4" />
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="cursor-pointer flex justify-between text-xs"
+                                    onClick={() => viewById(exam.id)}
+                                >
+                                    {t('table.buttons.preview')}
+                                    <LucideEye className="w-4 h-4" />
+                                </DropdownMenuItem>
+                                {/* <DropdownMenuSeparator /> */}
+                                {/* <DropdownMenuItem
+                                    className="cursor-pointer flex justify-between text-xs"
+                                    onClick={() => deleteById(exam.id)}
+                                >
+                                    {t('start_exam')}
+                                    <LucideTrash2 className="w-4 h-4" />
+                                </DropdownMenuItem> */}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
+            }
+        },
     ];
 
     return (
         <>
-            <RBACWrapper requiredScopes={[SCOPE_LEARNER, SCOPE_ADMIN, SCOPE_USER]}>
-                <ActionTable
-                    data={exams}
-                    fields={fields}
-                    actions={actions}
+            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 2xl:mt-10 sm:container">
+                <div className='w-full sm:w-80'>
+                    <Search />
+                </div>
+                <RBACWrapper requiredScopes={[SCOPE_ADMIN]}>
+                    <div className="grid grid-flow-col space-x-2">
+                        <Button onClick={create}>
+                            {t('table.buttons.create')}
+                        </Button>
+                    </div>
+                </RBACWrapper>
+            </div>
+
+            <section className="sm:container pt-5 2xl:pt-10">
+                
+                <ActionTable 
+                    columns={columns} 
+                    data={data}
                     pagination
                 />
-            </RBACWrapper>
+            
+            </section>
+            
+            <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+                <SheetContent className="overflow-auto w-full sm:min-w-[420px]">
+                    {!isEmpty(options) ? 
+                        <SheetHeader>
+                            <SheetTitle>{t(options.title)}</SheetTitle>
+                            <SheetDescription>{t(options.subtitle)}</SheetDescription>
+                        </SheetHeader>
+                        :
+                        null
+                    }
+                    <div className="py-5">
+                        {options.mode === MODE_CREATE && <FormCreateExam formData={options.formData} setOpen={setOpenSheet} />}
+                        {options.mode === MODE_VIEW && <FormEditExam {...options} setOpen={setOpenSheet} preview />}
+                        {options.mode === MODE_EDIT && <FormEditExam {...options} setOpen={setOpenSheet} />}
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* {options.mode === MODE_DELETE && <FormDeleteExam {...options} setOpen={setOpenSheet} />} */}
         </>
     );
 }

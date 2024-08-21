@@ -1,0 +1,12 @@
+{
+    "dialog": {
+        "warning": "Atenção",
+        "leave_page_message_1": "Ops! Parece que você está tentando sair da tela da Avaliação da prova.",
+        "leave_page_message_2": "Por favor, lembre-se de que sair da tela durante a prova pode resultar na interrupção da sua sessão de avaliação.",
+        "leave_page_message_3": "Tem certeza de que deseja sair?",
+        "buttons": {
+            "confirm": "Sair da prova",
+            "close": "Cancelar"
+        }
+    }
+}

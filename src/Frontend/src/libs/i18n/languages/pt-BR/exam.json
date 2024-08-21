@@ -1,0 +1,44 @@
+{
+    "exam": {
+        "titles" : {
+            "question": "Questão",
+            "of": "de",
+            "exam_instructions": "Instruções da Avaliação",
+            "students": "Estudantes"
+        },
+        "messages" : {
+            "select_student": "Selecione um estudante para fazer um novo Avaliação.",
+            "top_message_multiple_choice": "Quando estiver pronto, por favor e leia o texto abaixo e selecione a resposta que achar correta",
+            "top_message": "Quando estiver pronto, por favor clique no botão 'Iniciar Gravação' e leia o texto abaixo com seu microfone",
+            "bottom_message": "Ao finalizar a gravação, clique no botão 'Parar Gravação' e então em 'Próximo'",
+            "success_message": "Sucesso",
+            "audio_success_record": "seus áudios foram gravados com sucesso",
+            "recorded_as_impersonate": "Gravado como professor",
+            "analisys_message": "Caso queira analizar o resultado de um aluno, basta acessar no menu a opção Resultados e pesquisar pelo nome do aluno que você deseja, ao identificar o aluno clique em Ver Resultados e escolha qual a avaliação que você deseja verificar o resultado.\nÉ necessário cerca de 2 minutos após a realização de uma avaliação para que seja disponibilizado o resultado no menu de Resultados.",
+            "redirecting": "Redirecionando",
+            "seconds": "segundos",
+            "no_users_found": "Nenhum aluno encontrado."
+        },
+        "buttons" : {
+            "start_exam": "Iniciar Avaliação",
+            "go_to_group": "Ver Turma",
+            "go_to_exams": "Ver Avaliações",
+            "go_to_results": "Resultados",
+            "stop": "Parar",
+            "record": "Gravar",
+            "next": "Próximo",
+            "start_again": "Iniciar outro fluxo de gravação",
+            "next_student": "Próximo aluno",
+            "recording_state": "Gravando...",
+            "stop_recording_state": "Parar Gravação",
+            "microphone_tester": "Testador de Microfone",
+            "close": "Fechar"
+        },
+        "tips" : {
+            "tip_test_mic": "Teste de Microfone.\nClique no botão de reprodução abaixo e diga algumas palavras.",
+            "tip_get_a_place": "Encontre um lugar tranquilo para fazer o teste, dessa forma interferências externas não irão atrapalhar sua gravação.",
+            "tip_only_the_student": "Apenas o aluno deve ler as palavras durante a gravação. Se alguém estiver ajudando o aluno durante o teste, é importante permanecer em silêncio durante a gravação para não comprometer o resultado.",
+            "tip_tour": "Em caso de dúvida sobre como proceder no Avaliação, use o botão de ajuda no canto inferior direito da tela."
+        }
+    }
+}

@@ -1,39 +1,48 @@
-// Copyright 2022 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+import Alert from "@/classes/Alert";
+import { ALERT_ERROR } from "@/constants/alerts";
 import { IError } from "@/interfaces/error";
-import { isEmpty } from "lodash";
-import { i18n } from "next-i18next";
-import { toast } from "react-toastify";
+//import { isEmpty } from "lodash";
 
 export const getErrors = (errors : Array<IError>) : void => {
-    errors.map((error : IError) => {
-        const text_error = error.type || error.code || "";
-        toast.error(i18n?.t(text_error, { ns: "toast" }));
-    });
+    try {
+        Array.isArray(errors) && errors.map((error : IError) => {
+            const text_error = error.type || error.code || "";
+            new Alert().alert(ALERT_ERROR, text_error);
+        });
+    } catch (error) {
+        console.error('[COULD NOT GET ERROR]:', error);
+    }
 }
 
-export const getURL = (url: string, params: any) : string => {
-    if (!isEmpty(params)) {
-        Object.keys(params).map((param : any, i: number) => {
+export const getURL = (url: string, params: Record<string, any>): string => {
+    const searchParams = new URLSearchParams();
+    
+    if (params) {
+        Object.keys(params).forEach((param: string) => {
             const value = params[param];
-            if (i == 0) url += `?${param}=${value}`
-            else url += `&${param}=${value}`;
+            searchParams.append(param, value.toString());
         });
+    }
+    
+    const queryString = searchParams.toString();
+
+    if (queryString) {
+        url += `?${queryString}`;
     }
 
     return url;
-}
+};
+
+export const getFieldsFromData = (data : { [key: string]: any }) => {
+    const output : { [key: string]: any } = {};
+    
+    Object.keys(data).map((key) => {
+        const [form, field] = key.split("-");
+        output[field] = data[key];
+    });
+
+    return output;
+};
 
 export const getFormattedDate = (locale: string, dateTime: Date) => {
     const options: any = {
@@ -46,20 +55,25 @@ export const getFormattedDate = (locale: string, dateTime: Date) => {
     const formattedDate = new Intl.DateTimeFormat(locale, options).format(dateTime);
     return formattedDate;
 };
-  
-export const formatInputDate = (dateTime: string) => {
-    const date = new Date(dateTime);
+
+export const simulateRequest = async (seconds: number) : Promise<Object> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const resultObject: Object = {
+                code: 200,
+                message: "success"
+            };
+            resolve(resultObject);
+        }, seconds * 1000); // Convert seconds to milliseconds
+    });
+}
+
+export const fileListToBlob = (file: File) => {
+    const blobs = [];
+    blobs.push(file.slice(0, file.size, file.type));
     
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    
-    const hour = date.getHours().toString().padStart(2, '0');
-    const minute = date.getMinutes().toString().padStart(2, '0');
-    
-    const formattedDate = `${year}-${month}-${day}T${hour}:${minute}`;
-    return formattedDate;
-};
+    return new Blob(blobs);
+}
 
 export const getMimeTypeFromBase64 = (base64String: string) => {
     const match = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,/);

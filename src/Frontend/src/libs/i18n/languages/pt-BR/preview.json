@@ -1,0 +1,20 @@
+{
+    "preview":{
+        "titles":{
+            "preview_title_start": "Esta é uma prévia de como a questão de",
+            "preview_title_end": "será exibida."
+        },
+        "questions":{
+            "words": "Palavras",
+            "complex_words": "Palavras Complexas",
+            "phrases": "Texto Narrativo",
+            "multiple_choice": "Múltipla Escolha"
+        },
+        "buttons":{
+            "preview": "Prévia",
+            "previous": "Anterior",
+            "next": "Próximo",
+            "close": "Fechar"
+        }
+    }
+}
