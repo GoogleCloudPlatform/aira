@@ -4,7 +4,7 @@
             "hello_message": "Olá",
             "welcome__message" : "Bem-vindo ao AIRA, nossa plataforma para avaliação da proficiência de leitura em Português.",
             "welcome__message_saber" : "Boas-vindas ao Le.ia, sua plataforma de inteligência artificial na avaliação de leitura e pronúncia em português.",
-            "lia_message": "O AIRA é um experimento (prova de conceito) do Google Cloud, projetado para fornecer resultados de fluência de leitura a estudantes de todas as idades em escala, utilizando recursos de análise de dados em tempo real e inteligência artificial.",
+            "lia_message": "O AIRA é um experimento (prova de conceito) do Google Cloud, projetado para fornecer resultados de fluência de leitura a estudantes de todas as idades em escala, utilizando recursos de análise de dados em tempo real e inteligência artificial."
         },
         "profiles": {
             "profile__type": "Seu usuário tem um perfil de",
