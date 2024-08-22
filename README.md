@@ -13,6 +13,7 @@ After applying an online test, thanks to [Google Cloud's AI platform](https://cl
 ## Documentation
 
 * [Concepts and architecture](./docs/concepts-architecture.md)
+* [Understanding AIRA's data structure (New)](./docs/data-structure.md)
 * [Pre-requisites](./docs/pre-requisites.md)
 * [Building the cloud infrastructure](./docs/building-cloud-infrastructure.md)
 * [Looker requirements](./docs/looker-requirements.md)
