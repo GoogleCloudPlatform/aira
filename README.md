@@ -10,6 +10,8 @@ After applying an online test, thanks to [Google Cloud's AI platform](https://cl
 
 > Please do not use any personal or sensitive data with this demo. This demo should not be used by children under 13 or to process data from children under 13.
 
+This project is an experiment (proof-of-concept only) and does not reflect a completed system nor a finalized design.  Its purpose is solely for research and experimentation. This is not an officially supported Google product.
+
 ## Documentation
 
 * [Concepts and architecture](./docs/concepts-architecture.md)
