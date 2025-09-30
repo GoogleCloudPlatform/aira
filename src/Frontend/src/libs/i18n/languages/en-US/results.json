@@ -1,35 +1,55 @@
 {
     "results": {
-        "exam": "Exam",
+        "exam": "Assessment",
         "learner_response": "Learner Response",
         "question": "Question",
         "correct_words": "Correct Words",
         "status": "Status",
         "status_suficient": "Sufficient",
         "status_insuficient": "Insufficient",
-        "created_at": "Created At",
+        "created_at": "Created at",
         "no_browser_support": "Your browser does not support the audio element",
         "learner_audio": "Learner Audio",
         "total_accuracy": "Accuracy",
-        "words_accuracy": "Words Accuracy",
+        "words_accuracy": "Word Accuracy",
         "phrases_accuracy": "Narrative Text Accuracy",
         "student_accuracy": "Student Accuracy",
-        "item_word_total": "Total Words of the Item",
+        "item_word_total": "Total Item Words",
         "words_read_total": "Total Words Read",
         "correctly_read_total": "Total Words Read Correctly",
-        "true": "Right",
-        "false": "Wrong",
+        "correctly_multiple_choice_total": "Performance in Multiple Choice Questions",
+        "true": "Correct",
+        "false": "Incorrect",
+        "ai_feedback": "AI Feedback",
+        "lecture_proficiency": "Reading Proficiency",
+        "text_compreension": "Text Comprehension",
+        "critical_thinking": "Critical Thinking and Logic",
+        "communication_and_problem_solving": "Communication and Problem Solving",
+        "general_performance": "Overall Performance in Objective Questions",
+        "general_feedback": "General Feedback on Your Performance",
+        "general_performance_description": "This means you got {accuracy}% of the objective questions correct. Details below.",
+        "no_objective_questions": "This exam has no objective questions",
+        "no_ai_feedback": "This exam has no AI feedback",
+        "industry_areas": "Industry Areas",
         "buttons": {
-            "show_results": "Show Results"
+            "show_results": "View Results"
         },
         "classification": {
             "no_classification": "No Classification",
-            "pre_reader_one": "Pre-reader One",
-            "pre_reader_two": "Pre-reader Two",
-            "pre_reader_three": "Pre-reader Three",
-            "pre_reader_four": "Pre-reader Four",
-            "reader": "Beggining Reader",
-            "fluent": "Fluent Reader"
+            "pre_reader_one": "Pre-Reader One",
+            "pre_reader_two": "Pre-Reader Two",
+            "pre_reader_three": "Pre-Reader Three",
+            "pre_reader_four": "Pre-Reader Four",
+            "reader": "Beginning Reader",
+            "fluent": "Fluent Reader",
+            "low": "Low Performance",
+            "medium": "Intermediate Performance",
+            "high": "High Performance"
+        },
+        "emptyState": {
+            "title": "No Results Found",
+            "message": "Complete an exam, wait a moment, and try again.",
+            "linkText": "Back to Assessments List"
         }
     }
 }

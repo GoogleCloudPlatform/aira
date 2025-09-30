@@ -2,7 +2,7 @@ import { SCOPE_ADMIN, SCOPE_EDUCATOR, SCOPE_USER } from "./rbac";
 
 export const FIRST_ELEMENTARY_SCHOOL = '1º Ano';
 export const SECOND_ELEMENTARY_SCHOOL = '2º Ano';
-export const THIRD_ELEMENTARY_SCHOOL = '3º Ano';
+export const THIRD_ELEMENTARY_SCHOOL = '3ª Ano';
 export const FOURTH_ELEMENTARY_SCHOOL = '4º Ano';
 export const FIFTH_ELEMENTARY_SCHOOL = '5º Ano';
 export const SIXTH_ELEMENTARY_SCHOOL = '6º Ano';
@@ -30,17 +30,17 @@ export const ENUM_GRADE = [
 ];
 
 export const ENUM_GRADE_OPTIONS = [
-    { id: FIRST_ELEMENTARY_SCHOOL, name: FIRST_ELEMENTARY_SCHOOL, value: FIRST_ELEMENTARY_SCHOOL },
-    { id: SECOND_ELEMENTARY_SCHOOL, name: SECOND_ELEMENTARY_SCHOOL, value: SECOND_ELEMENTARY_SCHOOL },
-    { id: THIRD_ELEMENTARY_SCHOOL, name: THIRD_ELEMENTARY_SCHOOL, value: THIRD_ELEMENTARY_SCHOOL },
-    { id: FOURTH_ELEMENTARY_SCHOOL, name: FOURTH_ELEMENTARY_SCHOOL, value: FOURTH_ELEMENTARY_SCHOOL },
-    { id: FIFTH_ELEMENTARY_SCHOOL, name: FIFTH_ELEMENTARY_SCHOOL, value: FIFTH_ELEMENTARY_SCHOOL },
-    { id: SIXTH_ELEMENTARY_SCHOOL, name: SIXTH_ELEMENTARY_SCHOOL, value: SIXTH_ELEMENTARY_SCHOOL },
-    { id: SEVENTH_ELEMENTARY_SCHOOL, name: SEVENTH_ELEMENTARY_SCHOOL, value: SEVENTH_ELEMENTARY_SCHOOL },
-    { id: EIGHTH_ELEMENTARY_SCHOOL, name: EIGHTH_ELEMENTARY_SCHOOL, value: EIGHTH_ELEMENTARY_SCHOOL },
-    { id: NINTH_ELEMENTARY_SCHOOL, name: NINTH_ELEMENTARY_SCHOOL, value: NINTH_ELEMENTARY_SCHOOL },
-    { id: FIRST_HIGH_SCHOOL, name: FIRST_HIGH_SCHOOL, value: FIRST_HIGH_SCHOOL },
-    { id: SECOND_HIGH_SCHOOL, name: SECOND_HIGH_SCHOOL, value: SECOND_HIGH_SCHOOL },
+    // { id: FIRST_ELEMENTARY_SCHOOL, name: FIRST_ELEMENTARY_SCHOOL, value: FIRST_ELEMENTARY_SCHOOL },
+    // { id: SECOND_ELEMENTARY_SCHOOL, name: SECOND_ELEMENTARY_SCHOOL, value: SECOND_ELEMENTARY_SCHOOL },
+    // { id: THIRD_ELEMENTARY_SCHOOL, name: THIRD_ELEMENTARY_SCHOOL, value: THIRD_ELEMENTARY_SCHOOL },
+    // { id: FOURTH_ELEMENTARY_SCHOOL, name: FOURTH_ELEMENTARY_SCHOOL, value: FOURTH_ELEMENTARY_SCHOOL },
+    // { id: FIFTH_ELEMENTARY_SCHOOL, name: FIFTH_ELEMENTARY_SCHOOL, value: FIFTH_ELEMENTARY_SCHOOL },
+    // { id: SIXTH_ELEMENTARY_SCHOOL, name: SIXTH_ELEMENTARY_SCHOOL, value: SIXTH_ELEMENTARY_SCHOOL },
+    // { id: SEVENTH_ELEMENTARY_SCHOOL, name: SEVENTH_ELEMENTARY_SCHOOL, value: SEVENTH_ELEMENTARY_SCHOOL },
+    // { id: EIGHTH_ELEMENTARY_SCHOOL, name: EIGHTH_ELEMENTARY_SCHOOL, value: EIGHTH_ELEMENTARY_SCHOOL },
+    // { id: NINTH_ELEMENTARY_SCHOOL, name: NINTH_ELEMENTARY_SCHOOL, value: NINTH_ELEMENTARY_SCHOOL },
+    // { id: FIRST_HIGH_SCHOOL, name: FIRST_HIGH_SCHOOL, value: FIRST_HIGH_SCHOOL },
+    // { id: SECOND_HIGH_SCHOOL, name: SECOND_HIGH_SCHOOL, value: SECOND_HIGH_SCHOOL },
     { id: THIRD_HIGH_SCHOOL, name: THIRD_HIGH_SCHOOL, value: THIRD_HIGH_SCHOOL },
 ];
 
@@ -141,6 +141,9 @@ export const ENUM_QUESTION_TYPE_WORDS = 'words';
 export const ENUM_QUESTION_TYPE_COMPLEX_WORDS = 'complex_words';
 export const ENUM_QUESTION_TYPE_PHRASES = 'phrases';
 export const ENUM_QUESTION_TYPE_MULTIPLE_CHOICE = 'multiple_choice';
+export const ENUM_QUESTION_TYPE_LOGICAL_SITUATIONSAL_SITUATIONS = 'logical_situations';
+export const ENUM_QUESTION_TYPE_UNDERSTANDING_CHECK = 'understanding_check';
+export const ENUM_QUESTION_TYPE_SHORT_EXPLANATIONS = 'short_explanations';
 
 export const ENUM_NO_RATING = "no_classification";
 export const ENUM_FLUENT = "fluent";
@@ -151,3 +154,22 @@ export const ENUM_PRE_READER_THREE = "pre_reader_three";
 export const ENUM_PRE_READER_FOUR = "pre_reader_four";
 
 export const ENUM_ACCEPTED_FILE_TYPES = ['csv'];
+
+export enum QuestionType {
+    Words = 'words',
+    ComplexWords = 'complex_words',
+    Phrases = 'phrases',
+    MultipleChoice = 'multiple_choice',
+    LogicalSituations = 'logical_situations',
+    UnderstantindCheck = 'understanding_check',
+    ShortExplanations = 'short_explanations',
+    IndustryAreas = 'industry_areas',
+}
+
+export enum QuestionTheme {
+    FoodAndBeverages = "food_and_beverages",
+    Electronics = "electronics",
+    NonMetallicMaterials = "non_metallic_materials",
+    Telecommunications = "telecommunications",
+    SoftwareIt = "software_it",
+}

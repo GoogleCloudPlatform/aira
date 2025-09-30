@@ -7,27 +7,34 @@
             "students": "Students"
         },
         "messages": {
-            "select_student": "Select a student to take a new exam.",
-            "top_message_multiple_choice": "When you are ready, please read the text below and select the answer you think is correct",
-            "top_message": "When you are ready, please click the 'Start Recording' button and read the text below with your microphone",
-            "bottom_message": "When you finish the recording, click the 'Stop Recording' button and then 'Next'",
+            "select_student": "Select a student to start a new exam.",
+            "top_message_multiple_choice": "When ready, please read the text below and <strong>select the answer you think is correct</strong>",
+            "words_message": "When ready, please click the 'Start Recording' button and <strong>read the text below</strong> using your microphone",
+            "complex_words_message": "When ready, please click the 'Start Recording' button and <strong>read the text below</strong> using your microphone",
+            "phrases_message": "When ready, please click the 'Start Recording' button and <strong>read the text below</strong> using your microphone",
+            "multiple_choice_message": "When ready, please read the text below and <strong>select the answer you think is correct</strong>",
+            "logical_situations_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
+            "understanding_check_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
+            "short_explanations_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
+            "industry_areas_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
+            "bottom_message": "After finishing the recording, click the 'Stop Recording' button and then 'Next'",
             "success_message": "Success",
-            "audio_success_record": "your audio recordings were successful",
+            "audio_success_record": "your audios have been successfully recorded",
             "recorded_as_impersonate": "Recorded as teacher",
-            "analisys_message": "If you want to analyze a student's result, simply access the Results option in the menu and search for the name of the student you want. Once you identify the student, click on View Results and choose which assessment you want to check the result.\nIt takes about 2 minutes after an assessment is completed for the result to be available in the Results menu.",
+            "analysis_message": "Congratulations on completing the technical proficiency exam! To analyze your result, go to the Results option in the menu. It will open your last exam result; if needed, change the exam at the top left of the screen. Results will be available within 2 minutes after completion.",
             "redirecting": "Redirecting",
             "seconds": "seconds",
             "no_users_found": "No students found."
         },
         "buttons": {
             "start_exam": "Start Exam",
-            "go_to_group": "View Class",
+            "go_to_group": "View Group",
             "go_to_exams": "View Exams",
             "go_to_results": "Results",
             "stop": "Stop",
             "record": "Record",
             "next": "Next",
-            "start_again": "Start another recording session",
+            "start_again": "Start another recording flow",
             "next_student": "Next student",
             "recording_state": "Recording...",
             "stop_recording_state": "Stop Recording",
@@ -36,9 +43,9 @@
         },
         "tips": {
             "tip_test_mic": "Microphone Test.\nClick the play button below and say a few words.",
-            "tip_get_a_place": "Find a quiet place to take the test, so external interference won't disturb your recording.",
-            "tip_only_the_student": "Only the student should read the words during the recording. If someone is helping the student during the test, it is important to remain silent during the recording to avoid compromising the result.",
-            "tip_tour": "If you have any questions about how to proceed with the exam, use the help button at the bottom right corner of the screen."
+            "tip_get_a_place": "Find a quiet place to take the test so external noise does not affect your recording.",
+            "tip_only_the_student": "Only the student should read the words during the recording. If someone is helping the student, it is important to remain silent to avoid interfering with the result.",
+            "tip_tour": "If you have questions about how to proceed with the exam, use the help button in the bottom right corner of the screen."
         }
     }
 }

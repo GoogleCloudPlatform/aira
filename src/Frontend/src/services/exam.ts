@@ -109,12 +109,12 @@ export async function deleteExamById(id : string) : Promise<void> {
     });
 }
 
-export async function sendGCSUrl(user_id: string, exam_id: string, question_id: string, gcs_url : string) : Promise<void> {
+export async function sendGCSUrl(user_id: string, exam_id: string, question_id: string, gcs_url : string, type : string) : Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         try {
             gcs_url = gcs_url.split("?")[0];
             const url = `${ENDPOINT_USERS}/${user_id}/${ENDPOINT_EXAMS}/${exam_id}/${ENDPOINT_QUESTIONS}/${question_id}`;
-            await api.post(url, { url: gcs_url }).then(response => {         
+            await api.post(url, { url: gcs_url, type }).then(response => {         
                 AlertInstance.alert(ALERT_SUCCESS, 'toast.success.exam.success_sent_record');
                 resolve(response.data);
             }).catch((error: any) => {

@@ -7,27 +7,34 @@
             "students": "Estudiantes"
         },
         "messages": {
-            "select_student": "Seleccione un estudiante para realizar un nuevo examen.",
-            "top_message": "Cuando esté listo, haga clic en el botón 'Iniciar Grabación' y lea el texto a continuación con su micrófono",
-            "top_message_multiple_choice": "Cuando estés listo, por favor lee el texto a continuación y selecciona la respuesta que creas correcta",
-            "bottom_message": "Cuando termine la grabación, haga clic en el botón 'Detener Grabación' y luego en 'Siguiente'",
+            "select_student": "Seleccione un estudiante para iniciar un nuevo examen.",
+            "top_message_multiple_choice": "Cuando esté listo, por favor lea el texto a continuación y <strong>seleccione la respuesta que considere correcta</strong>",
+            "words_message": "Cuando esté listo, haga clic en el botón 'Iniciar Grabación' y <strong>lea el texto a continuación</strong> con su micrófono",
+            "complex_words_message": "Cuando esté listo, haga clic en el botón 'Iniciar Grabación' y <strong>lea el texto a continuación</strong> con su micrófono",
+            "phrases_message": "Cuando esté listo, haga clic en el botón 'Iniciar Grabación' y <strong>lea el texto a continuación</strong> con su micrófono",
+            "multiple_choice_message": "Cuando esté listo, por favor lea el texto a continuación y <strong>seleccione la respuesta que considere correcta</strong>",
+            "logical_situations_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
+            "understanding_check_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
+            "short_explanations_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
+            "industry_areas_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
+            "bottom_message": "Al finalizar la grabación, haga clic en el botón 'Detener Grabación' y luego en 'Siguiente'",
             "success_message": "Éxito",
-            "audio_success_record": "sus grabaciones de audio fueron exitosas",
+            "audio_success_record": "sus audios se han grabado correctamente",
             "recorded_as_impersonate": "Grabado como profesor",
-            "analisys_message": "Si desea analizar el resultado de un estudiante, simplemente acceda a la opción Resultados en el menú y busque el nombre del estudiante que desea. Una vez identificado el estudiante, haga clic en Ver Resultados y elija qué evaluación desea verificar el resultado.\nSe necesitan aproximadamente 2 minutos después de que se complete una evaluación para que el resultado esté disponible en el menú de Resultados.",
+            "analysis_message": "¡Felicidades por completar el examen de competencia técnica! Para analizar su resultado, acceda a la opción Resultados en el menú. Se abrirá el resultado de su último examen; si es necesario, cambie el examen en la parte superior izquierda de la pantalla. Los resultados estarán disponibles en un plazo de 2 minutos tras la finalización.",
             "redirecting": "Redirigiendo",
             "seconds": "segundos",
             "no_users_found": "No se encontraron estudiantes."
         },
         "buttons": {
             "start_exam": "Iniciar Examen",
-            "go_to_group": "Ver Clase",
+            "go_to_group": "Ver Grupo",
             "go_to_exams": "Ver Exámenes",
             "go_to_results": "Resultados",
             "stop": "Detener",
             "record": "Grabar",
             "next": "Siguiente",
-            "start_again": "Iniciar otra sesión de grabación",
+            "start_again": "Iniciar otro flujo de grabación",
             "next_student": "Siguiente estudiante",
             "recording_state": "Grabando...",
             "stop_recording_state": "Detener Grabación",
@@ -36,9 +43,9 @@
         },
         "tips": {
             "tip_test_mic": "Prueba de Micrófono.\nHaga clic en el botón de reproducción a continuación y diga algunas palabras.",
-            "tip_get_a_place": "Encuentre un lugar tranquilo para hacer la prueba, de esta manera las interferencias externas no perturbarán su grabación.",
-            "tip_only_the_student": "Solo el estudiante debe leer las palabras durante la grabación. Si alguien está ayudando al estudiante durante la prueba, es importante permanecer en silencio durante la grabación para no comprometer el resultado.",
-            "tip_tour": "Si tiene alguna duda sobre cómo proceder con el examen, use el botón de ayuda en la esquina inferior derecha de la pantalla."
+            "tip_get_a_place": "Busque un lugar tranquilo para realizar el examen, de esta manera los ruidos externos no afectarán su grabación.",
+            "tip_only_the_student": "Solo el estudiante debe leer las palabras durante la grabación. Si alguien está ayudando al estudiante, es importante permanecer en silencio para no afectar el resultado.",
+            "tip_tour": "En caso de duda sobre cómo proceder en el examen, use el botón de ayuda en la esquina inferior derecha de la pantalla."
         }
     }
 }
