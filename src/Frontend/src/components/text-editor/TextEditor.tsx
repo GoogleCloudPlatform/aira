@@ -24,26 +24,44 @@ import { FixedToolbarButtons } from '@/components/plate-ui/fixed-toolbar-buttons
 import { withPlaceholders } from '@/components/plate-ui/placeholder';
 import { TooltipProvider } from '@/components/plate-ui/tooltip';
 import { useTranslations } from 'next-intl';
-
+import { useLoading } from '@/context/loading';
+import { useState } from 'react';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { LoaderCircle, Sparkles } from 'lucide-react';
+import { useQuestions } from '@/context/questions';
+import { QuestionTheme, QuestionType } from '@/constants/enums';
 interface TextEditorProps {
     data: string
-    onChange: ( value: { data: string; formatted_data: string }) => void
+    questionType: string
+    order: number
+    preview?: boolean,
+    theme?: QuestionTheme | null
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
     data,
-    onChange
+    questionType,
+    order,
+    preview = false,
+    theme
 }) => {
     const t = useTranslations('text-editor')
-    
-    const initialValue = [
+
+    const [ key, setKey ] = useState(0)
+    const [ subject, setSubject ] = useState<string>('')
+    const [initialValue, setInitialValue] = useState<TElement[]>([
         {
             id: '1',
             type: 'p',
             align: 'left',
             children: [{ text: t('editor.write')}],
         },
-    ];
+    ]);
+    
+    const { loading } = useLoading()
+
+    const { handlePhrasesChange, handleMultipleChoiceChange, generateTextQuestion, generateMultipleChoiceQuestion, generateQuestions, useReference } = useQuestions()
     
     const saveTextPlugin = createPluginFactory({
         key: '',
@@ -55,7 +73,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
                 if (v !== i) {
                     const data = value.map((children: TElement) => children.children[0].text).join(' ').replace(/\s+/g, ' ')
                     const formatted_data = JSON.stringify(value)
-                    onChange({data, formatted_data})
+
+                    if (questionType === 'multiple_choice') {
+                        handleMultipleChoiceChange({data, formatted_data}, order)
+                    } else {
+                        handlePhrasesChange({data, formatted_data}, questionType, order)
+                    }
                 }
             },
         },
@@ -133,16 +156,86 @@ const TextEditor: React.FC<TextEditorProps> = ({
         }
     );
 
+    const handleGenerateQuestion = ()=>{
+        switch (questionType) {
+            case QuestionType.MultipleChoice:
+                return generateMultipleChoiceQuestion({ subject, order, setInitialValue, setKey, initialValue })
+            case QuestionType.Phrases:
+                return generateTextQuestion({ subject, questionType, setInitialValue, setKey, initialValue, order })
+            case QuestionType.IndustryAreas:
+                return generateQuestions({ subject, questionType, setInitialValue, setKey, initialValue, order, theme: theme as QuestionTheme })
+            default:
+                return generateQuestions({ subject, questionType, setInitialValue, setKey, initialValue, order })
+        }
+    }
+
+    const handleDisableButton = ()=>{
+        if (preview) {
+            return true
+        }
+
+        if (questionType === 'multiple_choice') {
+            return loading || (subject === '' && !useReference)
+        }
+
+        return loading || subject === ''
+    }
+
+    const disableButton = handleDisableButton()
+
     return (
-        <TooltipProvider>
-            <Plate plugins={plugins} initialValue={data.length > 0 ? data.charAt(0) === '[' && data.charAt(1) === '{' ? JSON.parse(data) : data : initialValue}>
-                <FixedToolbar>
-                    <FixedToolbarButtons />
-                </FixedToolbar>
-        
-                <Editor />
-            </Plate>
-        </TooltipProvider>
+        <>  
+            {questionType && (
+                <div className='w-full flex justify-end gap-2'>
+                    <Input 
+                        type='text' 
+                        disabled={preview} 
+                        placeholder={t('input.reference', { question_type: t(`input.${questionType}`) })} 
+                        value={subject} 
+                        onChange={(e)=> setSubject(e.target.value)} className='w-full input-no-spinner'
+                    />
+                    <Button type="button" disabled={disableButton} onClick={handleGenerateQuestion} className='flex items-center gap-2 min-w-[200px] max-w-[200px]'> 
+                        {loading ? (
+                            <>
+                                <LoaderCircle className={`animate-spin text-white`} size={20}/>
+                                {t('button.loading')}
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles size={16} /> 
+                                {t('button.generate_text')}
+                            </>
+                        )}
+                    </Button>
+                </div>
+            )}
+
+            <TooltipProvider>
+                <Plate 
+                    key={key}
+                    plugins={plugins} 
+                    initialValue={
+                        data.length > 0 
+                            ? (data.charAt(0) === '[' && data.charAt(1) === '{' 
+                                ? JSON.parse(data) 
+                                : [{
+                                    id: '1',
+                                    type: 'p',
+                                    children: [{ text: data }],
+                                }])
+                            : initialValue
+                    }
+                >   
+                    {!preview && (
+                        <FixedToolbar>
+                            <FixedToolbarButtons />
+                        </FixedToolbar>
+                    )}
+            
+                    <Editor disabled={loading || preview} />
+                </Plate>
+            </TooltipProvider>
+        </>
     );
 }
 

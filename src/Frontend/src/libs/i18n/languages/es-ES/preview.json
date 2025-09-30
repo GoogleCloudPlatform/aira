@@ -1,16 +1,21 @@
 {
     "preview": {
         "titles": {
-            "preview_title_start": "Esta es una vista previa de cómo se mostrará la pregunta de",
-            "preview_title_end": "será mostrada."
+            "preview_title_start": "Esta es una vista previa de cómo la pregunta de",
+            "preview_title_end": "se mostrará."
         },
         "questions": {
+            "question_type": "Tipo de Pregunta",
+            "logical_situations": "Situación Lógica",
+            "understanding_check": "Validación de Comprensión",
+            "short_explanations": "Explicación Corta",
             "words": "Palabras",
             "complex_words": "Palabras Complejas",
-            "phrases": "Texto Narrativo"
+            "phrases": "Texto Narrativo",
+            "multiple_choice": "Opción Múltiple"
         },
         "buttons": {
-            "preview": "Vista previa",
+            "preview": "Vista Previa",
             "previous": "Anterior",
             "next": "Siguiente",
             "close": "Cerrar"

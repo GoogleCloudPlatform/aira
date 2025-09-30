@@ -172,7 +172,7 @@ const ExamDisplay : React.FC<TExamDisplayProps> = ({ user_id, exam_id }) => {
     const { formatted_data, type } = questions[questionIndex];
 
     return (
-        <>
+        <div className="w-full">
             <RBACWrapper requiredScopes={[SCOPE_USER, SCOPE_USER_IMPERSONATE]}>
                 <LeavePageDialog 
                     open={showLeaveDialog}
@@ -202,14 +202,10 @@ const ExamDisplay : React.FC<TExamDisplayProps> = ({ user_id, exam_id }) => {
                 <article className="h-full flex overflow-y-auto [&::-webkit-scrollbar]:hidden flex-col dark:text-white text-black">
                     <section className='text-2xl w-full items-center justify-center flex flex-col gap-2' data-step={STEP_EXAM_QUESTION_INFO}>
                         <span>{t("exam.titles.question")} {questionIndex + 1} {t("exam.titles.of")} {questions.length}</span>
-                        {type === QUESTION_TYPE_MULTIPLE_CHOICE ? (
-                            <span className="text-xs sm:text-sm text-center">{t("exam.messages.top_message_multiple_choice")}</span>
-                        ) : (
-                            <span className="text-xs sm:text-sm text-center">{t("exam.messages.top_message")}</span>
-                        ) }
+                        <span className="text-xs sm:text-sm text-center max-w-[800px]" dangerouslySetInnerHTML={{ __html: t.raw(`exam.messages.${type}_message`) }} />
                     </section>
 
-                    <section className={`flex flex-col container gap-2 ${type === QUESTION_TYPE_MULTIPLE_CHOICE ? 'min-h-[300px] max-h-[300px]' : 'flex-grow'}`}>                                           
+                    <section className={`flex flex-col container gap-2 ${type === QUESTION_TYPE_MULTIPLE_CHOICE ? 'min-h-[300px] max-h-[300px]' : 'min-h-[360px] max-h-[360px]'}`}>                                           
                         <div className="w-full flex justify-end">
                             <div className="w-5 h-5 cursor-pointer" onClick={() => setExams("expanded", !expanded)} data-step={STEP_EXAM_VISOR_EXPAND}>
                                 {getIcon({ icon: expanded ? ICON_ARROWS_POINTING_IN : ICON_ARROWS_POINTING_OUT })}
@@ -267,7 +263,7 @@ const ExamDisplay : React.FC<TExamDisplayProps> = ({ user_id, exam_id }) => {
                     )}
                 </article>
             </RBACWrapper>
-        </>
+        </div>
     )
 }
 

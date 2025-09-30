@@ -12,5 +12,6 @@ export const CATEGORY_ORGANIZATIONS_UTILS = 'organizations-utils';
 export const CATEGORY_EXAMS = 'exams';
 export const CATEGORY_GROUPS = 'groups';
 export const CATEGORY_ROLES = 'roles';
+export const CATEGORY_USER_EXAMS = 'user_exams';
 
 export const VALUE_NONE = 'none';

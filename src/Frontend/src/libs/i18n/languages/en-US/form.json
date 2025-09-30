@@ -5,15 +5,28 @@
             "password": "Password",
             "confirm_password": "Confirm Password",
             "button_google_sign_in": "Sign in with Google",
-            "button_sign_in": "Sign in",
+            "button_cni_sign_in": "Sign in with my Senai account",
+            "button_sign_in": "Sign In",
             "forgot_password": "Forgot Password",
-            "reset_password": "Reset Password",
-            "button_reset_password": "Reset Password"
+            "reset_password": "Password Recovery",
+            "button_reset_password": "Recover Password",
+            "create_account": "Don't have an account? Sign up for free"
+        },
+        "signup": {
+            "register": "Sign Up",
+            "name": "Name",
+            "email_address": "Email",
+            "password": "Password",
+            "confirm_password": "Confirm Password",
+            "button_google_sign_up": "Sign up with Google",
+            "button_cni_sign_up": "Sign up with my CNI account",
+            "button_sign_up": "Sign Up",
+            "already_have_account": "Already have an account? Sign In"
         },
         "organization": {
             "create": {
                 "create_organization": "Create Schools",
-                "create_subtitle_organization": "Fill in the fields below to create a new school. All information below is required for the school to be properly registered in the system.",
+                "create_subtitle_organization": "Fill in the fields below to create a new school. All information below is required for the school to be correctly registered in the system.",
                 "name": "Name",
                 "state": "State",
                 "region": "Region",
@@ -24,15 +37,15 @@
             },
             "edit": {
                 "edit_organization": "Edit Schools",
-                "edit_subtitle_organization": "Update the fields below to edit the school's information. Modify only the necessary fields and ensure all information is correct before saving changes.",
+                "edit_subtitle_organization": "Update the fields below to edit the school information. Modify only the necessary fields and make sure all information is correct before saving the changes.",
                 "id": "ID",
                 "name": "Name",
                 "state": "State",
                 "region": "Region",
                 "city": "City",
                 "county": "County",
-                "created_at": "Created at",
-                "updated_at": "Updated at",
+                "created_at": "Created At",
+                "updated_at": "Updated At",
                 "confirm": "Confirm",
                 "loading": "Loading ..."
             },
@@ -45,7 +58,7 @@
             },
             "import": {
                 "import_organization": "Import School",
-                "import_subtitle_organization": "To import schools, upload a CSV file with the fields below. We recommend using the provided template. If you have created a new spreadsheet, you need to map the name of each column with the corresponding field below.",
+                "import_subtitle_organization": "To import schools, upload a CSV file with the fields below. We recommend using the provided template. If you created a new spreadsheet, you must map each column name with the respective field below.",
                 "file": "File",
                 "keys_relation": "Key Relation",
                 "customer_id": "Customer ID",
@@ -63,7 +76,7 @@
         "group": {
             "create": {
                 "create_group": "Create Class",
-                "create_subtitle_group": "Fill in the fields below to create a new class. All information below is required for the class to be properly registered in the system.",
+                "create_subtitle_group": "Fill in the fields below to create a new class. All information below is required for the class to be correctly registered in the system.",
                 "name": "Name",
                 "grade": "Grade",
                 "shift": "Shift",
@@ -71,13 +84,13 @@
                 "morning": "Morning",
                 "evening": "Afternoon",
                 "night": "Night",
-                "allday": "Full-time",
+                "allday": "All Day",
                 "confirm": "Confirm",
                 "loading": "Loading ..."
             },
             "edit": {
                 "edit_group": "Edit Class",
-                "edit_subtitle_group": "Update the fields below to edit the class information. Make sure all data is correct before saving changes.",
+                "edit_subtitle_group": "Update the fields below to edit the class information. Check all data and make the necessary changes before saving.",
                 "id": "ID",
                 "name": "Name",
                 "grade": "Grade",
@@ -86,13 +99,13 @@
                 "morning": "Morning",
                 "evening": "Afternoon",
                 "night": "Night",
-                "allday": "Full-time",
                 "confirm": "Confirm",
+                "allday": "All Day",
                 "loading": "Loading ..."
             },
             "import": {
                 "import_group": "Import Class",
-                "import_subtitle_group": "To import classes, upload a CSV file with the fields below. We recommend using the provided template. If you have created a new spreadsheet, you need to map the name of each column with the corresponding field below.",
+                "import_subtitle_group": "To import classes, upload a CSV file with the fields below. We recommend using the provided template. If you created a new spreadsheet, you must map each column name with the respective field below.",
                 "file": "File",
                 "keys_relation": "Key Relation",
                 "customer_id": "Customer ID",
@@ -117,11 +130,15 @@
             "questions": "Questions",
             "words": "Words",
             "complex_words": "Complex Words",
-            "phrases": "Complex Words",
             "multiple_choice": "Multiple Choice",
+            "phrases": "Narrative Text",
+            "question_type": "Question Type",
+            "logical_situations": "Logical Situation",
+            "understanding_check": "Understanding Check",
+            "short_explanations": "Short Explanation",
             "add_question": "Add Question",
             "add_answer": "Add Answer",
-            "answer_placeholder": "Enter an answer for the question",
+            "answer_placeholder": "Type an answer for the question",
             "answer": "Answer",
             "answers": "Answers",
             "confirm": "Confirm",
@@ -131,13 +148,30 @@
             "delete_question_title": "Delete Question",
             "delete_question_description": "This action will remove the question and cannot be undone.",
             "delete_confirm": "Delete Question",
+            "generate_words": "Generate Words",
+            "loading": "Generating ...",
+            "quantity": "Number of Words",
+            "use_reference": "Use text reference",
+            "question_dialog_description": "Question editor {order} of type {type}",
+            "dont_use_reference": "Don't use text reference",
+            "add_proficiency_questions": "Add Reading Proficiency Questions",
+            "select_question_type": "Select a question type to start creating the assessment",
+            "proficiency": "Reading Proficiency",
+            "food_and_beverages": "Food and Beverages",
+            "electronics": "Electronics",
+            "non_metallic_materials": "Non-metallic Materials",
+            "telecommunications": "Telecommunications",
+            "software_it": "Software and Information Technology",
+            "industry_areas": "Industry Areas",
+            "theme": "Theme",
             "create": {
-                "title": "Create Evaluation",
-                "subtitle": "Fill in the fields below to create a new evaluation. All information below is required for the evaluation to be properly created in the system.",
+                "title": "Create Assessment",
+                "subtitle": "Fill in the fields below to create a new assessment. All information below is required for the assessment to be correctly created in the system.",
                 "name": "Name",
                 "questions": "Questions",
                 "words": "Words",
                 "complex_words": "Complex Words",
+                "multiple_choice": "Multiple Choice",
                 "phrases": "Narrative Text",
                 "grade": "Grade",
                 "start_date": "Start Date",
@@ -148,17 +182,26 @@
                 "hours": "Hours",
                 "minutes": "Minutes",
                 "seconds": "Seconds",
-                "loading": "Loading ..."
+                "loading": "Loading ...",
+                "question_type": "Question Type",
+                "logical_situations": "Logical Situation",
+                "understanding_check": "Understanding Check",
+                "short_explanations": "Short Explanation"
             },
             "edit": {
-                "title": "Edit Evaluation",
-                "subtitle": "Update the fields below to edit the evaluation information. Make sure all data is correct before saving changes.",
+                "question_type": "Question Type",
+                "logical_situations": "Logical Situation",
+                "understanding_check": "Understanding Check",
+                "short_explanations": "Short Explanation",
+                "title": "Edit Assessment",
+                "subtitle": "Update the fields below to edit the assessment information. Check all data and make the necessary changes before saving.",
                 "id": "ID",
                 "name": "Name",
                 "questions": "Questions",
                 "words": "Words",
                 "complex_words": "Complex Words",
                 "phrases": "Narrative Text",
+                "multiple_choice": "Multiple Choice",
                 "grade": "Grade",
                 "start_date": "Start Date",
                 "end_date": "End Date",
@@ -167,16 +210,20 @@
                 "loading": "Loading ..."
             },
             "preview": {
-                "title": "Preview Evaluation",
-                "subtitle": "Click on each question below to preview them, or click on Preview to see how the questions will be displayed to students during the evaluation."
+                "question_type": "Question Type",
+                "logical_situations": "Logical Situation",
+                "understanding_check": "Understanding Check",
+                "short_explanations": "Short Explanation",
+                "title": "Preview Assessment",
+                "subtitle": "Click on each question below to view them, or click on Preview to see how the questions will be displayed to students during the assessment"
             }
         },
         "user": {
             "create": {
                 "create_user": "Create User",
-                "create_subtitle_user": "Fill in the fields below to create a new user. All information below is required to properly register the user in the system.",
+                "create_subtitle_user": "Fill in the fields below to create a new user. All information below is required to correctly register the user in the system.",
                 "type": "Account Type",
-                "google_signin": "Google Account",
+                "google_signin": "Senai IDP Account",
                 "with_password": "Password Account",
                 "name": "Name",
                 "email_address": "Email",
@@ -204,7 +251,7 @@
                 "organizations": "Schools",
                 "groups": "Classes",
                 "type": "Account Type",
-                "google_signin": "Google Account",
+                "google_signin": "Senai IDP Account",
                 "with_password": "Password Account",
                 "state": "State",
                 "region": "Region",
@@ -215,7 +262,7 @@
             },
             "import": {
                 "import_user": "Import User",
-                "import_subtitle_user": "To import users, upload a CSV file with the fields below. We recommend using the provided template. If you have created a new spreadsheet, you need to map the name of each column with the corresponding field below.",
+                "import_subtitle_user": "To import users, upload a CSV file with the fields below. We recommend using the provided template. If you created a new spreadsheet, you must map each column name with the respective field below.",
                 "file": "File",
                 "keys_relation": "Key Relation",
                 "customer_id": "Customer ID",
@@ -242,9 +289,9 @@
             }
         },
         "multiple_choice": {
-            "title" : "Multiple Choice",
-            "submit" : "Submit Answer",
-            "options" : "Options"
+            "title": "Multiple Choice",
+            "submit": "Submit Answer",
+            "options": "Options"
         }
     }
 }

@@ -3,11 +3,15 @@
         "editor": {
             "write": "Type your text here...",
             "title": "Title",
-            "words": "Words",
+            "words": "Simple Words",
             "complex_words": "Complex Words",
             "phrases": "Narrative Text",
             "multiple_choice": "Multiple Choice",
-            "total": "Total"
+            "total": "Total",
+            "logical_situations": "Logical Situation",
+            "understanding_check": "Understanding Check",
+            "short_explanations": "Short Explanation",
+            "industry_areas": "Industry Areas"
         },
         "heading": {
             "size": "Size",
@@ -17,7 +21,7 @@
             "h3": "Heading 3",
             "quote": "Quote",
             "quote-description": "Quote (Ctrl+⇧+.)",
-            "ul": "Bullet List",
+            "ul": "Bulleted List",
             "ol": "Numbered List"
         },
         "toolbar": {
@@ -32,6 +36,22 @@
         "placeholder": {
             "write": "Type your text here...",
             "title": "Title"
+        },
+        "button": {
+            "generate_text": "Generate",
+            "loading": "Loading..."
+        },
+        "input": {
+            "reference": "Insert here the theme of the {question_type} question",
+            "text": "multiple choice",
+            "words": "words",
+            "complex_words": "complex words",
+            "phrases": "narrative text",
+            "multiple_choice": "multiple choice",
+            "logical_situations": "logical situation",
+            "understanding_check": "understanding check",
+            "short_explanations": "short explanation",
+            "industry_areas": "industry areas"
         }
     }
 }

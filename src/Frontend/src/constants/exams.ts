@@ -4,6 +4,9 @@ export const QUESTION_TYPE_WORDS = 'words';
 export const QUESTION_TYPE_COMPLEX_WORDS = 'complex_words';
 export const QUESTION_TYPE_PHRASES = 'phrases';
 export const QUESTION_TYPE_MULTIPLE_CHOICE = 'multiple_choice';
+export const QUESTION_TYPE_LOGICAL_SITUATIONS = 'logical_situations';
+export const QUESTION_TYPE_UNDERSTANDING_CHECK = 'understanding_check';
+export const QUESTION_TYPE_SHORT_EXPLANATIONS = 'short_explanations';
 
 export const MAX_RECORD_SECONDS = 60;
 
