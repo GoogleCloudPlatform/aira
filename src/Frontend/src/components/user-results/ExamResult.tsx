@@ -344,7 +344,7 @@ const ExamResult : React.FC<TExamResult> = ({ exam_id, user_id }) => {
             </div>
 
             <Tabs defaultValue={`${proficiency ? 'lecture_proficiency' : textComprehensionQuestionsCount > 0 ? 'text_compreension' : criticalThinkingQuestionsCount > 0 ? 'critical_thinking' : communicationAndProblemSolvingQuestionsCount > 0 ? 'communication_and_problem_solving' : industryAreaQuestionsCount > 0 ? 'industry_areas' : ''}`} className="w-full">
-                <TabsList className="bg-slate-100 dark:bg-slate-900 rounded-lg p-1 w-full justify-start">
+                <TabsList className="bg-slate-100 dark:bg-slate-900 text-black dark:text-white rounded-lg p-1 w-full justify-start">
                     {proficiency ? (
                         <TabsTrigger value="lecture_proficiency" className="w-[20%] lg:w-auto">
                             <span className="truncate">{t('results.lecture_proficiency')}</span>
