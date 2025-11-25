@@ -25,6 +25,8 @@ import { useLoading } from "@/context/loading";
 import FormQuestions from "./FormQuestions";
 import { SchemaCreateExam, SchemaCreateExamDefaultValues } from "./schema";
 import { useQuestions } from "@/context/questions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ENUM_GRADE_OPTIONS } from "@/constants/enums";
 
 const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
     const [startDate, setStartDate] = useState<Date>(new Date());
@@ -126,39 +128,39 @@ const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
             )
         }
 
-        // if (fieldName === 'grade') {
-        //     return (
-        //         <FormField
-        //             control={form.control}
-        //             name={fieldName as any}
-        //             render={({ field }) => (
-        //                 <FormItem className="space-y-2">
-        //                     <FormLabel>{t(`form.exam.create.${field.name}`)}</FormLabel>
-        //                     <Select
-        //                         onValueChange={field.onChange}
-        //                         defaultValue={field.value}
-        //                         value={field.value}
-        //                         disabled={field.disabled}
-        //                     >
-        //                         <FormControl>
-        //                             <SelectTrigger>
-        //                                 <SelectValue placeholder={t(`form.exam.create.${field.name}`)} />
-        //                             </SelectTrigger>
-        //                         </FormControl>
-        //                         <SelectContent>
-        //                             {ENUM_GRADE_OPTIONS.map((option, index) => (
-        //                                 <SelectItem key={index} value={option.value}>
-        //                                     {option.name}
-        //                                 </SelectItem>
-        //                             ))}
-        //                         </SelectContent>
-        //                     </Select>
-        //                     <FormMessage />
-        //                 </FormItem>
-        //             )}
-        //         />
-        //     )  
-        // }
+        if (fieldName === 'grade') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.exam.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={t(`form.exam.create.${field.name}`)} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {ENUM_GRADE_OPTIONS.map((option, index) => (
+                                        <SelectItem key={index} value={option.value}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )  
+        }
 
         if (['start_date', 'end_date'].includes(fieldName)) {
             return (
