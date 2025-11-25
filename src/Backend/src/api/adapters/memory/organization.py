@@ -118,12 +118,15 @@ class ListOrganizations(ports.ListOrganizations):
         page_size: int = 10,
         page: int = 1,
         query: str | None = None,
+        name: str | None = None,
     ) -> tuple[list[models.Organization], typings.PaginationMetadata]:
         """
         Method to list all orgs.
         """
         items = self._items
         self.called += 1
+        if name:
+            items = [item for item in items if item.name == name]
         if city:
             items = [item for item in items if item.city == city]
         if organizations:

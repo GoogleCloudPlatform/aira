@@ -67,7 +67,22 @@ class EngineSQLAlchemy(injector.Module):
         """
         Provides sqlalchemy engine.
         """
-        return sqlalchemy_aio.create_async_engine(settings.get("database_uri", ""))
+        return sqlalchemy_aio.create_async_engine(
+            url=settings.get("database_uri", ""),
+            echo=False,
+            pool_timeout=60,
+            pool_pre_ping=True,
+            pool_recycle=-1,
+            max_overflow=20,
+            pool_size=15,
+            future=True,
+            connect_args={
+                "server_settings": {
+                    "application_name": "stt-exams",
+                    "idle_in_transaction_session_timeout": "10min",
+                },
+            },
+        )
 
 
 class EngineTestSQLAlchemy(injector.Module):
@@ -428,6 +443,16 @@ class GoogleModule(injector.Module):
 
     @injector.provider
     @injector.singleton
+    def provide_generative_ai(self, settings: Settings) -> ports.GenAI:
+        """
+        Provide the Generative AI.
+        """
+        return google.GenerativeAI(
+            api_key=settings.get("gemini_api_key", ""),
+        )
+
+    @injector.provider
+    @injector.singleton
     def provide_cloud_storage(self, settings: Settings) -> ports.Storage:
         """
         Provide the Cloud Storage.
@@ -518,6 +543,16 @@ class InternetlessModule(injector.Module):
     """
     Google module.
     """
+
+    @injector.provider
+    @injector.singleton
+    def provide_generative_ai(self, settings: Settings) -> ports.GenAI:
+        """
+        Provide the Generative AI.
+        """
+        return google.GenerativeAI(
+            api_key=settings.get("gemini_api_key", ""),
+        )
 
     @injector.provider
     @injector.singleton

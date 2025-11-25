@@ -18,7 +18,7 @@
 
 resource "google_storage_bucket" "bucket_audio" {
   name          = "${var.project_id}-store-audio"
-  location      = "US-EAST1"
+  location      = var.region
   force_destroy = true
   project = var.project_id
   public_access_prevention = "enforced"
@@ -66,12 +66,15 @@ resource "google_storage_bucket_iam_binding" "backend_objectAdmin" {
 
 resource "google_storage_bucket" "bucket_files" {
   name          = "${var.project_id}-store-public-files"
-  location      = "US-EAST1"
+  location      = var.region
   force_destroy = true
   project = var.project_id
   public_access_prevention = "inherited"
   storage_class = "STANDARD"
   uniform_bucket_level_access = false
+  depends_on = [
+    google_project_service.project
+  ]
 
 }
 

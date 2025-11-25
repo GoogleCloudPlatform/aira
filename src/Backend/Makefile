@@ -9,11 +9,12 @@ build:
 		--no-compress \
 		--strip-pex-env \
 		--find-links=dist \
-		--script="uvicorn" \
+		--script="gunicorn" \
 		--sources-directory=src \
 		--output-file=dist/stt.pex \
 		--inject-arg="api.asgi:app" \
 		--inject-env="_GIT_SHA=$(shell git rev-parse HEAD)" \
+		--inject-arg="--worker-class=uvicorn.workers.UvicornWorker" \
 		--requirement=dist/requirements.txt
 	rm dist/*.whl
 

@@ -291,3 +291,29 @@ class CantEditExam(BaseError):
             "message": "Can't edit exam after start date.",
             "code": "cant_edit_after_start_date",
         }
+
+
+class UserAlreadyExists(BaseError):
+    """
+    Error raised when editing an exam that is already in progress.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 409,
+            "message": "User already exists.",
+            "code": "user_already_exists",
+        }
+
+
+class InvalidEmail(BaseError):
+    """
+    Error raised when editing an exam that is already in progress.
+    """
+
+    def __init__(self) -> None:
+        self.output = {
+            "status_code": 400,
+            "message": "Invalid email.",
+            "code": "invalid_email",
+        }

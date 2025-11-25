@@ -16,7 +16,7 @@
 
 resource "google_artifact_registry_repository" "app-stt" {
   project = var.project_id  
-  location      = "us-east1"
+  location      = var.region
   repository_id = "app-stt"
   description   = "Docker repository from app-stt"
   format        = "DOCKER"

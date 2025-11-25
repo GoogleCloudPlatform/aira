@@ -16,5 +16,4 @@ def healthz() -> fastapi.Response:
     """
     Health check to see if it's able to receive more transactions.
     """
-    logger.info("teste")
     return fastapi.Response(status_code=200, content="OK")

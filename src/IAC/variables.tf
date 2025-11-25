@@ -24,7 +24,11 @@ variable "project_number" {
   default = "PROJECT_NUMBER"
 }
 
-
+variable "region" {
+  description = "The region to host the resources"
+  type        = string
+  default     = "southamerica-east1"
+}
 
 ### The variables below need to be changed after uploading Frontend and Backend in Cloud Run. ###
 

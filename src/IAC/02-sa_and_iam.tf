@@ -46,6 +46,9 @@ resource "google_service_account" "service_account_gcs" {
 resource "google_service_account_key" "service_account_gcs" {
   service_account_id = google_service_account.service_account_gcs.name
   public_key_type    = "TYPE_X509_PEM_FILE"
+  depends_on = [
+    google_project_service.project
+  ]
 }
 
 
@@ -59,6 +62,15 @@ resource "google_service_account" "service_account_looker" {
 }
 
 
+resource "google_service_account" "service_account_cloud_build" {
+  account_id   = "sa-${var.project_number}-cloudbuild"
+  display_name = "Service Account for cloudbuild"
+  project = var.project_id
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
 ## Giving IAM Roles for the Service Accounts ##
 
 resource "google_project_iam_member" "service_account_backend_role" {
@@ -67,15 +79,18 @@ resource "google_project_iam_member" "service_account_backend_role" {
   for_each = toset(["roles/speech.admin","roles/secretmanager.secretAccessor","roles/firebaseauth.admin","roles/iam.serviceAccountTokenCreator","roles/bigquery.dataViewer","roles/bigquery.dataOwner","roles/pubsub.publisher","roles/cloudtrace.agent"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_backend.email}"
+  depends_on = [
+    google_project_service.project
+  ]
 }
 
 
 resource "google_project_iam_member" "service_account_cloud_build" {
   project = var.project_id
   provider = google-beta
-  for_each = toset(["roles/run.admin","roles/secretmanager.secretAccessor","roles/iam.serviceAccountUser"])
+  for_each = toset(["roles/run.admin","roles/secretmanager.secretAccessor","roles/iam.serviceAccountUser","roles/storage.objectViewer","roles/logging.logWriter","roles/artifactregistry.writer","roles/cloudbuild.builds.editor"])
   role    = each.key
-  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${google_service_account.service_account_cloud_build.email}"
   depends_on = [
     google_project_service.project
   ]
@@ -88,6 +103,9 @@ resource "google_project_iam_member" "service_account_frontend_role" {
   for_each = toset(["roles/secretmanager.secretAccessor"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_frontend.email}"
+  depends_on = [
+    google_project_service.project
+  ]
 }
 
 resource "google_project_iam_member" "service_account_gcs" {
@@ -96,6 +114,9 @@ resource "google_project_iam_member" "service_account_gcs" {
   for_each = toset(["roles/iam.serviceAccountTokenCreator"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_gcs.email}"
+  depends_on = [
+    google_project_service.project
+  ]
 }
 
 
@@ -105,4 +126,7 @@ resource "google_project_iam_member" "service_account_looker" {
   for_each = toset(["roles/bigquery.jobUser","roles/bigquery.dataViewer"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_looker.email}"
+  depends_on = [
+    google_project_service.project
+  ]
 }
