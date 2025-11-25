@@ -18,8 +18,11 @@ class Group(pydantic.BaseModel):
     """
 
     id: uuid.UUID
-    customer_id: str | None
     name: str
+    grade: models.Grades
+    shift: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         """
@@ -34,11 +37,32 @@ class GroupGet(Group):
     Schema related to the Group.
     """
 
-    grade: models.Grades
-    shift: str
+    customer_id: str | None
     organization: schemas.Organization
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+
+
+class OrgList(pydantic.BaseModel):
+    """
+    Schema related to the organization request.
+    """
+
+    id: uuid.UUID
+    name: str
+
+    class Config:
+        """
+        Pydantic's config.
+        """
+
+        orm_mode = True
+
+
+class GroupList(Group):
+    """
+    Schema related to the Group.
+    """
+
+    organization: OrgList
 
 
 class GroupCreate(pydantic.BaseModel):
@@ -66,7 +90,7 @@ class GroupsList(pydantic.BaseModel):
     Schema related to the groups request.
     """
 
-    items: list[GroupGet]
+    items: list[GroupList]
     pages: int
     current_page: int
     total: int

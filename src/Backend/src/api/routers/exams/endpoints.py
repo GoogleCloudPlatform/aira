@@ -90,7 +90,7 @@ async def get(
 
 @router.get(
     "/{exam_id}/users/{user_id}",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["exam.list"])],
+    dependencies=[fastapi.Security(auth.get_token, scopes=["exam.list", "user"])],
 )
 async def get_user_exam(
     get_user_exam: ports.GetUsersExamDetails = fastapi_injector.Injected(
@@ -99,6 +99,10 @@ async def get_user_exam(
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
     exam_id: uuid.UUID = fastapi.Path(...),
     user_id: uuid.UUID = fastapi.Path(...),
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
 ) -> schemas.ExamWithQuestionsDataGet:
     """
     Get exams.
@@ -126,6 +130,15 @@ async def get_user_exam(
             question["response"]["audio_url"] = signed_audio_url
     exam_dict["questions"] = sorted(questions, key=lambda x: x["order"])
 
+    async with uow_builder() as uow:
+        exam_user = await uow.exam_user_repository.get(exam_id=exam_id, user_id=user_id)
+        if not exam_user.ai_exam_feedback:
+            exam_feedback = gen_ai.get_exam_feedback(questions)
+            exam_user.ai_exam_feedback = exam_feedback
+
+        exam_dict["ai_exam_feedback"] = exam_user.ai_exam_feedback
+        await uow.commit()
+
     return schemas.ExamWithQuestionsDataGet(**exam_dict)
 
 
@@ -140,6 +153,9 @@ async def create(
     settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
     body: schemas.ExamCreate = fastapi.Body(...),
+    publisher: ports.MessagePublisher = fastapi_injector.Injected(
+        ports.MessagePublisher
+    ),
 ) -> schemas.ExamGet:
     """
     Create exams.
@@ -164,6 +180,8 @@ async def create(
                     phrase_id=phrase_id,
                     type=question.type,
                     order=question.order,
+                    answers=question.answers,
+                    theme=question.theme,
                 )
             )
         exam = models.Exam(
@@ -175,6 +193,11 @@ async def create(
         )
         exam_model = await uow.exam_repository.create(exam)
         await uow.commit()
+
+        await publisher.publish(
+            schemas.SendEmailMessage(grade=body.grade),
+            topic=settings.get("pubsub_send_email_topic"),
+        )
     return schemas.ExamGet.from_orm(exam_model)
 
 
@@ -222,6 +245,8 @@ async def update_exam(
                     phrase_id=phrase_id,
                     type=question.type,
                     order=question.order,
+                    answers=question.answers,
+                    theme=question.theme,
                 )
             )
         for k, v in body_data.items():

@@ -1,0 +1,166 @@
+version: "3.9"
+services:
+  reverse-proxy:
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile-local
+      target: builder
+    image: stt-exams
+    platform: linux/amd64
+    container_name: cni-stt-exams_api
+    ports:
+      - "8000:8080"
+    volumes:
+      - ./src:/app/src
+      - ./main.py:/app/main.py
+      - ./fixture.py:/app/fixture.py
+      - ./poetry.lock:/app/poetry.lock
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./migrations:/app/migrations
+      - ./tests:/app/tests
+      - ./chroma_data:/app/chroma_data
+    environment:
+      _GCP_STORAGE_CREDENTIALS: ${_GCP_STORAGE_CREDENTIALS:-service-full.json}
+      _GCP_STT_CREDENTIALS: ${_GCP_STT_CREDENTIALS:-service-full.json}
+      _PROJECT_ID: ${_PROJECT_ID:-rad-stt-dev}
+      _GCP_SM_CREDENTIALS: ${_GCP_SM_CREDENTIALS:-service-full.json}
+      _GCP_BUCKET_CREDENTIALS: ${_GCP_BUCKET_CREDENTIALS:-service-full.json}
+      _GCP_BIGQUERY_CREDENTIALS: ${_GCP_BIGQUERY_CREDENTIALS:-service-full.json}
+      _GCP_FB_CREDENTIALS: ${_GCP_FB_CREDENTIALS:-service-full.json}
+      _DATABASE_URI: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      _PUBSUB_TOPIC: ${_PUBSUB_TOPIC:-processor-queue}
+      _PUBSUB_CONVERT_TOPIC: ${_PUBSUB_CONVERT_TOPIC:-conversion-queue}
+      _PUBSUB_DELETE_USER_TOPIC: ${_PUBSUB_DELETE_USER_TOPIC:-delete-looker-user-queue}
+      _PUBSUB_SEND_EMAIL_TOPIC: ${_PUBSUB_SEND_EMAIL_TOPIC:-send-email-queue}
+      _DATABASE_TEST_URI: postgresql+asyncpg://postgres:postgres@db-test:5432/postgres
+      _BUCKET_PATH: ${_BUCKET_PATH:-rad-stt-dev-store-audio}
+      _BQ_TABLE_NAME: ${_BQ_TABLE_NAME:-student_results}
+      _BQ_DATASET: ${_BQ_DATASET:-dataset_lia}
+      _LOOKER_HOST: ${_LOOKER_HOST}
+      _LOG_LEVEL: ${_LOG_LEVEL:-DEBUG}
+      _LOOKER_SECRET: ${_LOOKER_SECRET}
+      _ORIGIN: ${_ORIGIN:-http://dev.localhost}
+      _ENV: ${_ENV:-local}
+      _EXPORT_TO: ${_EXPORT_TO:-console}
+      PUBSUB_EMULATOR_HOST: "dns:///pubsub:8085"
+      _SENDGRID_KEY: ${_SENDGRID_KEY}
+      _BASE_URL: ${_BASE_URL:-http://localhost:8080}
+      _FRONT_BASE_URL: ${_FRONT_BASE_URL:-http://localhost:3000}
+      _FORGOT_PW_TEMPLATE: ${_FORGOT_PW_TEMPLATE}
+      _SENDER_EMAIL: support@radhark.tech
+      STORAGE_EMULATOR_HOST: ${STORAGE_EMULATOR_HOST}
+      LOOKERSDK_BASE_URL: ${LOOKERSDK_BASE_URL}
+      LOOKERSDK_CLIENT_ID: ${LOOKERSDK_CLIENT_ID}
+      LOOKERSDK_CLIENT_SECRET: ${LOOKERSDK_CLIENT_SECRET}
+      _SEDUC_TOKEN: ${_SEDUC_TOKEN}
+      _GEMINI_API_KEY: ${_GEMINI_API_KEY}
+      _SMTP_SERVER: ${_SMTP_SERVER}
+      _SMTP_USER: ${_SMTP_USER}
+      _SMTP_PASSWORD: ${_SMTP_PASSWORD}
+      _EMAIL_FROM: ${_EMAIL_FROM}
+      _SMTP_PORT: ${_SMTP_PORT}
+    command: make migrate fixture server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.stt-api.rule=Host(`api.dev.localhost`)"
+      - "traefik.http.services.stt-api.loadbalancer.server.port=8080"
+    depends_on:
+      - db
+
+  storage:
+    image: oittaa/gcp-storage-emulator:latest
+    command: start --host=storage --port=9023 --default-bucket=rad-stt-dev-store-audio
+    restart: unless-stopped
+    ports:
+      - 9023:9023
+    volumes:
+      - ./cloudstorage:/storage
+    profiles:
+      - storage
+  
+  frontend:
+    image: us-east1-docker.pkg.dev/rad-stt-dev/app-stt/frontend:54861f1
+    environment:
+      API_URL: http://api.dev.localhost/api/v1/
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_APP_ID: ${FIREBASE_APP_ID}
+      LOOKER: ${LOOKER}
+      LOOKER_GENERAL_DASHBOARD_ID: 1
+      LOOKER_LEARNERS_DASHBOARD_ID: 2
+    depends_on:
+      - api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`dev.localhost`)"
+    profiles:
+      - frontend
+
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: postgres
+
+  db-test:
+    image: postgres:14
+    ports:
+      - 5433:5432
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: postgres
+
+  pubsub:
+    image: us-east1-docker.pkg.dev/rad-stt-dev/pubsub-emulator/pubsub-emulator:1.0.1
+    platform: linux/amd64
+    ports:
+      - 8085:8085
+    environment:
+      PUBSUB_PROJECT_ID: ${_PROJECT_ID:-rad-dev-poc}
+      PUBSUB_CONFIG: |
+        [
+          {
+            "name": "processor-queue",
+            "subscriptions": [
+              {"id": "process-api", "endpoint": "http://host.docker.internal:8000/api/v1/processor/_handle"}
+            ]
+          },
+          {
+            "name": "conversion-queue",
+            "subscriptions": [
+              {"id": "convert-api", "endpoint": "http://host.docker.internal:8000/api/v1/processor/convert/_handle"}
+            ]
+          },
+          {
+            "name": "delete-looker-user-queue",
+            "subscriptions": [
+              {"id": "delete-looker-user-api", "endpoint": "http://host.docker.internal:8000/api/v1/auth/user/looker/_handle"}
+            ]
+          },
+          {
+            "name": "send-email-queue",
+            "subscriptions": [
+              {"id": "send-email-api", "endpoint": "http://host.docker.internal:8000/api/v1/processor/email/_handle"}
+            ]
+          }
+        ]
+
+networks:
+  default:
+    name: stt-api

@@ -3,6 +3,7 @@ Module related to the port of exam data.
 """
 
 import abc
+import dataclasses
 import typing
 import uuid
 
@@ -170,13 +171,25 @@ class ListQuestionsWithStatus(abc.ABC):
     Query to list all questions.
     """
 
+    @dataclasses.dataclass
+    class Result:
+        id: uuid.UUID
+        data: str
+        formatted_data: str
+        name: str
+        type: models.QuestionType
+        theme: models.QuestionTheme | None
+        status: models.ExamStatus | None
+        order: int
+        answers: dict[str, typing.Any] | None
+
     @abc.abstractmethod
     async def __call__(
         self,
         user_id: uuid.UUID,
         group_id: uuid.UUID,
         exam_id: uuid.UUID,
-    ) -> list[tuple[models.Question, models.ExamUserQuestion | None]]:
+    ) -> list[Result]:
         """
         Method to list all questions.
         """
@@ -227,4 +240,64 @@ class GetExamUserStatus(abc.ABC):
     ) -> models.ExamUser | None:
         """
         Method to get a pending question.
+        """
+
+
+class ExamUserRepository(abc.ABC):
+    """
+    ExamUser repository implementation that returns exam data.
+    """
+
+    @abc.abstractmethod
+    async def get(self, exam_id: uuid.UUID, user_id: uuid.UUID) -> models.ExamUser:
+        """
+        Returns the model data.
+        """
+
+    @abc.abstractmethod
+    async def create(
+        self,
+        exam_model: models.ExamUser,
+    ) -> models.ExamUser:
+        """
+        Creates and return the exam model.
+        :param exam_model: the exam model parameter.
+        """
+
+    @abc.abstractmethod
+    async def delete(self, exam_model: models.ExamUser) -> None:
+        """
+        Method to delete a exam.
+        :param exam_model: the exam model parameter.
+        """
+
+
+class ExamUserQuestionRepository(abc.ABC):
+    """
+    ExamUserQuestion repository implementation that returns exam data.
+    """
+
+    @abc.abstractmethod
+    async def get(
+        self, exam_id: uuid.UUID, user_id: uuid.UUID, question_id: uuid.UUID
+    ) -> models.ExamUserQuestion:
+        """
+        Returns the model data.
+        """
+
+    @abc.abstractmethod
+    async def create(
+        self,
+        exam_model: models.ExamUserQuestion,
+    ) -> models.ExamUserQuestion:
+        """
+        Creates and return the exam model.
+        :param exam_model: the exam model parameter.
+        """
+
+    @abc.abstractmethod
+    async def delete(self, exam_model: models.ExamUserQuestion) -> None:
+        """
+        Method to delete a exam.
+        :param exam_model: the exam model parameter.
         """

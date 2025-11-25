@@ -15,7 +15,7 @@ import fastapi_injector
 from passlib import context
 
 from api import dependencies, errors, models, ports, typings
-from api.helpers import auth, data
+from api.helpers import auth, data, util
 from api.helpers import session_manager as sess_mg
 from api.helpers.schemas import AnalyticalResult as UserResult
 from api.helpers.schemas import ImportData, ListSchema
@@ -157,7 +157,7 @@ async def list_resources(
 
 @router.get(
     "/exams",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["user.list"])],
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "user.list"])],
 )
 async def list_resources_with_exams(
     groups: list[uuid.UUID] | None = fastapi.Query(default=None),
@@ -338,11 +338,86 @@ async def create(
     return schemas.UserGet.from_orm(user_model)
 
 
+@router.post("/signup")
+async def signup(
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+    body: schemas.SignupUserCreate = fastapi.Body(...),
+    list_groups: ports.ListGroupsWithoutOrg = fastapi_injector.Injected(
+        ports.ListGroupsWithoutOrg
+    ),
+    list_organizations: ports.ListOrganizations = fastapi_injector.Injected(
+        ports.ListOrganizations
+    ),
+    hash_ctx: context.CryptContext = fastapi_injector.Injected(context.CryptContext),
+) -> schemas.UserGet:
+    """
+    Create user.
+
+    Handles requests related to creating a specific user.
+
+    :param uow_builder: implementation user get query.
+    :param body: parsed data for user creation.
+    """
+    async with uow_builder() as uow:
+        try:
+            await uow.user_repository.get(email=body.email_address)
+            raise errors.UserAlreadyExists()
+        except errors.NotFound as err:
+            if not util.validate_email(body.email_address):
+                raise errors.InvalidEmail() from err
+        groups = await list_groups(
+            name="Senai 3EM",
+        )
+        orgs, _ = await list_organizations(name="Escola Senai")
+        role = await uow.role_repository.get(name="user")
+        user_dict = {
+            "external_id": None,
+            "customer_id": None,
+            "role_id": role.id,
+            "state": None,
+            "region": None,
+            "county": None,
+            "groups": [group.id for group in groups],
+            "organizations": [org.id for org in orgs],
+            **body.dict(),
+        }
+        logger.info(f"\n\n{user_dict}\n\n")
+        user_model = await crud.create_user(
+            body_dict=user_dict,
+            role=role,
+            hash_ctx=hash_ctx,
+            groups=groups,
+            organizations=orgs,
+        )
+        await uow.user_repository.create(user_model)
+        await uow.commit()
+
+    return schemas.UserGet.from_orm(user_model)
+
+
+@router.get("/check_email/{user_email}")
+async def delete(
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+    user_email: str = fastapi.Path(...),
+) -> fastapi.Response:
+    async with uow_builder() as uow:
+        try:
+            await uow.user_repository.get(email=user_email)
+            raise errors.UserAlreadyExists()
+        except errors.NotFound:
+            pass
+    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)
+
+
 @router.delete(
     "/{user_id}",
     dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
 )
-async def delete(
+async def delete_user(
     uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
         ports.UnitOfWorkBuilder
     ),
@@ -549,11 +624,12 @@ async def list_exams_to_process(
         )
         if not (
             user_tb_imp := next(
-                user_imp for user_imp in impersonate_list if user_imp.id == user_id
+                (user_imp for user_imp in impersonate_list if user_imp.id == user_id),
+                None,
             )
         ):
             raise errors.Forbidden()
-        group_id = user_tb_imp.groups[0].id
+        group_id = user_tb_imp.group_id
     else:
         raise errors.Forbidden()
 
@@ -584,7 +660,9 @@ async def list_exams_to_process(
 @router.get(
     "/{user_id}/exams-results",
     dependencies=[
-        fastapi.Security(auth.get_token, scopes=["user.impersonate", "user.list"])
+        fastapi.Security(
+            auth.get_token, scopes=["user.impersonate", "user.list", "user"]
+        )
     ],
 )
 async def list_exams_with_results(
@@ -618,11 +696,12 @@ async def list_exams_with_results(
         )
         if not (
             user_tb_imp := next(
-                user_imp for user_imp in impersonate_list if user_imp.id == user_id
+                (user_imp for user_imp in impersonate_list if user_imp.id == user_id),
+                None,
             )
         ):
             raise errors.Forbidden()
-        group_id = user_tb_imp.groups[0].id
+        group_id = user_tb_imp.group_id
     else:
         raise errors.Forbidden()
 
@@ -672,11 +751,12 @@ async def get_questions(
         )
         if not (
             user_tb_imp := next(
-                user_imp for user_imp in impersonate_list if user_imp.id == user_id
+                (user_imp for user_imp in impersonate_list if user_imp.id == user_id),
+                None,
             )
         ):
             raise errors.Forbidden()
-        group_id = user_tb_imp.groups[0].id
+        group_id = user_tb_imp.group_id
     else:
         raise errors.Forbidden()
     results = await list_questions(user_id, group_id, exam_id)
@@ -688,13 +768,13 @@ async def get_questions(
             name=question.name,
             type=question.type,
             status=(
-                question_status.status
-                if question_status
-                else models.ExamStatus.NOT_STARTED
+                question.status if question.status else models.ExamStatus.NOT_STARTED
             ),
             order=question.order,
+            answers=question.answers,
+            theme=question.theme,
         )
-        for question, question_status in results
+        for question in results
     ]
 
 
@@ -717,8 +797,8 @@ async def send_question_data(
     get_exam_user: ports.GetExamUserStatus = fastapi_injector.Injected(
         ports.GetExamUserStatus
     ),
-    session_factory: typings.SessionFactory = fastapi_injector.Injected(
-        typings.SessionFactory
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
     ),
     publisher: ports.MessagePublisher = fastapi_injector.Injected(
         ports.MessagePublisher
@@ -727,6 +807,9 @@ async def send_question_data(
     settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
     list_personifiable: ports.ListPersonifiableUsers = fastapi_injector.Injected(
         ports.ListPersonifiableUsers
+    ),
+    list_pending_questions: ports.ListPendingQuestions = fastapi_injector.Injected(
+        ports.ListPendingQuestions
     ),
 ) -> fastapi.Response:
     """
@@ -749,15 +832,16 @@ async def send_question_data(
         )
         if not (
             user_tb_imp := next(
-                user_imp for user_imp in impersonate_list if user_imp.id == user_id
+                (user_imp for user_imp in impersonate_list if user_imp.id == user_id),
+                None,
             )
         ):
             raise errors.Forbidden()
-        group_id = user_tb_imp.groups[0].id
-        organization_id = user_tb_imp.organizations[0].id
+        group_id = user_tb_imp.group_id
+        organization_id = user_tb_imp.organization_id
     else:
         raise errors.Forbidden()
-    async with session_factory() as session:
+    async with uow_builder() as uow:
         question_data = await get_pending(user_id, group_id, exam_id, question_id)
         if not question_data:
             raise fastapi.HTTPException(
@@ -765,15 +849,23 @@ async def send_question_data(
                 detail="You already finished this exam/question",
             )
 
-        if not await get_exam_user(user_id=user_id, exam_id=exam_id, group_id=group_id):
+        if not (
+            exam_user := await get_exam_user(
+                user_id=user_id, exam_id=exam_id, group_id=group_id
+            )
+        ):
             exam_user = models.ExamUser(
                 exam_id=exam_id,
                 user_id=user_id,
                 status=models.ExamStatus.IN_PROGRESS,
             )
-            session.add(exam_user)
-
+            await uow.exam_user_repository.create(exam_user)
+        else:
+            exam_user = await uow.merge(exam_user)
+        assert exam_user
         exam_user_question = models.ExamUserQuestion(
+            ai_is_correct=None,
+            ai_feedback=None,
             exam_id=exam_id,
             user_id=user_id,
             question_id=question_id,
@@ -785,21 +877,42 @@ async def send_question_data(
             total_accuracy=0.0,
             user_accuracy=0.0,
         )
-        session.add(exam_user_question)
+        await uow.euq_repository.create(exam_user_question)
 
         text_list = re.sub(
             r"\s+", " ", re.sub(r"[\[\]\.,\(\)!-\?]", "", question_data.data)
         ).split(" ")
 
-        await publisher.publish(
-            exam_schemas.QuestionMessage(
-                result_id=exam_user_question.id,
-                phrase_set_id=question_data.phrase_id,
-                audio=body.url,
-                words=text_list,
-                question_type=question_data.type.value,
-            ),
-            topic=settings.get("pubsub_convert_topic"),
-        )
-        await session.commit()
+        match question_data.type:
+            case models.QuestionType.MULTIPLE_CHOICE:
+                exam_user_question.result = body.answers if body.answers else []
+                right_count = 0
+                total_correct = 0
+                if question_data.answers is not None and body.answers is not None:
+                    for question_answer in question_data.answers:
+                        if question_answer.get("is_correct"):
+                            total_correct += 1
+                            if question_answer.get("answer") in body.answers:
+                                right_count += 1
+                exam_user_question.right_count = right_count
+                exam_user_question.ai_is_correct = bool(right_count == total_correct)
+                exam_user_question.status = models.ExamStatus.FINISHED
+                question_list = await list_pending_questions(user_id, group_id, exam_id)
+                if len(question_list) == 1:
+                    exam_user.status = models.ExamStatus.FINISHED
+            case _:
+                await publisher.publish(
+                    exam_schemas.QuestionMessage(
+                        result_id=exam_user_question.id,
+                        phrase_set_id=question_data.phrase_id,
+                        audio=body.url if body.url else "",
+                        words=text_list,
+                        question_type=question_data.type.value,
+                        question_theme=question_data.theme.value
+                        if question_data.theme
+                        else None,
+                    ),
+                    topic=settings.get("pubsub_convert_topic"),
+                )
+        await uow.commit()
     return fastapi.Response(status_code=fastapi.status.HTTP_201_CREATED)

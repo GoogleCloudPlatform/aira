@@ -114,13 +114,11 @@ class User(db.Base, db.DefaultColumns):
     groups: Mapped[list[groups.Group]] = relationship(
         groups.Group,
         secondary=UserGroup.__table__,
-        lazy="joined",
     )
 
     organizations: Mapped[list[organizations.Organization]] = relationship(
         organizations.Organization,
         secondary=UserOrganization.__table__,
-        lazy="joined",
     )
 
     role: Mapped[Role] = relationship(
@@ -131,6 +129,17 @@ class User(db.Base, db.DefaultColumns):
 
     reset_token: Mapped[str | None] = mapped_column(
         sa.String(100), nullable=True, init=False
+    )
+
+    __table_args__ = (
+        sa.Index(
+            "ix_user_external_id",
+            external_id,
+        ),
+        sa.Index(
+            "ix_user_email_address",
+            email_address,
+        ),
     )
 
     @property

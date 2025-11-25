@@ -4,6 +4,7 @@ Module for all user related sqlalchemy queries.
 
 import json
 import logging
+import typing
 import uuid
 
 import sqlalchemy as sa
@@ -31,6 +32,7 @@ class UserRepository(ports.UserRepository):
         external_id: str | None = None,
         email: str | None = None,
         reset_token: str | None = None,
+        joined_load: bool = True,
     ) -> models.User:
         """
         Get user by params.
@@ -39,18 +41,15 @@ class UserRepository(ports.UserRepository):
         :param external_id: user id provided by firebase.
         :param email: user's email.
         """
-        stmt = (
-            sa.select(models.User)
-            .options(
-                orm.joinedload(models.User.role),
-            )
-            .options(
+        stmt = sa.select(models.User).options(
+            orm.joinedload(models.User.role),
+        )
+        if joined_load:
+            stmt = stmt.options(
                 orm.joinedload(models.User.groups),
-            )
-            .options(
+            ).options(
                 orm.joinedload(models.User.organizations),
             )
-        )
         if user_id:
             stmt = stmt.where(models.User.id == user_id)
         if external_id:
@@ -278,7 +277,11 @@ class ListUsers(ports.ListUsers):
         user = models.User
         org = models.Organization
         group = models.Group
-        stmt = sa.select(user).order_by(user.updated_at.desc())
+        stmt = (
+            sa.select(user)
+            .options(orm.joinedload(user.groups), orm.joinedload(user.organizations))
+            .order_by(user.updated_at.desc())
+        )
         if organizations or query:
             stmt = stmt.outerjoin(models.UserOrganization)
 
@@ -374,6 +377,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
                     type_=sa.String,
                 ).label("exams"),
             )
+            .select_from(user)
             .join(models.UserGroup, models.UserGroup.user_id == user.id)
             .join(
                 group,
@@ -431,7 +435,11 @@ class ListUsersWithExams(ports.ListUsersWithExams):
                 )
             )
 
-        stmt = stmt.group_by(user.id)
+        stmt = stmt.options(
+            orm.load_only(user.id, user.name, user.email_address, user.role_id).noload(
+                "*"
+            )
+        ).group_by(user.id)
 
         async with self._session_factory() as session:
             if page_size >= 0:
@@ -453,8 +461,10 @@ class ListUsersWithExams(ports.ListUsersWithExams):
         items_result = []
         for item in result_items:
             user_dict = {
-                col.name: getattr(item.User, col.name)
-                for col in item.User.__table__.columns
+                "id": item.User.id,
+                "name": item.User.name,
+                "email_address": item.User.email_address,
+                "role_id": item.User.role_id,
             }
             exams_dict_list = json.loads(item.exams)
             items_result.append(
@@ -492,6 +502,9 @@ class GetUser(ports.GetUser):
             )
             .options(
                 orm.joinedload(models.User.groups),
+            )
+            .options(
+                orm.joinedload(models.User.organizations),
             )
             .where(models.User.id == user_id)
         )
@@ -538,24 +551,28 @@ class ListPersonifiableUsers(ports.ListPersonifiableUsers):
     List users that a user can impersonate.
     """
 
+    Result: typing.TypeAlias = ports.ListPersonifiableUsers.Result
+
     def __init__(self, session_factory: typings.SessionFactory):
         self._session_factory = session_factory
 
-    async def __call__(self, groups: list[uuid.UUID]) -> list[models.User]:
+    async def __call__(self, groups: list[uuid.UUID]) -> list[Result]:
         """
         Method to list all users.
         """
         stmt = (
-            sa.select(models.User)
-            .join(models.UserGroup)
-            .filter(models.UserGroup.group_id.in_(groups))
-            .options(
-                orm.joinedload(models.User.groups),
+            sa.select(
+                models.User.id,
+                models.UserGroup.group_id.label("group_id"),
+                models.UserOrganization.organization_id.label("organization_id"),
             )
-            .options(
-                orm.joinedload(models.User.organizations),
+            .join(models.UserGroup, models.UserGroup.user_id == models.User.id)
+            .filter(models.UserGroup.group_id.in_(groups))
+            .join(
+                models.UserOrganization,
+                models.UserOrganization.user_id == models.User.id,
             )
         )
         async with self._session_factory() as session:
             result = await session.execute(stmt)
-        return list(result.scalars().unique())
+        return [self.Result(**item) for item in result.mappings().unique()]

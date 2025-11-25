@@ -7,7 +7,8 @@ import uuid
 
 import pydantic
 
-from api import models
+from api import errors, models
+from api.helpers import util
 from api.routers.exams import schemas as exam_schemas
 from api.routers.groups import schemas as group_schemas
 from api.routers.organizations import schemas as org_schemas
@@ -136,6 +137,34 @@ class UserCreate(pydantic.BaseModel):
     state: str | None = None
     county: str | None = None
     region: str | None = None
+
+    class Config:
+        """
+        Pydantic config to receive as an orm.
+        """
+
+        orm_mode = True
+
+
+class SignupUserCreate(pydantic.BaseModel):
+    """
+    Schema related to the creation of a User.
+    """
+
+    name: str
+    email_address: pydantic.EmailStr
+    password: pydantic.StrictStr | None = None
+    type: models.UserType
+
+    @pydantic.validator("email_address", pre=True, always=True)
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        """
+        Validate the status of the exam.
+        """
+        if not util.validate_email(value):
+            raise errors.InvalidEmail()
+        return value
 
     class Config:
         """

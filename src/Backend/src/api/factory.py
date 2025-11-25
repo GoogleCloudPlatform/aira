@@ -19,6 +19,7 @@ from .middleware import (
     default_error_handler,
     error_handler,
     firebase_handler,
+    start_middleware,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     """
     setts = container.get(typings.Settings)
     app = fastapi.FastAPI(title="LIA", version="0.5.2")
+    tracing_context = container.get(tracing.TracingContext)
     sentry.setup(settings=setts)
     logging_config.configure(
         processors=None,
@@ -48,7 +50,7 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     app.add_middleware(
         LoggingMiddleware,
         log_context=container.get(logging_config.LogContext),
-        tracing_context=container.get(tracing.TracingContext),
+        tracing_context=tracing_context,
         project_id=setts.get("project_id", "unknown"),
     )
 
@@ -69,7 +71,10 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     app.add_exception_handler(Exception, handler=default_error_handler)
 
     fastapi_pagination.add_pagination(app)
+    # tracing_context.setup(app)
 
     fastapi_injector.attach_injector(app, container)
+    if setts.get("env", "local") == "local":
+        start_middleware(app)
 
     return app
