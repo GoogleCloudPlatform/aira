@@ -57,7 +57,7 @@ const QuestionDialog: React.FC<IQuestionDialogProps> = ({ question, field, index
                     </i>
                 </div>
             </DialogTrigger>
-            <DialogContent style={{maxWidth: '1024px', minWidth: '90%', width: '90%'}}>
+            <DialogContent style={{maxWidth: '1024px', minWidth: '90%', width: '90%'}} className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="dark:text-white">{t(`form.exam.${question.type}`)}</DialogTitle>
                     <DialogDescription>

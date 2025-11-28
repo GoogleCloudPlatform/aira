@@ -50,9 +50,9 @@ const QuestionsEditorWords : React.FC<TQuestionEditorWordsProps> = ({ question, 
 
     return  ( 
         <div className="flex flex-col gap-4">
-            <div className='w-full flex justify-end gap-2'>
-                <Input type='number' placeholder={t('form.exam.quantity')} onChange={(e)=> setQuantity(Number(e.target.value))} className='w-[185px] input-no-spinner'/>
-                <Button type="button" disabled={loading || quantity === 0} onClick={() => generateWordsQuestion(question, quantity)} className='flex items-center gap-2 w-[180px]'> 
+            <div className='w-full flex flex-col lg:flex-row justify-end gap-2'>
+                <Input type='number' placeholder={t('form.exam.quantity')} onChange={(e)=> setQuantity(Number(e.target.value))} className='w-full lg:max-w-[185px] input-no-spinner'/>
+                <Button type="button" disabled={loading || quantity === 0} onClick={() => generateWordsQuestion(question, quantity)} className='flex items-center gap-2 w-full lg:max-w-[185px]'> 
                     {loading ? (
                         <>
                             <LoaderCircle className={`animate-spin text-white`} size={20}/>
