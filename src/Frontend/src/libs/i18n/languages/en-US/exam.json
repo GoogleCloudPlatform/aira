@@ -24,7 +24,8 @@
             "analysis_message": "Congratulations on completing the technical proficiency exam! To analyze your result, go to the Results option in the menu. It will open your last exam result; if needed, change the exam at the top left of the screen. Results will be available within 2 minutes after completion.",
             "redirecting": "Redirecting",
             "seconds": "seconds",
-            "no_users_found": "No students found."
+            "no_users_found": "No students found.",
+            "analisys_message": "After analisys, your results will be available on students area to your parents, responsables and teachers"
         },
         "buttons": {
             "start_exam": "Start Exam",

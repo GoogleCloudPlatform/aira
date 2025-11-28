@@ -29,6 +29,8 @@ import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
 import FormQuestions from "./FormQuestions";
 import { useQuestions } from "@/context/questions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ENUM_GRADE_OPTIONS } from "@/constants/enums";
 
 type TViewProps = {
     preview?: boolean
@@ -46,6 +48,9 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
     const { data, isLoading, isFetching} = useQuery<IExamResponse | z.infer<typeof formData.schema>>({ queryKey: ['exam'], queryFn: formData.defaultValues });
 
     const { form, resetForm } = useQuestions()
+
+    console.log(form.watch());
+    console.log(form.formState.errors);
     
     useEffect(() => {
         if (data && !isEmpty(data)) {
@@ -57,6 +62,7 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
                     ...q,
                     data: q.data || '',
                     formatted_data: q.formatted_data || '',
+                    theme: q.theme ?? null,
                     answers: Array.isArray(q.answers) ? q.answers : []
                 }))
             };
@@ -157,6 +163,40 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
             return (
                 <FormQuestions isEditable={isEditable} preview={preview} />
             )
+        }
+
+        if (fieldName === 'grade') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.exam.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={t(`form.exam.edit.${field.name}`)} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {ENUM_GRADE_OPTIONS.map((option, index) => (
+                                        <SelectItem key={index} value={option.value}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )  
         }
 
         if (['start_date', 'end_date'].includes(fieldName)) {

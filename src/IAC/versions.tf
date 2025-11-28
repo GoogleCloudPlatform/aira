@@ -21,8 +21,6 @@ provider "google" {
 }
 
 provider "google-beta" {
-  # This provider is ONLY used for resources that specify it by its alias
-  alias   = "beta"
   project = var.project_id
   region  = var.region
   

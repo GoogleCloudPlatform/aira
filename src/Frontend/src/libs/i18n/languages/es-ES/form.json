@@ -223,7 +223,7 @@
                 "create_user": "Crear Usuario",
                 "create_subtitle_user": "Complete los campos a continuación para crear un nuevo usuario. Toda la información es obligatoria para registrar correctamente al usuario en el sistema.",
                 "type": "Tipo de Cuenta",
-                "google_signin": "Cuenta IDP Senai",
+                "google_signin": "Cuenta Google",
                 "with_password": "Cuenta con Contraseña",
                 "name": "Nombre",
                 "email_address": "Correo electrónico",

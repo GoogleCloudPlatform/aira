@@ -24,7 +24,8 @@
             "analysis_message": "Parabéns por concluir a avaliação de proficiência técnica! Para analisar o seu resultado, acesse no menu a opção Resultados, irá abrir o resultado da sua ultima avaliação feita, se precisar altere a avaliação na parte superior esquerda da tela. Os resultados estarão disponíveis em até 2 minutos após a conclusão da avaliação",
             "redirecting": "Redirecionando",
             "seconds": "segundos",
-            "no_users_found": "Nenhum aluno encontrado."
+            "no_users_found": "Nenhum aluno encontrado.",
+            "analisys_message": "Após análise, seus resultados estarão disponíveis na área do aluno para seus pais, responsáveis e professores"
         },
         "buttons" : {
             "start_exam": "Iniciar Avaliação",

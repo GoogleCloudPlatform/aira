@@ -75,7 +75,7 @@ const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_ques
         router.push(`/users/${user_id}/exams/${exam_id}/finish`);
     }, [setExams, setRecord, setLoading, isStudent, router, exam_id, user_id]);
 
-    if (!exam_id || !user_id || !question_id) return null
+    if (!exam_id || !question_id || (!isStudent && !user_id)) return null
     if (!question.answers) return null
 
     const onSubmit = async ({answers}: z.infer<typeof SchemaMultipleChoiceAnswer>)=>{

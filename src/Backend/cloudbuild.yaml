@@ -42,7 +42,7 @@ steps:
         "--region",
         "us-central1",
         "--memory",
-        "4Gi",
+        "8Gi",
         "--cpu",
         "2",
         "--service-account",

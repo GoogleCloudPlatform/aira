@@ -448,7 +448,7 @@ class GoogleModule(injector.Module):
         Provide the Generative AI.
         """
         return google.GenerativeAI(
-            api_key=settings.get("gemini_api_key", ""),
+            project_id=settings.get("project_id", ""),
         )
 
     @injector.provider
@@ -551,7 +551,7 @@ class InternetlessModule(injector.Module):
         Provide the Generative AI.
         """
         return google.GenerativeAI(
-            api_key=settings.get("gemini_api_key", ""),
+            project_id=settings.get("project_id", ""),
         )
 
     @injector.provider

@@ -29,3 +29,11 @@ terraform plan
 ```bash
 terraform apply
 ```
+
+4. After the execution of the command above, you will need to redeploy the backend and frontend service so run the commands bellow on frontend and backend folders:
+
+ ```bash
+gcloud builds submit --config cloudbuild.yaml .
+```
+
+Now you can access the application at the URL of the frontend service. The default admin user is admin@example.com and the password is admin.
