@@ -186,7 +186,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
     return (
         <>  
             {questionType && (
-                <div className='w-full flex justify-end gap-2'>
+                <div className='w-full flex flex-col lg:flex-row justify-end gap-2'>
                     <Input 
                         type='text' 
                         disabled={preview} 
@@ -194,7 +194,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
                         value={subject} 
                         onChange={(e)=> setSubject(e.target.value)} className='w-full input-no-spinner'
                     />
-                    <Button type="button" disabled={disableButton} onClick={handleGenerateQuestion} className='flex items-center gap-2 min-w-[200px] max-w-[200px]'> 
+                    <Button type="button" disabled={disableButton} onClick={handleGenerateQuestion} className='flex items-center gap-2 w-full lg:max-w-[200px]'> 
                         {loading ? (
                             <>
                                 <LoaderCircle className={`animate-spin text-white`} size={20}/>
