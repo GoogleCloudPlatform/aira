@@ -24,7 +24,8 @@
             "analysis_message": "¡Felicidades por completar el examen de competencia técnica! Para analizar su resultado, acceda a la opción Resultados en el menú. Se abrirá el resultado de su último examen; si es necesario, cambie el examen en la parte superior izquierda de la pantalla. Los resultados estarán disponibles en un plazo de 2 minutos tras la finalización.",
             "redirecting": "Redirigiendo",
             "seconds": "segundos",
-            "no_users_found": "No se encontraron estudiantes."
+            "no_users_found": "No se encontraron estudiantes.",
+            "analisys_message": "Después del análisis, tus resultados estarán disponibles en el área de estudiantes para tus padres, responsables y profesores"
         },
         "buttons": {
             "start_exam": "Iniciar Examen",
