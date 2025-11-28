@@ -9,8 +9,9 @@ __import__("pysqlite3")
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
 import chromadb
-import google.generativeai as google_genai
+import vertexai
 from chromadb.utils import embedding_functions
+from vertexai.generative_models import GenerativeModel
 
 from api import errors, models, ports
 
@@ -29,16 +30,25 @@ class GenerativeAI(ports.GenAI):
     Implementation of google's cloud storage.
     """
 
-    def __init__(self, api_key: str, embedding_model="models/embedding-001"):
-        google_genai.configure(api_key=api_key)
-        self.model = google_genai.GenerativeModel("gemini-2.0-flash")
+    def __init__(self, project_id: str, location: str = "us-central1", embedding_model="text-embedding-004"):
+        vertexai.init(project=project_id, location=location)
+        self.model = GenerativeModel("gemini-2.0-flash-exp")
         self.embedding_model = embedding_model
+        self.project_id = project_id
+        self.location = location
         self.chroma_client = chromadb.PersistentClient(
             path="./chroma_data"
-        )  # Alterado aqui
+        )
+        # GoogleVertexEmbeddingFunction requires api_key but uses it as a placeholder
+        # when running in GCP with service account, it will use default credentials
+        import google.auth
+        credentials, _ = google.auth.default()
         self.embedding_function = (
-            embedding_functions.GoogleGenerativeAiEmbeddingFunction(
-                api_key=api_key, model_name=self.embedding_model
+            embedding_functions.GoogleVertexEmbeddingFunction(
+                api_key="",  # Empty string - will use default credentials
+                project_id=project_id,
+                region=location,
+                model_name=self.embedding_model,
             )
         )
         self.collections = {}

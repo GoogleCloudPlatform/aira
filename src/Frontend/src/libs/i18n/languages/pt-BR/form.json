@@ -34,7 +34,6 @@
                 "county": " Município",
                 "confirm": "Confirmar",
                 "loading": "Carregando ..."
-
             },
             "edit": {
                 "edit_organization": "Editar Escolas",
@@ -224,7 +223,7 @@
                 "create_user": "Criar Usuário",
                 "create_subtitle_user": "Preencha os campos abaixo para criar um novo usuário. Todas as informações abaixo são obrigatórias para cadastrar o usuário no sistema corretamente.",
                 "type": "Tipo de Conta",
-                "google_signin": "Conta do IDP Senai",
+                "google_signin": "Conta do Google",
                 "with_password": "Conta com Senha",
                 "name": "Nome",
                 "email_address": "E-mail",
@@ -252,7 +251,7 @@
                 "organizations": "Escolas",
                 "groups": "Turmas",
                 "type": "Tipo de Conta",
-                "google_signin": "Conta do IDP Senai",
+                "google_signin": "Conta do Google",
                 "with_password": "Conta com Senha",
                 "state": "Estado",
                 "region": "Região",
@@ -290,9 +289,9 @@
             }
         },
         "multiple_choice": {
-            "title" : "Múltipla escolha",
-            "submit" : "Enviar Resposta",
-            "options" : "Opções"
+            "title": "Múltipla escolha",
+            "submit": "Enviar Resposta",
+            "options": "Opções"
         }
     }
 }
