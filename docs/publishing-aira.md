@@ -29,3 +29,9 @@ terraform plan
 ```bash
 terraform apply
 ```
+
+4. After the execution of the command above, you will need to redeploy the backend and frontend service so run the commands bellow on frontend and backend folders:
+
+ ```bash
+gcloud builds submit --config cloudbuild.yaml .
+```

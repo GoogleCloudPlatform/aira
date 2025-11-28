@@ -36,14 +36,6 @@ class PubsubDataReprocessed(PubsubData):
     channels: int | None
 
 
-class PubsubEmailData(pydantic.BaseModel):
-    """
-    Defines only needed data that will be used to send email.
-    """
-
-    grade: models.Grades
-
-
 class CreateSignedRequest(pydantic.BaseModel):
     """
     Defines the base data to create a signed url

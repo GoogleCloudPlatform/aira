@@ -52,7 +52,7 @@ looker-sdk = "^24.0.0"
 pyjwt = {version = "^2.8.0", extras = ["crypto"]}
 sentry-sdk = {extras = ["fastapi"], version = "^2.20.0"}
 phonemizer = "^3.2.1"
-google-generativeai = "^0.8.3"
+google-cloud-aiplatform = "^1.75.0"
 fastapi-profiler = "^1.4.1"
 gunicorn = "^23.0.0"
 ddtrace = "^2.20.0"

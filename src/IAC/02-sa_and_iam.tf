@@ -76,7 +76,7 @@ resource "google_service_account" "service_account_cloud_build" {
 resource "google_project_iam_member" "service_account_backend_role" {
   project = var.project_id
   provider = google-beta
-  for_each = toset(["roles/speech.admin","roles/secretmanager.secretAccessor","roles/firebaseauth.admin","roles/iam.serviceAccountTokenCreator","roles/bigquery.dataViewer","roles/bigquery.dataOwner","roles/pubsub.publisher","roles/cloudtrace.agent"])
+  for_each = toset(["roles/speech.admin","roles/secretmanager.secretAccessor","roles/firebaseauth.admin","roles/iam.serviceAccountTokenCreator","roles/bigquery.dataViewer","roles/bigquery.dataOwner","roles/pubsub.publisher","roles/cloudtrace.agent","roles/aiplatform.user"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_backend.email}"
   depends_on = [
