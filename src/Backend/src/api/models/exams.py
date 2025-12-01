@@ -76,11 +76,9 @@ class QuestionTheme(enum.StrEnum):
     Question Theme.
     """
 
-    FOOD_AND_BEVERAGES = "food_and_beverages"
-    ELECTRONICS = "electronics"
-    NON_METALLIC_MATERIALS = "non_metallic_materials"
-    TELECOMMUNICATIONS = "telecommunications"
-    SOFTWARE_IT = "software_it"
+    MONICA_AGUA_BOA = "monica_agua_boa"
+    O_MENINO_MALUQUINHO = "o_menino_maluquinho"
+    O_PEQUENO_PRINCIPE = "o_pequeno_principe"
 
     @classmethod
     def _missing_(cls, value: object) -> enum.StrEnum | None:

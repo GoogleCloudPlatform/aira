@@ -90,8 +90,8 @@ export const ENUM_USER_TYPES = [
 
 export const ENUM_ROLE_SCOPES = [
     { id: SCOPE_ADMIN, label: SCOPE_ADMIN, value: SCOPE_ADMIN },
-    { id: SCOPE_USER, label: SCOPE_USER, value: SCOPE_USER }, 
-    { id: SCOPE_EDUCATOR, label: SCOPE_EDUCATOR, value: SCOPE_EDUCATOR }, 
+    { id: SCOPE_USER, label: SCOPE_USER, value: SCOPE_USER },
+    { id: SCOPE_EDUCATOR, label: SCOPE_EDUCATOR, value: SCOPE_EDUCATOR },
 ]
 
 export const ENUM_IMPORT_TYPES = {
@@ -167,9 +167,7 @@ export enum QuestionType {
 }
 
 export enum QuestionTheme {
-    FoodAndBeverages = "food_and_beverages",
-    Electronics = "electronics",
-    NonMetallicMaterials = "non_metallic_materials",
-    Telecommunications = "telecommunications",
-    SoftwareIt = "software_it",
+    MonicaAguaBoa = "monica_agua_boa",
+    OMeninoMaluquinho = "o_menino_maluquinho",
+    OPequenoPrincipe = "o_pequeno_principe",
 }

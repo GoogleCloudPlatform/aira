@@ -1,5 +1,5 @@
 {
-    "results":{
+    "results": {
         "exam": "Avaliação",
         "learner_response": "Resposta do Estudante",
         "question": "Questão",
@@ -30,8 +30,8 @@
         "general_performance_description": "Significa que voce acertou {accuracy}% das questões objetivas respondidas. Detalhes à seguir.",
         "no_objective_questions": "Este exame não possui questões objetivas",
         "no_ai_feedback": "Este exame não possui feedbacks da IA",
-        "industry_areas": "Áreas da Indústria",
-        "buttons":{
+        "industry_areas": "Conhecimentos Específicos",
+        "buttons": {
             "show_results": "Ver resultados"
         },
         "classification": {
