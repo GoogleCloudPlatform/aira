@@ -8,6 +8,8 @@ from .dashboard import Dashboard
 from .data_sync import DataSyncApi
 from .exam import (
     ExamRepository,
+    ExamUserQuestionRepository,
+    ExamUserRepository,
     GetExam,
     GetExamUserStatus,
     GetPendingQuestion,
@@ -19,6 +21,7 @@ from .exam import (
     ListQuestionsWithStatus,
     QuestionRepository,
 )
+from .genai import GenAI
 from .group import (
     CheckGroupOnOrg,
     GetGroup,
@@ -58,6 +61,7 @@ __all__ = (
     "DataSyncApi",
     "ExamRepository",
     "ExternalAuth",
+    "GenAI",
     "GetExam",
     "GetUsersExamDetails",
     "GetExamUserStatus",
@@ -96,4 +100,6 @@ __all__ = (
     "QuestionRepository",
     "SessionRepository",
     "UserRepository",
+    "ExamUserQuestionRepository",
+    "ExamUserRepository",
 )

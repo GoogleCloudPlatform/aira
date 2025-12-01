@@ -1,9 +1,10 @@
 {
-    "home": {
+    "home": {      
         "messages": {
             "hello_message": "Hello",
             "welcome__message": "Welcome to AIRA, our platform for assessing reading proficiency in Portuguese.",
-            "lia_message": "AIRA is a Google Cloud proof-of-concept experiment designed to deliver reading fluency results to students of all ages at scale using real-time data analytics and artificial intelligence."
+            "welcome__message_saber": "Welcome to Le.ia, your artificial intelligence platform for reading and pronunciation assessment in Portuguese.",
+            "lia_message": "AIRA is a Google Cloud experiment, designed to provide reading fluency results to students of all ages at scale, using real-time data analysis and artificial intelligence."
         },
         "profiles": {
             "profile__type": "Your user has a profile of",
@@ -15,41 +16,43 @@
         "permissions": {
             "view_permissions": "You can perform the following actions on our platform:",
             "permission__user_groups": "Check which groups are associated with your user.",
-            "permission__studants_groups": "Check the students who are linked to these groups.",
-            "permission__apply_exams": "Administer exams to your students.",
-            "permission__analyze_performance": "Analyze the performance of your students.",
+            "permission__studants_groups": "Check the students linked to these groups.",
+            "permission__apply_exams": "Administer Assessments to your students.",
+            "permission__analyze_performance": "Analyze your students' performance.",
             "permission__url": "Consult the platform's tutorial documentation.",
-            "permission__actions": "Perform the viewing, editing, creating, or deleting of the following platform resources: Schools, Groups, Users, Exams.",
+            "permission__actions": "View, edit, create, or delete the following platform resources: Schools, Groups, Users, Assessments.",
             "permission__reports": "Access reports and view the results of all students on the platform.",
             "permission__docs": "Consult the platform's tutorial documentation.",
-            "permission__exams": "Consult exams and apply them."
+            "permission__exams": "Consult Assessments and apply them.",
+            "permission__user": "Take reading fluency assessments.",
+            "permission__user_view": "View the assessment result."
         },
         "cards": {
             "titles": {
-                "exams": "Exams",
-                "group": "Group",
+                "exams": "Assessments",
+                "group": "Class",
                 "groups": "Classes",
                 "users": "Users",
                 "organizations": "Schools"
             },
             "descriptions": {
-                "group": "Administer exams and view results for your students.",
-                "organizations": "Dashboard for managing schools.",
-                "users": "Dashboard for managing users.",
-                "groups": "Dashboard for managing classes."
+                "group": "Administer Assessments and see your students' results.",
+                "organizations": "Dashboard for school management.",
+                "users": "Dashboard for user management.",
+                "groups": "Dashboard for class management."
             },
             "buttons": {
-                "view_group": "View group",
-                "view_groups": "View groups",
+                "view_group": "View class",
+                "view_groups": "View classes",
                 "view_users": "View users",
                 "view_organizations": "View schools"
             }
         },
         "home_table": {
-            "title": "Exams",
+            "title": "Assessments",
             "button": "View all",
             "name": "Name",
-            "grade": "Grade",
+            "grade": "School year",
             "start_date": "Start date",
             "end_date": "End date"
         }

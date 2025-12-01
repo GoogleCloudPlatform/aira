@@ -195,13 +195,14 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
                         const mimeType = getMimeTypeFromBase64(base64Data) as string;
 
                         const byteCharacters: string = atob(data[1]);
-                        const byteArrays: Uint8Array[] = [];
+                        const byteNumbers = new Array(byteCharacters.length);
                         
                         for (let i = 0; i < byteCharacters.length; i++) {
-                            byteArrays.push(new Uint8Array([byteCharacters.charCodeAt(i)]));
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
                         }
-                
-                        const audioBlob: Blob = new Blob(byteArrays, { type: mimeType });
+                        
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const audioBlob: Blob = new Blob([byteArray], { type: mimeType });
                         
                         setRecord("audioChunks", audioBlob);
                     } catch (error) {
@@ -241,7 +242,7 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
             if (!upload) return;
 
             try {
-                await sendGCSUrl(user_id as string, exam_id as string, question_id, signed_url)
+                await sendGCSUrl(user_id as string, exam_id as string, question_id, signed_url, questions[questionIndex].type)
                 if (!hasNextQuestion) return endExam()
 
                 setRecord("audioURL", "");
@@ -327,7 +328,7 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
                         data-step={STEP_EXAM_RECORD_BUTTON_STOP}
                         className={cn(
                             'rounded-full dark:bg-darkPrimary bg-primary text-white',
-                            'w-14 h-14 sm:w-[80px] sm:h-[80px]',
+                            'w-14 h-14',
                             isDisabled(BUTTON_STOP) && 'cursor-not-allowed',
                         )}
                         disabled={isDisabled(BUTTON_STOP)}
@@ -345,14 +346,14 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
                         data-step={STEP_EXAM_RECORD_BUTTON_START}
                         className={cn(
                             'relative rounded-full dark:bg-darkPrimary bg-primary text-white',
-                            'w-20 h-20 sm:w-[140px] sm:h-[140px]',
+                            'w-20 h-20',
                             state === RECORD_STATE_RECORDING ? 'animate-pulse ' : '',
                             isDisabled(BUTTON_RECORD) && 'cursor-not-allowed',
                         )}
                         disabled={isDisabled(BUTTON_RECORD)}
                         onClick={record}
                     >
-                        <MicIcon color="white" size={48} />
+                        <MicIcon color="white" size={32} />
                         {state === "recording" && !audioURL ? 
                             <div className="absolute right-0 top-1/4">
                                 <span className="relative flex h-3 w-3">
@@ -374,7 +375,7 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
                         data-step={STEP_EXAM_RECORD_BUTTON_NEXT}
                         className={cn(
                             'rounded-full dark:bg-darkPrimary bg-primary text-white',
-                            'w-14 h-14 sm:w-[80px] sm:h-[80px]',
+                            'w-14 h-14 ',
                             isDisabled(BUTTON_NEXT) && 'cursor-not-allowed',
                         )}
                         disabled={isDisabled(BUTTON_NEXT)}

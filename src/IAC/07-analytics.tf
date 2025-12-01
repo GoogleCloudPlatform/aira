@@ -32,5 +32,7 @@ resource "google_bigquery_table" "resultados_alunos" {
   table_id   = "student_results"
   schema = file("${path.module}/bq/schema.json")
   deletion_protection = "false"
-
+  depends_on = [
+    google_project_service.project
+  ]
 }

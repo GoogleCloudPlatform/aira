@@ -1,5 +1,5 @@
 {
-    "results":{
+    "results": {
         "exam": "Avaliação",
         "learner_response": "Resposta do Estudante",
         "question": "Questão",
@@ -17,9 +17,21 @@
         "item_word_total": "Total de Palavras do Item",
         "words_read_total": "Total de Palavras Lidas",
         "correctly_read_total": "Total de Palavras Lidas Corretamente",
+        "correctly_multiple_choice_total": "Desempenho nas Questões de Múltipla Escolha",
         "true": "Correta",
         "false": "Errada",
-        "buttons":{
+        "ai_feedback": "Feedback da NAI",
+        "lecture_proficiency": "Proficiência de leitura",
+        "text_compreension": "Compreensão de texto",
+        "critical_thinking": "Pensamento crítico e lógica",
+        "communication_and_problem_solving": "Comunicação e resolução de problemas",
+        "general_performance": "Performance geral em questões objetivas",
+        "general_feedback": "Feedback geral de sua performance",
+        "general_performance_description": "Significa que voce acertou {accuracy}% das questões objetivas respondidas. Detalhes à seguir.",
+        "no_objective_questions": "Este exame não possui questões objetivas",
+        "no_ai_feedback": "Este exame não possui feedbacks da IA",
+        "industry_areas": "Conhecimentos Específicos",
+        "buttons": {
             "show_results": "Ver resultados"
         },
         "classification": {
@@ -29,7 +41,15 @@
             "pre_reader_three": "Pré Leitor Três",
             "pre_reader_four": "Pré Leitor Quatro",
             "reader": "Leitor Iniciante",
-            "fluent": "Leitor Fluente"
+            "fluent": "Leitor Fluente",
+            "low": "Baixo desempenho",
+            "medium": "Desempenho Intermediário",
+            "high": "Alto desempenho"
+        },
+        "emptyState": {
+            "title": "Nenhum resultado encontrado",
+            "message": "Complete um exame, espere um momento e tente novamente.",
+            "linkText": "Voltar para a lista de avaliações"
         }
     }
 }

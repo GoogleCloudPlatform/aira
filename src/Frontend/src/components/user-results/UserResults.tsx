@@ -6,13 +6,17 @@ import { useTranslations } from "next-intl";
 import { isEmpty } from "lodash";
 import { usePaginationStore } from "@/store/pagination";
 import { IPaginationStore } from "@/interfaces/store";
-import { getExamsResultsByUserId, } from "@/services/user";
+import { getExamsResultsByUserId, getUserById, } from "@/services/user";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { IExam } from "@/interfaces/exam";
 import { toast } from "react-toastify";
 import ExamResult from "./ExamResult";
-import { useUserStore } from "@/store/users";
 import SkeletonResults from "../skeletons/SkeletonResults";
+import { CATEGORY_USER_EXAMS, CATEGORY_USERS } from "@/constants";
+import { useAuth } from "@/context/auth";
+import { useRBAC } from "@/context/rbac";
+import { SCOPE_USER, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
+import UserResultsEmptyState from "./UserResultsEmptyState";
 
 type TUserResults = {
     user_id: string;
@@ -22,11 +26,36 @@ const UserResults : React.FC<TUserResults> = ({ user_id }) => {
     const [mounted, setMounted] = useState<boolean>(false);
     const [exam, setExam] = useState<IExam>();
     const [options, setOptions] = useState<IExam[]>([]);
+    const { user } = useAuth()
+    const { hasScopePermission } = useRBAC()
 
     const queryClient = useQueryClient();
     const t = useTranslations();
     const { page, query, page_size, setPagination } : IPaginationStore = usePaginationStore();
-    const { user } = useUserStore();
+
+    const { data, isLoading, error } = useQuery({ 
+        queryKey: [CATEGORY_USER_EXAMS, page, user_id], 
+        queryFn: () => getExamsResultsByUserId(user_id), 
+        retryOnMount: false, retry: false,
+        enabled: mounted
+    });
+
+    const { data: userData, isLoading: isLoadingUser } = useQuery({
+        queryKey: [CATEGORY_USERS], 
+        queryFn: () => getUserById(user_id), 
+        retryOnMount: false, retry: false,
+        enabled: mounted && hasScopePermission([SCOPE_USER_IMPERSONATE]) ? true : false
+    });
+
+    useEffect(() => {
+        if (error) toast.warn(t('toast.errors.loading.error_loading_user_exams'));
+        if (data) {
+            if (Array.isArray(data) && !isEmpty(data)) {
+                setExam(data[0]);
+                setOptions(data);
+            }
+        }
+    }, [data, t, error]);
 
     useEffect(() => {
         if (mounted) {
@@ -43,25 +72,8 @@ const UserResults : React.FC<TUserResults> = ({ user_id }) => {
         }
     }, [mounted]);
 
-    const { data, isLoading, error } = useQuery({ 
-        queryKey: ['user_exams', page, user_id], 
-        queryFn: () => getExamsResultsByUserId(user_id), 
-        retryOnMount: false, retry: false,
-        enabled: mounted
-    });
-
-    useEffect(() => {
-        if (error) toast.warn(t('toast.errors.loading.error_loading_user_exams'));
-        if (data) {
-            if (Array.isArray(data) && !isEmpty(data)) {
-                setExam(data[0]);
-                setOptions(data);
-            }
-        }
-    }, [data, t, error]);
-
-    if (isLoading || !options || isEmpty(options)) return <SkeletonResults />;
-    if (!data) return null;
+    if (isLoading) return <SkeletonResults />;
+    if (!data || !options || isEmpty(options) || isEmpty(data)) return <UserResultsEmptyState />;
     if (error) return <>could not load data</>;
     
     const handleSelectExam = (id: string) => {
@@ -71,8 +83,8 @@ const UserResults : React.FC<TUserResults> = ({ user_id }) => {
     }
 
     return (
-        <>
-            <div className="flex flex-col gap-5 justify-between p-1 2xl:mt-10 sm:mx-8">
+        <div className="w-full">
+            <div className="flex flex-col gap-5 justify-between">
                 <div className='w-full sm:w-80'>
                     <Select onValueChange={handleSelectExam}>
                         <SelectTrigger className="text-black dark:text-white">
@@ -88,15 +100,15 @@ const UserResults : React.FC<TUserResults> = ({ user_id }) => {
                     </Select>
                 </div>
 
-                <h2 className="w-full text-center text-2xl text-black dark:text-white">
-                    {user ? user.name : ''}
+                <h2 className="w-full text-center text-2xl text-black dark:text-white my-6">
+                    {hasScopePermission([SCOPE_USER]) ? user?.user_name : userData?.name}
                 </h2>
 
                 <section>
                     {exam && <ExamResult exam_id={exam.id} user_id={user_id}/>}
                 </section>
             </div>
-        </>
+        </div>
     );
 }
 

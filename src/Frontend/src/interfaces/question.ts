@@ -1,4 +1,4 @@
-import { ENUM_EXAM_STATUS_FINISHED, ENUM_EXAM_STATUS_NOT_STARTED, ENUM_QUESTION_TYPE_COMPLEX_WORDS, ENUM_QUESTION_TYPE_MULTIPLE_CHOICE, ENUM_QUESTION_TYPE_PHRASES, ENUM_QUESTION_TYPE_WORDS } from "@/constants/enums";
+import { ENUM_EXAM_STATUS_FINISHED, ENUM_EXAM_STATUS_NOT_STARTED, QuestionTheme, QuestionType } from "@/constants/enums";
 
 export interface IAnswer {
     answer: string,
@@ -14,6 +14,7 @@ export interface IQuestionEditor {
     type: string;
     answers?: IAnswer[]
     status?: string;
+    theme: QuestionTheme | null;
 }
 
 export interface IQuestion {
@@ -24,9 +25,10 @@ export interface IQuestion {
     status: typeof ENUM_EXAM_STATUS_FINISHED | typeof ENUM_EXAM_STATUS_NOT_STARTED;
     start_date: Date | string;
     end_date: Date | string;
-    type: typeof ENUM_QUESTION_TYPE_PHRASES | typeof ENUM_QUESTION_TYPE_WORDS | typeof ENUM_QUESTION_TYPE_COMPLEX_WORDS | typeof ENUM_QUESTION_TYPE_MULTIPLE_CHOICE
+    type: QuestionType;
     response?: any;
     answers?: IAnswer[]
+    theme: QuestionTheme | null;
 }
 
 export interface IQuestionsResponse {
@@ -35,4 +37,17 @@ export interface IQuestionsResponse {
 
 export interface IQuestionResponse {
     
+}
+
+export interface IGenerateWordsQuestionResponse {
+    words: string[]
+}
+
+export interface IGenerateMultipleChoiceQuestionResponse {
+    question: string,
+    answers: IAnswer[]
+}
+
+export interface IGenerateQuestionsResponse {
+    question: string,
 }

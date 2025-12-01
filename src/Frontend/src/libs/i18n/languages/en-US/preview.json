@@ -1,10 +1,14 @@
 {
     "preview": {
         "titles": {
-            "preview_title_start": "This is a preview of how the question of",
-            "preview_title_end": "will be displayed."
+            "preview_title_start": "This is a preview of how the",
+            "preview_title_end": "question will be displayed."
         },
         "questions": {
+            "question_type": "Question Type",
+            "logical_situations": "Logical Situation",
+            "understanding_check": "Understanding Check",
+            "short_explanations": "Short Explanation",
             "words": "Words",
             "complex_words": "Complex Words",
             "phrases": "Narrative Text",

@@ -19,7 +19,7 @@ Follow the steps below to deploy the Infrastructure requirements for the applica
 
 1. [Create a new GCP project](https://developers.google.com/workspace/guides/create-project) and save the `project ID` and `Project Number` of this project.
 2. [Start your Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell#:~:text=Cloud%20Shell%20session.-,Start%20a%20new%20session,the%20session%20to%20be%20initialized.) and clone this repository.
-3. Inside IAC folder go to the `variables.tf` file and replace the default value from the variables `project_id` and `project_number` by the values that you saved in step 1.
+3. Inside IAC folder go to the `variables.tfvars` file and replace the default value from the variables `project_id` and `project_number` by the values that you saved in step 1.
 4. You're going to need a place to store your terraform state file, so [create a GCS bucket](https://cloud.google.com/storage/docs/creating-buckets) for this. You can use the name that you prefer.
 5. Next, go to the `backend.tf` file and update the bucket value using the bucket name you choose.
 6. Inside the `IAC` folder, run the commands bellow:
@@ -37,3 +37,31 @@ terraform apply
 ```
 
 It will take several minutes for all the resources to be created. It might be a good time for a cup of coffee.
+
+## Troubleshooting
+
+If you encounter authentication issues during the IAC execution, try running the following command to authenticate with your Google Cloud account:
+
+```bash
+gcloud auth application-default login
+```
+
+If you encounter an error stating `The identitytoolkit.googleapis.com API requires a quota project, which is not set by default`, run the following command to set the quota project:
+
+```bash
+gcloud auth application-default set-quota-project <YOUR_PROJECT_ID>
+```
+
+If the problem persists, check if the configured quota project matches your project ID. You can check the current configuration with:
+
+```bash
+gcloud config list
+```
+
+If the `quota_project` under `[billing]` does not match your project, unset it:
+
+```bash
+gcloud config unset billing/quota_project
+```
+
+Then try setting the quota project again.

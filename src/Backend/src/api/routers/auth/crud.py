@@ -94,16 +94,20 @@ async def login(
             user_data = await external_login.login_from_token(credentials.token)
             user_id = user_data.get("uid")
             try:
-                user = await db.user_repository.get(external_id=user_id)
+                user = await db.user_repository.get(
+                    external_id=user_id, joined_load=False
+                )
             except errors.NotFound as err:
                 email = user_data.get("email")
-                user = await db.user_repository.get(email=email)
+                user = await db.user_repository.get(email=email, joined_load=False)
                 if user.external_id or user.type != models.UserType.FIREBASE:
                     raise errors.InvalidCredentials() from err
                 user.external_id = user_id
         case schemas.EmailPasswordLogin():
             try:
-                user = await db.user_repository.get(email=credentials.email_address)
+                user = await db.user_repository.get(
+                    email=credentials.email_address, joined_load=False
+                )
             except errors.NotFound as err:
                 raise errors.InvalidCredentials() from err
             if not (

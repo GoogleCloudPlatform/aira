@@ -5,6 +5,7 @@ Module of google adapters.
 from .bigquery import BigQuery
 from .cloud_storage import CloudStorage
 from .firebase import FirebaseAuth
+from .generative_ai import GenerativeAI
 from .looker import LookerDashboard
 from .pubsub import MessagePublisher
 from .secret_manager import SecretManager
@@ -15,6 +16,7 @@ __all__ = (
     "BigQuery",
     "CloudStorage",
     "FirebaseAuth",
+    "GenerativeAI",
     "LookerDashboard",
     "MessagePublisher",
     "SecretManager",

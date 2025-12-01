@@ -4,7 +4,6 @@ Middleware file for the connector runtime.
 
 # pylint: disable=import-private-name
 import collections.abc
-import json
 import logging
 import time
 import typing
@@ -16,6 +15,7 @@ from firebase_admin import _auth_utils as au
 from firebase_admin import _token_gen as tkn
 from firebase_admin import exceptions
 from opentelemetry import trace
+from pyinstrument import Profiler
 
 from api import errors, logging_config, tracing
 
@@ -111,31 +111,12 @@ class LoggingMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
         response: starlette.responses.Response,
         latency: float,
     ) -> dict[str, typing.Any]:
-        if isinstance(response, starlette.responses.StreamingResponse):
-            chunks = [section async for section in response.body_iterator]
-
-            response.body_iterator = starlette.concurrency.iterate_in_threadpool(
-                iter(chunks)
-            )
-
-            body = b"".join(
-                (chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
-                for chunk in chunks
-            )
-        else:
-            body = response.body
-
-        try:
-            data = json.loads(body.decode("utf-8"))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            data = None
-
         return dict(
             method=request.method,
             url=str(request.url),
             status=response.status_code,
-            body=body,
-            data=data,
+            body=None,
+            data=None,
             headers=dict(response.headers),
             latency=latency,
         )
@@ -215,7 +196,6 @@ class LoggingMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
                     "response",
                     extra={"http_info": http_info},
                 )
-
         return response
 
 
@@ -303,3 +283,14 @@ async def handle_handlers(
             return await firebase_handler(request, exc)
         case _:
             return await default_error_handler(request, exc)
+
+
+def start_middleware(app: fastapi.FastAPI):
+    @app.middleware("http")
+    async def _profiling(request: fastapi.Request, call_next):
+        p = Profiler()
+        p.start()
+        response: fastapi.Response = await call_next(request)
+        p.stop()
+        p.print()
+        return response

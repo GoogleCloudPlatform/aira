@@ -44,6 +44,12 @@ def get_file_metadata(path: str) -> dict[str, typing.Any]:
     return metadata
 
 
+def validate_email(email: str) -> bool:
+    if "@" not in email:
+        return False
+    return True
+
+
 class CustomEncoder(json.JSONEncoder):
     """
     Class for uuid encoding when dumping

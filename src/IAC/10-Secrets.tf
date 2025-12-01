@@ -7,7 +7,7 @@ resource "google_secret_manager_secret" "gcs_sa_key" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -31,7 +31,7 @@ resource "google_secret_manager_secret" "bucket" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -53,7 +53,7 @@ resource "google_secret_manager_secret" "processor_queue" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -76,7 +76,7 @@ resource "google_secret_manager_secret" "conversion_queue" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -99,7 +99,7 @@ resource "google_secret_manager_secret" "sqlurl" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -122,7 +122,7 @@ resource "google_secret_manager_secret" "appId" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -143,7 +143,7 @@ resource "google_secret_manager_secret" "apiKey" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -165,7 +165,7 @@ resource "google_secret_manager_secret" "authDomain" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -209,7 +209,7 @@ resource "google_secret_manager_secret" "private_key" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -234,7 +234,7 @@ resource "google_secret_manager_secret" "public_key" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -262,7 +262,7 @@ resource "google_secret_manager_secret" "dataset" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -282,7 +282,7 @@ resource "google_secret_manager_secret" "table" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -306,7 +306,7 @@ resource "google_secret_manager_secret" "api_url" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -326,7 +326,7 @@ resource "google_secret_manager_secret_version" "api_url" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -351,7 +351,7 @@ resource "google_secret_manager_secret" "lookersdk_base_url" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -374,7 +374,7 @@ resource "google_secret_manager_secret_version" "lookersdk_base_url" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -397,7 +397,7 @@ resource "google_secret_manager_secret_version" "lookersdk_client_id" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -420,7 +420,7 @@ resource "google_secret_manager_secret_version" "lookersdk_client_id" {
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -438,13 +438,13 @@ resource "google_secret_manager_secret_version" "lookersdk_client_id" {
 
 #API Key
 
-resource "google_secret_manager_secret" "sere_api_key" {
-  secret_id = "sere_api_key"
+resource "google_secret_manager_secret" "sendgrid_api_key" {
+  secret_id = "sendgrid_api_key"
   project   = var.project_id
   replication {
     user_managed {
       replicas {
-        location = "us-east1"
+        location = var.region
       }
     }
   }
@@ -453,7 +453,7 @@ resource "google_secret_manager_secret" "sere_api_key" {
   ]
 }
 
-resource "google_secret_manager_secret_version" "sere_api_key" {
-  secret      = google_secret_manager_secret.sere_api_key.name
+resource "google_secret_manager_secret_version" "sendgrid_api_key" {
+  secret      = google_secret_manager_secret.sendgrid_api_key.name
   secret_data = "update-here" 
   }

@@ -2,7 +2,7 @@ import { SCOPE_ADMIN, SCOPE_EDUCATOR, SCOPE_USER } from "./rbac";
 
 export const FIRST_ELEMENTARY_SCHOOL = '1º Ano';
 export const SECOND_ELEMENTARY_SCHOOL = '2º Ano';
-export const THIRD_ELEMENTARY_SCHOOL = '3º Ano';
+export const THIRD_ELEMENTARY_SCHOOL = '3ª Ano';
 export const FOURTH_ELEMENTARY_SCHOOL = '4º Ano';
 export const FIFTH_ELEMENTARY_SCHOOL = '5º Ano';
 export const SIXTH_ELEMENTARY_SCHOOL = '6º Ano';
@@ -90,8 +90,8 @@ export const ENUM_USER_TYPES = [
 
 export const ENUM_ROLE_SCOPES = [
     { id: SCOPE_ADMIN, label: SCOPE_ADMIN, value: SCOPE_ADMIN },
-    { id: SCOPE_USER, label: SCOPE_USER, value: SCOPE_USER }, 
-    { id: SCOPE_EDUCATOR, label: SCOPE_EDUCATOR, value: SCOPE_EDUCATOR }, 
+    { id: SCOPE_USER, label: SCOPE_USER, value: SCOPE_USER },
+    { id: SCOPE_EDUCATOR, label: SCOPE_EDUCATOR, value: SCOPE_EDUCATOR },
 ]
 
 export const ENUM_IMPORT_TYPES = {
@@ -141,6 +141,9 @@ export const ENUM_QUESTION_TYPE_WORDS = 'words';
 export const ENUM_QUESTION_TYPE_COMPLEX_WORDS = 'complex_words';
 export const ENUM_QUESTION_TYPE_PHRASES = 'phrases';
 export const ENUM_QUESTION_TYPE_MULTIPLE_CHOICE = 'multiple_choice';
+export const ENUM_QUESTION_TYPE_LOGICAL_SITUATIONSAL_SITUATIONS = 'logical_situations';
+export const ENUM_QUESTION_TYPE_UNDERSTANDING_CHECK = 'understanding_check';
+export const ENUM_QUESTION_TYPE_SHORT_EXPLANATIONS = 'short_explanations';
 
 export const ENUM_NO_RATING = "no_classification";
 export const ENUM_FLUENT = "fluent";
@@ -151,3 +154,20 @@ export const ENUM_PRE_READER_THREE = "pre_reader_three";
 export const ENUM_PRE_READER_FOUR = "pre_reader_four";
 
 export const ENUM_ACCEPTED_FILE_TYPES = ['csv'];
+
+export enum QuestionType {
+    Words = 'words',
+    ComplexWords = 'complex_words',
+    Phrases = 'phrases',
+    MultipleChoice = 'multiple_choice',
+    LogicalSituations = 'logical_situations',
+    UnderstantindCheck = 'understanding_check',
+    ShortExplanations = 'short_explanations',
+    IndustryAreas = 'industry_areas',
+}
+
+export enum QuestionTheme {
+    MonicaAguaBoa = "monica_agua_boa",
+    OMeninoMaluquinho = "o_menino_maluquinho",
+    OPequenoPrincipe = "o_pequeno_principe",
+}

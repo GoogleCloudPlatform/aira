@@ -9,7 +9,7 @@ import uuid
 import sqlalchemy as sa
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import exc
+from sqlalchemy import exc, orm
 from sqlalchemy.engine.row import Row
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
@@ -142,8 +142,12 @@ class GetUsersExamDetails(ports.GetUsersExamDetails):
                             question.formatted_data,
                             "type",
                             question.type,
+                            "theme",
+                            question.theme,
                             "order",
                             question.order,
+                            "answers",
+                            question.answers,
                             "response",
                             sa.func.json_build_object(
                                 "result",
@@ -164,6 +168,10 @@ class GetUsersExamDetails(ports.GetUsersExamDetails):
                                 euq.user_accuracy,
                                 "total_accuracy",
                                 euq.total_accuracy,
+                                "ai_feedback",
+                                euq.ai_feedback,
+                                "ai_is_correct",
+                                euq.ai_is_correct,
                             ),
                         )
                     ),
@@ -257,6 +265,12 @@ class ListPendingExams(ports.ListPendingExams):
         exam = models.Exam
         stmt = (
             sa.select(exam, exam_user.status)
+            .select_from(exam)
+            .options(
+                orm.load_only(
+                    exam.id, exam.name, exam.start_date, exam.end_date, exam.grade
+                )
+            )
             .join(
                 group,
                 sa.and_(
@@ -447,6 +461,8 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
     Query to get all questions pending.
     """
 
+    Result: typing.TypeAlias = ports.ListQuestionsWithStatus.Result
+
     def __init__(self, session_factory: typings.SessionFactory):
         self._session_factory = session_factory
 
@@ -455,12 +471,23 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
         user_id: uuid.UUID,
         group_id: uuid.UUID,
         exam_id: uuid.UUID,
-    ) -> list[tuple[models.Question, models.ExamUserQuestion | None]]:
+    ) -> list[Result]:
         Question = models.Question
         Euq = models.ExamUserQuestion
         current_date = helpers.time_now()
         stmt = (
-            sa.select(Question, models.ExamUserQuestion)
+            sa.select(
+                Question.id,
+                Question.data,
+                Question.formatted_data,
+                Question.name,
+                Question.type,
+                Question.theme,
+                Euq.status,
+                Question.order,
+                Question.answers,
+            )
+            .select_from(Question)
             .join(models.Exam, models.Exam.id == Question.exam_id)
             .join(models.Group, models.Group.grade == models.Exam.grade)
             .outerjoin(
@@ -482,8 +509,7 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
 
         async with self._session_factory() as session:
             result = await session.execute(stmt)
-        response = [(res[0], res[1]) for res in result.unique()]
-        return response
+        return [self.Result(**item) for item in result.mappings()]
 
 
 class QuestionRepository(ports.QuestionRepository):
@@ -579,3 +605,115 @@ class GetExamUserStatus(ports.GetExamUserStatus):
             return None
 
         return exam_user
+
+
+class ExamUserRepository(ports.ExamUserRepository):
+    """
+    ExamUser repository implementation that returns exam data.
+    """
+
+    def __init__(self, session: sqlalchemy_aio.AsyncSession) -> None:
+        self._session = session
+
+    async def get(
+        self,
+        exam_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> models.ExamUser:
+        """
+        Get exam by params.
+        :param exam_id: exam id on database.
+        :param name: name on database.
+        :raises errors.NotFound: if the entity was not found.
+        """
+        stmt = (
+            sa.select(models.ExamUser)
+            .where(models.ExamUser.exam_id == exam_id)
+            .where(models.ExamUser.user_id == user_id)
+        )
+
+        result = await self._session.execute(stmt)
+        if not (exam := result.unique().scalars().one_or_none()):
+            raise errors.NotFound("exam_user")
+        return exam
+
+    async def create(self, exam_model: models.ExamUser) -> models.ExamUser:
+        """
+        Method to create a exam.
+        :param exam_model: the exam model parameter.
+        :returns: exam model.
+        :raises errors.AlreadyExists: if the entity is duplicated.
+        """
+        self._session.add(exam_model)
+
+        try:
+            await self._session.flush()
+        except exc.IntegrityError as exception:
+            raise errors.AlreadyExists() from exception
+
+        return exam_model
+
+    async def delete(self, exam_model: models.ExamUser) -> None:
+        """
+        Method to delete a exam.
+        :param exam_model: the exam model parameter.
+        """
+        await self._session.delete(exam_model)
+
+
+class ExamUserQuestionRepository(ports.ExamUserQuestionRepository):
+    """
+    ExamUserQuestion repository implementation that returns exam data.
+    """
+
+    def __init__(self, session: sqlalchemy_aio.AsyncSession) -> None:
+        self._session = session
+
+    async def get(
+        self,
+        exam_id: uuid.UUID,
+        user_id: uuid.UUID,
+        question_id: uuid.UUID,
+    ) -> models.ExamUserQuestion:
+        """
+        Get exam by params.
+        :param exam_id: exam id on database.
+        :param name: name on database.
+        :raises errors.NotFound: if the entity was not found.
+        """
+        stmt = (
+            sa.select(models.ExamUserQuestion)
+            .where(models.ExamUserQuestion.exam_id == exam_id)
+            .where(models.ExamUserQuestion.user_id == user_id)
+            .where(models.ExamUserQuestion.question_id == question_id)
+        )
+
+        result = await self._session.execute(stmt)
+        if not (exam := result.unique().scalars().one_or_none()):
+            raise errors.NotFound("exam_user_question")
+        return exam
+
+    async def create(
+        self, exam_model: models.ExamUserQuestion
+    ) -> models.ExamUserQuestion:
+        """
+        Method to create a exam.
+        :param exam_model: the exam model parameter.
+        :returns: exam model.
+        :raises errors.AlreadyExists: if the entity is duplicated.
+        """
+        self._session.add(exam_model)
+
+        try:
+            await self._session.flush()
+        except exc.IntegrityError as exception:
+            raise errors.AlreadyExists() from exception
+
+        return exam_model
+
+    async def delete(self, exam_model: models.ExamUserQuestion) -> None:
+        """
+        Method to delete a exam.
+        :param exam_model: the exam model parameter.
+        """
+        await self._session.delete(exam_model)

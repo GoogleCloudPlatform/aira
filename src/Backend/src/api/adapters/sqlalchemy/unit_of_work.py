@@ -66,6 +66,12 @@ class UnitOfWork(ports.UnitOfWork):
         self.result_repository = result.ResultRepository(
             session=session,
         )
+        self.exam_user_repository = exam.ExamUserRepository(
+            session=session,
+        )
+        self.euq_repository = exam.ExamUserQuestionRepository(
+            session=session,
+        )
 
     async def close(self) -> None:
         if not self.closed:

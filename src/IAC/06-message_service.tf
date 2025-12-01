@@ -1,4 +1,3 @@
-
 // Create a Pub/Sub topic for processor_queue.
 
 resource "google_pubsub_topic" "processor_queue" {

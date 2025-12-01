@@ -154,7 +154,19 @@ class ListGroups(ports.ListGroups):
         group = models.Group
 
         stmt = sa.select(group).options(
-            orm.joinedload(group.organization),
+            orm.load_only(
+                group.id,
+                group.name,
+                group.grade,
+                group.shift,
+                group.created_at,
+                group.updated_at,
+                group.customer_id,
+                group.organization_id,
+            ),
+            orm.joinedload(group.organization).load_only(
+                models.Organization.id, models.Organization.name
+            ),
         )
 
         if groups is not None:
@@ -245,6 +257,7 @@ class ListGroupsWithoutOrg(ports.ListGroupsWithoutOrg):
         groups: list[uuid.UUID] | None = None,
         shift: str | None = None,
         grade: str | None = None,
+        name: str | None = None,
     ) -> list[models.Group]:
         """
         Method to list all groups.
@@ -257,6 +270,9 @@ class ListGroupsWithoutOrg(ports.ListGroupsWithoutOrg):
 
         if shift:
             stmt = stmt.where(models.Group.shift == shift)
+
+        if name:
+            stmt = stmt.where(models.Group.name == name)
 
         if grade:
             stmt = stmt.where(models.Group.grade == grade)

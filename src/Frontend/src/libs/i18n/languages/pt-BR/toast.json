@@ -6,7 +6,8 @@
             },
             "auth": {
                 "reset_password_email_sent": "Recuperação de senha enviada com sucesso",
-                "success_reset_password": "Senha redefinida com sucesso"
+                "success_reset_password": "Senha redefinida com sucesso",
+                "success_signup": "Cadastro realizado com sucesso"
             },
             "form": {
                 "exam_created": "Avaliação criada com sucesso",
@@ -44,9 +45,13 @@
                 "error_no_data": "Não foi possível encontrar dados",
                 "error_auth": "Não foi possível autenticar",
                 "error_google_auth": "Erro ao entrar com o Google",
+                "error_cni_auth": "Erro ao entrar com o IDP CNI",
                 "reset_password_email_sent_error": "Ocorreu um erro ao enviar a recuperação de senha. Por favor tente novamente",
                 "failed_reset_password": "Ocorreu um erro ao recuperar a senha. Por favor tente novamente",
-                "error_missing_reset_token": "Token para recuperar senha não encontrado"
+                "error_missing_reset_token": "Token para recuperar senha não encontrado",
+                "signup_user_error": "Ocorreu um erro ao cadastrar sua conta. Por favor tente novamente",
+                "email_already_registered": "Usuário já cadastrado.",
+                "user_not_registered": "Usuário nao encontrado."
             },
             "loading": {
                 "error_loading_organizations": "Erro ao carregar Escolas",
@@ -97,7 +102,15 @@
                 "missing_true": "Adicione ao menos uma resposta correta para a última questão.",
                 "question_one_max_size":"O Limite para a primeira questão é de 60 palavras.",
                 "question_two_max_size":"O Limite para a segunta questão é de 40 palavras.",
-                "answer_already_exists":"Resposta já existente, por favor adicione uma resposta diferente."
+                "answer_already_exists":"Resposta já existente, por favor adicione uma resposta diferente.",
+                "min_size_string": "O tamanho mínimo de caracteres é {min_size}.",
+                "max_size_string": "O tamanho máximo de caracteres é {max_size}.",
+                "passwords_not_match": "As senhas não coincidem.",
+                "password_must_have_uppercase": "A senha deve conter pelo menos uma letra maiúscula.",
+                "password_must_have_special": "A senha deve conter pelo menos um caractere especial.",
+                "passwords_do_not_match": "As senhas não coincidem.",
+                "group_has_users": "Não é possível deletar uma turma com alunos",
+                "organization_has_groups": "Não é possível deletar uma escola com turmas"
             },
             "exam": {
                 "error_record": "Não foi possível gravar",

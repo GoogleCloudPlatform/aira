@@ -3,17 +3,30 @@
         "signin": {
             "email": "Correo electrónico",
             "password": "Contraseña",
-            "confirm_password": "Confirmación de contraseña",
-            "button_google_sign_in": "Ingresar con Google",
-            "button_sign_in": "Ingresar",
+            "confirm_password": "Confirmar contraseña",
+            "button_google_sign_in": "Iniciar sesión con Google",
+            "button_cni_sign_in": "Iniciar sesión con mi cuenta Senai",
+            "button_sign_in": "Iniciar sesión",
             "forgot_password": "Olvidé mi contraseña",
             "reset_password": "Recuperación de contraseña",
-            "button_reset_password": "Recuperar contraseña"
+            "button_reset_password": "Recuperar contraseña",
+            "create_account": "¿No tienes una cuenta? Regístrate gratis"
+        },
+        "signup": {
+            "register": "Registrarse",
+            "name": "Nombre",
+            "email_address": "Correo electrónico",
+            "password": "Contraseña",
+            "confirm_password": "Confirmar contraseña",
+            "button_google_sign_up": "Registrarse con Google",
+            "button_cni_sign_up": "Registrarse con mi cuenta CNI",
+            "button_sign_up": "Registrarse",
+            "already_have_account": "¿Ya tienes una cuenta? Inicia sesión"
         },
         "organization": {
             "create": {
                 "create_organization": "Crear Escuelas",
-                "create_subtitle_organization": "Complete los campos a continuación para crear una nueva escuela. Toda la información a continuación es obligatoria para que la escuela se registre correctamente en el sistema.",
+                "create_subtitle_organization": "Complete los campos a continuación para crear una nueva escuela. Toda la información es obligatoria para que la escuela se registre correctamente en el sistema.",
                 "name": "Nombre",
                 "state": "Estado",
                 "region": "Región",
@@ -45,7 +58,7 @@
             },
             "import": {
                 "import_organization": "Importar Escuela",
-                "import_subtitle_organization": "Para importar escuelas, cargue un archivo CSV con los campos a continuación. Recomendamos que utilice la plantilla de ejemplo proporcionada. Si ha creado una nueva plantilla, deberá mapear el nombre de cada columna con el campo correspondiente a continuación.",
+                "import_subtitle_organization": "Para importar escuelas, cargue un archivo CSV con los campos a continuación. Recomendamos usar la plantilla proporcionada. Si creó una nueva hoja de cálculo, debe asignar cada columna al campo correspondiente.",
                 "file": "Archivo",
                 "keys_relation": "Relación de Claves",
                 "customer_id": "ID del Cliente",
@@ -63,7 +76,7 @@
         "group": {
             "create": {
                 "create_group": "Crear Clase",
-                "create_subtitle_group": "Complete los campos a continuación para crear una nueva clase. Toda la información a continuación es obligatoria para que la clase se registre correctamente en el sistema.",
+                "create_subtitle_group": "Complete los campos a continuación para crear una nueva clase. Toda la información es obligatoria para que la clase se registre correctamente en el sistema.",
                 "name": "Nombre",
                 "grade": "Grado",
                 "shift": "Turno",
@@ -71,13 +84,13 @@
                 "morning": "Mañana",
                 "evening": "Tarde",
                 "night": "Noche",
+                "allday": "Todo el día",
                 "confirm": "Confirmar",
-                "allday": "Integral",
                 "loading": "Cargando ..."
             },
             "edit": {
                 "edit_group": "Editar Clase",
-                "edit_subtitle_group": "Actualice los campos a continuación para editar la información de la clase. Asegúrese de que todos los datos sean correctos antes de guardar los cambios.",
+                "edit_subtitle_group": "Actualice los campos a continuación para editar la información de la clase. Revise todos los datos y realice los cambios necesarios antes de guardar.",
                 "id": "ID",
                 "name": "Nombre",
                 "grade": "Grado",
@@ -86,13 +99,13 @@
                 "morning": "Mañana",
                 "evening": "Tarde",
                 "night": "Noche",
-                "allday": "Integral",
                 "confirm": "Confirmar",
+                "allday": "Todo el día",
                 "loading": "Cargando ..."
             },
             "import": {
                 "import_group": "Importar Clase",
-                "import_subtitle_group": "Para importar clases, cargue un archivo CSV con los campos a continuación. Recomendamos que utilice la plantilla de ejemplo proporcionada. Si ha creado una nueva plantilla, deberá mapear el nombre de cada columna con el campo correspondiente a continuación.",
+                "import_subtitle_group": "Para importar clases, cargue un archivo CSV con los campos a continuación. Recomendamos usar la plantilla proporcionada. Si creó una nueva hoja de cálculo, debe asignar cada columna al campo correspondiente.",
                 "file": "Archivo",
                 "keys_relation": "Relación de Claves",
                 "customer_id": "ID del Cliente",
@@ -117,11 +130,15 @@
             "questions": "Preguntas",
             "words": "Palabras",
             "complex_words": "Palabras Complejas",
-            "multiple_choice": "Selección Múltiple",
+            "multiple_choice": "Opción Múltiple",
             "phrases": "Texto Narrativo",
+            "question_type": "Tipo de Pregunta",
+            "logical_situations": "Situación Lógica",
+            "understanding_check": "Verificación de Comprensión",
+            "short_explanations": "Explicación Corta",
             "add_question": "Agregar Pregunta",
             "add_answer": "Agregar Respuesta",
-            "answer_placeholder": "Ingrese una respuesta para la pregunta",
+            "answer_placeholder": "Escribe una respuesta para la pregunta",
             "answer": "Respuesta",
             "answers": "Respuestas",
             "confirm": "Confirmar",
@@ -131,15 +148,31 @@
             "delete_question_title": "Eliminar Pregunta",
             "delete_question_description": "Esta acción eliminará la pregunta y no se podrá deshacer.",
             "delete_confirm": "Eliminar Pregunta",
+            "generate_words": "Generar Palabras",
+            "loading": "Generando ...",
+            "quantity": "Cantidad de palabras",
+            "use_reference": "Usar referencia de texto",
+            "question_dialog_description": "Editor de la pregunta {order} de tipo {type}",
+            "dont_use_reference": "No usar referencia de texto",
+            "add_proficiency_questions": "Agregar Preguntas de Competencia Lectora",
+            "select_question_type": "Seleccione un tipo de pregunta para comenzar a crear la evaluación",
+            "proficiency": "Competencia Lectora",
+            "food_and_beverages": "Alimentos y Bebidas",
+            "electronics": "Electrónica",
+            "non_metallic_materials": "Materiales No Metálicos",
+            "telecommunications": "Telecomunicaciones",
+            "software_it": "Software y Tecnología de la Información",
+            "industry_areas": "Áreas de la Industria",
+            "theme": "Tema",
             "create": {
                 "title": "Crear Evaluación",
-                "subtitle": "Complete los campos a continuación para crear una nueva evaluación. Toda la información a continuación es obligatoria para que la evaluación se cree correctamente en el sistema.",
+                "subtitle": "Complete los campos a continuación para crear una nueva evaluación. Toda la información es obligatoria para que se registre correctamente en el sistema.",
                 "name": "Nombre",
                 "questions": "Preguntas",
                 "words": "Palabras",
                 "complex_words": "Palabras Complejas",
+                "multiple_choice": "Opción Múltiple",
                 "phrases": "Texto Narrativo",
-                "multiple_choice": "Selección Múltiple",
                 "grade": "Grado",
                 "start_date": "Fecha de Inicio",
                 "end_date": "Fecha de Finalización",
@@ -149,18 +182,26 @@
                 "hours": "Horas",
                 "minutes": "Minutos",
                 "seconds": "Segundos",
-                "loading": "Cargando ..."
+                "loading": "Cargando ...",
+                "question_type": "Tipo de Pregunta",
+                "logical_situations": "Situación Lógica",
+                "understanding_check": "Verificación de Comprensión",
+                "short_explanations": "Explicación Corta"
             },
             "edit": {
+                "question_type": "Tipo de Pregunta",
+                "logical_situations": "Situación Lógica",
+                "understanding_check": "Verificación de Comprensión",
+                "short_explanations": "Explicación Corta",
                 "title": "Editar Evaluación",
-                "subtitle": "Actualice los campos a continuación para editar la información de la evaluación. Asegúrese de que todos los datos sean correctos antes de guardar los cambios.",
+                "subtitle": "Actualice los campos a continuación para editar la información de la evaluación. Revise todos los datos y realice los cambios necesarios antes de guardar.",
                 "id": "ID",
                 "name": "Nombre",
                 "questions": "Preguntas",
                 "words": "Palabras",
                 "complex_words": "Palabras Complejas",
                 "phrases": "Texto Narrativo",
-                "multiple_choice": "Selección Múltiple",
+                "multiple_choice": "Opción Múltiple",
                 "grade": "Grado",
                 "start_date": "Fecha de Inicio",
                 "end_date": "Fecha de Finalización",
@@ -169,16 +210,20 @@
                 "loading": "Cargando ..."
             },
             "preview": {
-                "title": "Visualizar Evaluación",
-                "subtitle": "Haga clic en cada una de las preguntas a continuación para visualizarlas, o haga clic en Previsualización para ver cómo se mostrarán las preguntas a los estudiantes durante la evaluación."
+                "question_type": "Tipo de Pregunta",
+                "logical_situations": "Situación Lógica",
+                "understanding_check": "Verificación de Comprensión",
+                "short_explanations": "Explicación Corta",
+                "title": "Vista Previa de la Evaluación",
+                "subtitle": "Haga clic en cada una de las preguntas a continuación para verlas, o haga clic en Vista Previa para ver cómo se mostrarán a los estudiantes durante la evaluación"
             }
         },
         "user": {
             "create": {
                 "create_user": "Crear Usuario",
-                "create_subtitle_user": "Complete los campos a continuación para crear un nuevo usuario. Toda la información a continuación es obligatoria para registrar correctamente al usuario en el sistema.",
+                "create_subtitle_user": "Complete los campos a continuación para crear un nuevo usuario. Toda la información es obligatoria para registrar correctamente al usuario en el sistema.",
                 "type": "Tipo de Cuenta",
-                "google_signin": "Cuenta de Google",
+                "google_signin": "Cuenta Google",
                 "with_password": "Cuenta con Contraseña",
                 "name": "Nombre",
                 "email_address": "Correo electrónico",
@@ -206,7 +251,7 @@
                 "organizations": "Escuelas",
                 "groups": "Clases",
                 "type": "Tipo de Cuenta",
-                "google_signin": "Cuenta de Google",
+                "google_signin": "Cuenta IDP Senai",
                 "with_password": "Cuenta con Contraseña",
                 "state": "Estado",
                 "region": "Región",
@@ -217,7 +262,7 @@
             },
             "import": {
                 "import_user": "Importar Usuario",
-                "import_subtitle_user": "Para importar usuarios, cargue un archivo CSV con los campos a continuación. Recomendamos que utilice la plantilla de ejemplo proporcionada. Si ha creado una nueva plantilla, deberá mapear el nombre de cada columna con el campo correspondiente a continuación.",
+                "import_subtitle_user": "Para importar usuarios, cargue un archivo CSV con los campos a continuación. Recomendamos usar la plantilla proporcionada. Si creó una nueva hoja de cálculo, debe asignar cada columna al campo correspondiente.",
                 "file": "Archivo",
                 "keys_relation": "Relación de Claves",
                 "customer_id": "ID del Cliente",
@@ -238,15 +283,15 @@
             "delete": {
                 "title": "Eliminar Usuario",
                 "subtitle": "Eliminar Usuario",
-                "message": "¿Está seguro de que desea eliminar a este usuario?",
+                "message": "¿Está seguro de que desea eliminar este usuario?",
                 "close": "Cerrar",
                 "confirm": "Confirmar"
             }
         },
         "multiple_choice": {
-            "title" : "Opción múltiple",
-            "submit" : "Enviar Respuesta",
-            "options" : "Opciones"
+            "title": "Opción Múltiple",
+            "submit": "Enviar Respuesta",
+            "options": "Opciones"
         }
     }
 }
