@@ -1,6 +1,6 @@
 {
     "results": {
-        "exam": "Avaliaçãon",
+        "exam": "Evaluación",
         "learner_response": "Respuesta del Estudiante",
         "question": "Pregunta",
         "correct_words": "Palabras Correctas",
@@ -8,7 +8,7 @@
         "status_suficient": "Suficiente",
         "status_insuficient": "Insuficiente",
         "created_at": "Creado en",
-        "no_browser_support": "Tu navegador no admite el elemento de audio",
+        "no_browser_support": "Su navegador no soporta el elemento de audio",
         "learner_audio": "Audio del Estudiante",
         "total_accuracy": "Precisión",
         "words_accuracy": "Precisión de Palabras",
@@ -17,19 +17,39 @@
         "item_word_total": "Total de Palabras del Ítem",
         "words_read_total": "Total de Palabras Leídas",
         "correctly_read_total": "Total de Palabras Leídas Correctamente",
-        "true": "Correcto",
-        "false": "Incorrecto",
+        "correctly_multiple_choice_total": "Rendimiento en Preguntas de Opción Múltiple",
+        "true": "Correcta",
+        "false": "Incorrecta",
+        "ai_feedback": "Retroalimentación de la IA",
+        "lecture_proficiency": "Competencia Lectora",
+        "text_compreension": "Comprensión de Texto",
+        "critical_thinking": "Pensamiento Crítico y Lógica",
+        "communication_and_problem_solving": "Comunicación y Resolución de Problemas",
+        "general_performance": "Rendimiento General en Preguntas Objetivas",
+        "general_feedback": "Retroalimentación General de su Rendimiento",
+        "general_performance_description": "Significa que respondió correctamente el {accuracy}% de las preguntas objetivas. Detalles a continuación.",
+        "no_objective_questions": "Este examen no tiene preguntas objetivas",
+        "no_ai_feedback": "Este examen no tiene retroalimentación de la IA",
+        "industry_areas": "Áreas de la Industria",
         "buttons": {
             "show_results": "Ver Resultados"
         },
         "classification": {
             "no_classification": "Sin Clasificación",
-            "pre_reader_one": "Pre-Lector Uno",
-            "pre_reader_two": "Pre-Lector Dos",
-            "pre_reader_three": "Pre-Lector Tres",
-            "pre_reader_four": "Pre-Lector Cuatro",
-            "reader": "Lector principiante",
-            "fluent": "Lector Fluido"
+            "pre_reader_one": "Prelector Uno",
+            "pre_reader_two": "Prelector Dos",
+            "pre_reader_three": "Prelector Tres",
+            "pre_reader_four": "Prelector Cuatro",
+            "reader": "Lector Principiante",
+            "fluent": "Lector Fluido",
+            "low": "Bajo Rendimiento",
+            "medium": "Rendimiento Intermedio",
+            "high": "Alto Rendimiento"
+        },
+        "emptyState": {
+            "title": "No se Encontraron Resultados",
+            "message": "Complete un examen, espere un momento e intente nuevamente.",
+            "linkText": "Volver a la Lista de Evaluaciones"
         }
     }
 }

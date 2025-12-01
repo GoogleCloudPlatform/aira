@@ -54,6 +54,9 @@
             "create": "Criar",
             "edit": "Editar",
             "go_to_exams": "Ver Avaliações",
+            "not_started": "Iniciar Avaliação",
+            "in_progress": "Continuar Avaliação",
+            "finished": "Concluído",
             "go_to_results": "Ver Resultados",
             "go_to_group": "Ver Turma",
             "go_to_users": "Ver Usuários",
@@ -84,5 +87,10 @@
     "pagination": {
         "previous": "Anterior",
         "next": "Próximo"
-    }
+    },
+    "errors": {
+        "cant_delete_resource": "Não é possível deletar o recurso"
+    },
+    "group_has_users": "Não é possível deletar uma turma com alunos",
+    "organization_has_groups": "Não é possível deletar uma escola com turmas"
 }

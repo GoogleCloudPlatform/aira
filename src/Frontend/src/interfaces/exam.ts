@@ -17,6 +17,7 @@ export interface IExamResponse {
     updated_at: Date | string;
     start_date: Date | string;
     end_date: Date | string;
+    ai_exam_feedback: string;
 }
 
 export interface IExam {

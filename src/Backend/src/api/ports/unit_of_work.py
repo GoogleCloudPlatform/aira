@@ -49,6 +49,8 @@ class UnitOfWork(abc.ABC):
     role_repository: role.RoleRepository
     question_repository: exam.QuestionRepository
     result_repository: result.ResultRepository
+    exam_user_repository: exam.ExamUserRepository
+    euq_repository: exam.ExamUserQuestionRepository
     closed: bool
     _session: sqlalchemy_aio.AsyncSession
     committed: bool

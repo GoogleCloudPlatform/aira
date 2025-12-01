@@ -3,6 +3,7 @@ Module related to the port of any external auth.
 """
 
 import abc
+import dataclasses
 import uuid
 
 from api import models, typings
@@ -21,6 +22,7 @@ class UserRepository(abc.ABC):
         external_id: str | None = None,
         email: str | None = None,
         reset_token: str | None = None,
+        joined_load: bool = True,
     ) -> models.User:
         """
         Returns the model data.
@@ -165,8 +167,14 @@ class ListPersonifiableUsers(abc.ABC):
     List users that a user can impersonate.
     """
 
+    @dataclasses.dataclass
+    class Result:
+        id: uuid.UUID
+        group_id: uuid.UUID
+        organization_id: uuid.UUID
+
     @abc.abstractmethod
-    async def __call__(self, groups: list[uuid.UUID]) -> list[models.User]:
+    async def __call__(self, groups: list[uuid.UUID]) -> list[Result]:
         """
         Method to list users that a user can impersonate.
 

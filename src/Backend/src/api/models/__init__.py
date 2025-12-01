@@ -8,6 +8,7 @@ from .exams import (
     ExamUser,
     ExamUserQuestion,
     Question,
+    QuestionTheme,
     QuestionType,
     UserRating,
 )
@@ -26,6 +27,7 @@ __all__ = (
     "Organization",
     "Question",
     "QuestionType",
+    "QuestionTheme",
     "Role",
     "Session",
     "Shifts",

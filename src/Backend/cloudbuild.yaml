@@ -19,14 +19,14 @@ steps:
       [
         "build",
         "-t",
-        "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest",
+        "us-central1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest",
         ".",
       ]
 
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args:
-      ["push", "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest"]
+      ["push", "us-central1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest"]
 
   # Deploy container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -38,19 +38,23 @@ steps:
         "backend",
         "--project=$PROJECT_ID",
         "--image",
-        "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest",
+        "us-central1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest",
         "--region",
-        "us-east1",
+        "us-central1",
+        "--memory",
+        "8Gi",
+        "--cpu",
+        "2",
         "--service-account",
         "sa-$PROJECT_NUMBER-back-engine@$PROJECT_ID.iam.gserviceaccount.com",
-        "--update-secrets=_BUCKET_PATH=bucket_name:latest,_DATABASE_URI=sql_connection_url:latest,_PUBSUB_TOPIC=processor_queue:latest,_BQ_DATASET=dataset_name:latest,_BQ_TABLE_NAME=table_name:latest,_PUBSUB_CONVERT_TOPIC=conversion_queue:latest,_ORIGIN=front_url:latest,LOOKERSDK_BASE_URL=lookersdk_base_url:latest,LOOKERSDK_CLIENT_ID=lookersdk_client_id:latest,LOOKERSDK_CLIENT_SECRET=lookersdk_client_secret:latest,_LOOKER_SECRET=looker_secret:latest,/secrets/api/gcs_sa_key=gcs_sa_key:latest",
-        "--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=update_value.cloud.looker.com,_FRONT_BASE_URL=https://frontend-url,_SENDGRID_KEY=update-here,_FORGOT_PW_TEMPLATE=update-here,_SENDER_EMAIL=update-here@domain.com",
+        "--update-secrets=_BUCKET_PATH=bucket_name:latest,_DATABASE_URI=sql_connection_url:latest,_PUBSUB_TOPIC=processor_queue:latest,_BQ_DATASET=dataset_name:latest,_BQ_TABLE_NAME=table_name:latest,_PUBSUB_CONVERT_TOPIC=conversion_queue:latest,_ORIGIN=front_url:latest,LOOKERSDK_BASE_URL=lookersdk_base_url:latest,LOOKERSDK_CLIENT_ID=lookersdk_client_id:latest,LOOKERSDK_CLIENT_SECRET=lookersdk_client_secret:latest,_LOOKER_SECRET=looker_secret:latest,/secrets/api/gcs_sa_key=gcs_sa_key:latest,_SENDGRID_KEY=sendgrid_api_key:latest",
+        "--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=update_value.cloud.looker.com,_FRONT_BASE_URL=https://update-here.run.app,_FORGOT_PW_TEMPLATE=update-here,_SENDER_EMAIL=update-here@domain.com",
         "--allow-unauthenticated",
         "--vpc-connector=vpc-con",
-        "--set-cloudsql-instances=$PROJECT_ID:us-east1:$PROJECT_ID-sql-instance",
+        "--set-cloudsql-instances=$PROJECT_ID:us-central1:$PROJECT_ID-sql-instance",
       ]
 images:
-  - "us-east1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest"
-
+  - "us-central1-docker.pkg.dev/$PROJECT_ID/app-stt/backend:latest"
+serviceAccount: projects/${PROJECT_ID}/serviceAccounts/sa-${PROJECT_NUMBER}-cloudbuild@${PROJECT_ID}.iam.gserviceaccount.com
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -95,6 +95,7 @@ class ListOrganizations(abc.ABC):
         page_size: int = 10,
         page: int = 1,
         query: str | None = None,
+        name: str | None = None,
     ) -> tuple[list[models.Organization], typings.PaginationMetadata]:
         """
         Method to list all orgs.

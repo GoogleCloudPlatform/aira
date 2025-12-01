@@ -114,6 +114,7 @@ class ListGroupsWithoutOrg(abc.ABC):
         groups: list[uuid.UUID] | None = None,
         shift: str | None = None,
         grade: str | None = None,
+        name: str | None = None,
     ) -> list[models.Group]:
         """
         Method to list all groups.

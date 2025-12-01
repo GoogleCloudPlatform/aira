@@ -6,8 +6,12 @@ import base64
 import datetime
 import logging
 import os
+import smtplib
 import urllib.parse
 import uuid
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from pathlib import Path
 
 import fastapi
 import fastapi_injector
@@ -71,6 +75,8 @@ def calculate_user_rating(
             if question_data.right_count > 0:
                 return models.UserRating.PRE_READER_FOUR
             return calculate_pre_reader_rating(question_data.result, data_words)
+        case _:
+            return current_rating
 
 
 def calculate_pre_reader_rating(
@@ -144,6 +150,11 @@ def levenshtein_distance_words(list_one: list[str], list_two: list[str]) -> int:
     return distances[-1][-1]
 
 
+def chunk_list(lst, chunk_size):
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i : i + chunk_size]
+
+
 @router.post("/_handle", response_model=None)
 async def process(
     request: fastapi.Request,
@@ -162,6 +173,7 @@ async def process(
     analytical: ports.AnalyticalResult = fastapi_injector.Injected(
         ports.AnalyticalResult
     ),
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
 ) -> fastapi.Response:
     """
     Receive pubsub message.
@@ -200,16 +212,37 @@ async def process(
         channels=data.channels,
         model_type=model_type,
     )
+    right_count = 0
+    user_result = []
+    ai_is_correct = None
+    ai_feedback = None
 
-    right_count, user_result = process_result.get_right_count_user_result(
-        data.words, tts_words, data.question_type
-    )
+    match data.question_type:
+        case (
+            models.QuestionType.UNDERSTANDING_CHECK
+            | models.QuestionType.LOGICAL_SITUATIONS
+            | models.QuestionType.SHORT_EXPLANATIONS
+            | models.QuestionType.INDUSTRY_AREAS
+        ):
+            ai_is_correct, ai_feedback = gen_ai.evaluate_test(
+                data.question_type,
+                data.words,
+                tts_words,
+                question_theme=data.question_theme,
+            )
+            user_result = tts_words.split()
+        case _:
+            right_count, user_result = process_result.get_right_count_user_result(
+                data.words, tts_words, data.question_type
+            )
 
     async with uow_builder() as uow:
         try:
             user_question = await uow.result_repository.get(data.result_id)
         except errors.NotFound:
             return fastapi.Response(status_code=200)
+        user_question.ai_feedback = ai_feedback
+        user_question.ai_is_correct = ai_is_correct
         user_question.result = user_result
         user_question.right_count = right_count
         user_question.status = models.ExamStatus.FINISHED
@@ -359,9 +392,86 @@ async def convert_audio_type(
             sample_rate=sample_rate,
             channels=channels,
             question_type=data.question_type,
+            question_theme=data.question_theme,
         )
     )
     return fastapi.Response(status_code=200)
+
+
+@router.post(
+    "/generate_words", dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])]
+)
+async def generate_words(
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
+    body: schemas.GenerateWord = fastapi.Body(...),
+) -> schemas.GeneratedWords:
+    if body.question_type not in {
+        models.QuestionType.COMPLEX_WORDS,
+        models.QuestionType.WORDS,
+    }:
+        raise errors.InvalidField("question_type")
+    list_words = gen_ai.generate_words(body.qty_words, body.question_type, body.words)
+    return schemas.GeneratedWords(
+        words=list_words,
+    )
+
+
+@router.post(
+    "/generate_multiple_choice",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
+)
+async def generate_multiple_choice(
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
+    body: schemas.GenerateMultipleChoice = fastapi.Body(...),
+) -> schemas.GeneratedMultipleChoice:
+    if not (body.user_input or body.text_data):
+        raise fastapi.HTTPException(
+            status_code=400,
+            detail="Invalid user_input and text_data.",
+        )
+    question_info = gen_ai.generate_multiple_choice(
+        body.qty_options, body.text_data, body.user_input, body.block_questions
+    )
+    return schemas.GeneratedMultipleChoice(
+        question=question_info["question"],
+        answers=question_info["answers"],
+    )
+
+
+@router.get(
+    "/generate_text", dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])]
+)
+async def generate_text(
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
+    subject: str = fastapi.Query(
+        default="infantil", description="The subject for text generation"
+    ),
+) -> schemas.GeneratedWords:
+    return fastapi.Response(status_code=200, content=gen_ai.generate_text(subject))
+
+
+@router.post(
+    "/generate_question",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
+)
+async def generate_question(
+    gen_ai: ports.GenAI = fastapi_injector.Injected(ports.GenAI),
+    body: schemas.GenerateQuestion = fastapi.Body(...),
+) -> schemas.GeneratedQuestion:
+    if not (body.user_input or body.question_theme or body.text_data):
+        raise fastapi.HTTPException(
+            status_code=400,
+            detail="Invalid user_input and text_data.",
+        )
+    return schemas.GeneratedQuestion(
+        question=gen_ai.generate_question(
+            body.question_type,
+            body.text_data,
+            body.user_input,
+            body.block_questions,
+            body.question_theme,
+        ),
+    )
 
 
 @router.get(
@@ -589,19 +699,23 @@ async def create_signed_url(
                 )
                 if not (
                     user_tb_imp := next(
-                        user_imp
-                        for user_imp in impersonate_list
-                        if user_imp.id == user_id
+                        (
+                            user_imp
+                            for user_imp in impersonate_list
+                            if user_imp.id == user_id
+                        ),
+                        None,
                     )
                 ):
                     raise errors.Forbidden()
-                group = user_tb_imp.groups[0]
+                group_id = user_tb_imp.group_id
+                organization_id = user_tb_imp.organization_id
             else:
                 if session.user_id != user_id:
                     raise errors.Forbidden()
                 group = user.groups[0]
-            group_id = group.id
-            organization_id = group.organization_id
+                group_id = group.id
+                organization_id = group.organization_id
             file_path = (
                 f"{organization_id}/{group_id}/{body.exam_id}"
                 f"|{body.question_id}|{user_id}.{body.file_type}"

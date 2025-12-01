@@ -20,6 +20,10 @@ DictJSON = typing.Annotated[dict[str, str], mapped_column(psql.JSON, nullable=Fa
 ListJSON = typing.Annotated[
     list[str], mapped_column(psql.JSONB(none_as_null=True), nullable=False)
 ]
+ListDictJSON = typing.Annotated[
+    list[dict[str, typing.Any]],
+    mapped_column(psql.JSONB(none_as_null=True), nullable=True),
+]
 UuidPk = typing.Annotated[
     uuid.UUID,
     mapped_column(psql.UUID(as_uuid=True), primary_key=True),

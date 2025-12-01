@@ -56,6 +56,29 @@ class QuestionType(enum.StrEnum):
     WORDS = "words"
     COMPLEX_WORDS = "complex_words"
     PHRASES = "phrases"
+    MULTIPLE_CHOICE = "multiple_choice"
+    UNDERSTANDING_CHECK = "understanding_check"
+    LOGICAL_SITUATIONS = "logical_situations"
+    SHORT_EXPLANATIONS = "short_explanations"
+    INDUSTRY_AREAS = "industry_areas"
+
+    @classmethod
+    def _missing_(cls, value: object) -> enum.StrEnum | None:
+        value = str(value).lower()
+        for member in cls:
+            if member.lower() == value:
+                return member
+        return None
+
+
+class QuestionTheme(enum.StrEnum):
+    """
+    Question Theme.
+    """
+
+    MONICA_AGUA_BOA = "monica_agua_boa"
+    O_MENINO_MALUQUINHO = "o_menino_maluquinho"
+    O_PEQUENO_PRINCIPE = "o_pequeno_principe"
 
     @classmethod
     def _missing_(cls, value: object) -> enum.StrEnum | None:
@@ -81,10 +104,14 @@ class Question(db.Base, db.DefaultColumns):
     )
     name: Mapped[db.Str50]
     type: Mapped[QuestionType] = mapped_column(psql.ENUM(QuestionType))
+    theme: Mapped[QuestionTheme | None] = mapped_column(
+        psql.ENUM(QuestionTheme), nullable=True
+    )
     phrase_id: Mapped[db.Str100]
     data: Mapped[str] = mapped_column(sa.Text, nullable=False)
     formatted_data: Mapped[str] = mapped_column(sa.Text, nullable=False)
     order: Mapped[int] = mapped_column(sa.SmallInteger, nullable=False)
+    answers: Mapped[db.ListDictJSON | None]
 
 
 class ExamUser(db.Base):
@@ -116,6 +143,12 @@ class ExamUser(db.Base):
         default=datetime.datetime.now(tz=datetime.UTC),
     )
 
+    ai_exam_feedback: Mapped[str | None] = mapped_column(
+        sa.String(1000), nullable=True, default=None
+    )
+
+    __table_args__ = (sa.Index("ix_exam_user_exam_user_id", "exam_id", "user_id"),)
+
 
 class Exam(db.Base, db.DefaultColumns):
     """
@@ -139,6 +172,11 @@ class Exam(db.Base, db.DefaultColumns):
         order_by=Question.order.asc(),
     )
 
+    __table_args__ = (
+        sa.Index("ix_exam_start_end_date", "start_date", "end_date"),
+        sa.Index("ix_exam_grade", "grade"),
+    )
+
 
 class ExamUserQuestion(db.Base, db.DefaultColumns):
     """
@@ -149,6 +187,11 @@ class ExamUserQuestion(db.Base, db.DefaultColumns):
 
     __table_args__ = (
         sa.UniqueConstraint("user_id", "exam_id", "question_id", name="ueq_uc"),
+        sa.Index("ix_exam_user_question_user_exam_id", "user_id", "exam_id"),
+        sa.Index("ix_exam_user_question_question_id", "question_id"),
+        sa.Index(
+            "ix_exam_user_question_group_organization_id", "group_id", "organization_id"
+        ),
     )
 
     user_id: Mapped[db.UuidDefault]
@@ -166,6 +209,9 @@ class ExamUserQuestion(db.Base, db.DefaultColumns):
     total_accuracy: Mapped[float] = mapped_column(sa.FLOAT, nullable=False)
 
     audio_url: Mapped[str] = mapped_column(sa.String(400))
+
+    ai_feedback: Mapped[str | None] = mapped_column(sa.String(1000), nullable=True)
+    ai_is_correct: Mapped[bool | None] = mapped_column(sa.Boolean, nullable=True)
 
     status: Mapped[ExamStatus] = mapped_column(
         psql.ENUM(ExamStatus), default=ExamStatus.IN_PROGRESS, init=False

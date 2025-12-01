@@ -1,20 +1,24 @@
 {
     "text-editor": {
         "editor": {
-            "write": "Escriba su texto aquí...",
+            "write": "Escribe tu texto aquí...",
             "title": "Título",
-            "words": "Palabras",
+            "words": "Palabras Simples",
             "complex_words": "Palabras Complejas",
             "phrases": "Texto Narrativo",
-            "multiple_choice": "Opción multiple",
-            "total": "Total"
+            "multiple_choice": "Opción Múltiple",
+            "total": "Total",
+            "logical_situations": "Situación Lógica",
+            "understanding_check": "Validación de Comprensión",
+            "short_explanations": "Explicación Corta",
+            "industry_areas": "Áreas de la Industria"
         },
         "heading": {
             "size": "Tamaño",
             "p": "Párrafo",
-            "h1": "Título 1",
-            "h2": "Título 2",
-            "h3": "Título 3",
+            "h1": "Encabezado 1",
+            "h2": "Encabezado 2",
+            "h3": "Encabezado 3",
             "quote": "Cita",
             "quote-description": "Cita (Ctrl+⇧+.)",
             "ul": "Lista con viñetas",
@@ -27,11 +31,27 @@
             "align": "Alinear",
             "viewing": "Visualizando",
             "editing": "Editando",
-            "editor-mode": "Modo de Editor"
+            "editor-mode": "Modo del Editor"
         },
         "placeholder": {
-            "write": "Escriba su texto aquí...",
+            "write": "Escribe tu texto aquí...",
             "title": "Título"
+        },
+        "button": {
+            "generate_text": "Generar",
+            "loading": "Cargando..."
+        },
+        "input": {
+            "reference": "Inserte aquí el tema de la pregunta de {question_type}",
+            "text": "opción múltiple",
+            "words": "palabras",
+            "complex_words": "palabras complejas",
+            "phrases": "texto narrativo",
+            "multiple_choice": "opción múltiple",
+            "logical_situations": "situación lógica",
+            "understanding_check": "validación de comprensión",
+            "short_explanations": "explicación corta",
+            "industry_areas": "áreas de la industria"
         }
     }
 }

@@ -21,7 +21,9 @@ class Question(pydantic.BaseModel):
     data: str
     formatted_data: str
     type: models.QuestionType
+    theme: models.QuestionTheme | None
     order: int
+    answers: list[dict[str, typing.Any]] | None
 
     class Config:
         """
@@ -102,6 +104,8 @@ class QuestionDetailData(pydantic.BaseModel):
     user_rating: str
     user_accuracy: float
     total_accuracy: float
+    ai_feedback: str | None
+    ai_is_correct: bool | None
 
 
 class QuestionWithResultData(QuestionListStatusless, pydantic.BaseModel):
@@ -118,6 +122,7 @@ class ExamWithQuestionsDataGet(Exam):
     """
 
     questions: list[QuestionWithResultData] = []
+    ai_exam_feedback: str | None
     grade: models.Grades
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -157,7 +162,8 @@ class QuestionPost(pydantic.BaseModel):
     Schema related to the post of questions.
     """
 
-    url: pydantic.AnyHttpUrl
+    url: pydantic.AnyHttpUrl | None
+    answers: list[str] | None
 
 
 @dataclasses.dataclass
@@ -171,6 +177,7 @@ class QuestionMessage(typings.Message):
     phrase_set_id: str
     audio: str
     question_type: str
+    question_theme: str | None
 
 
 class ExamPatch(ExamCreate):
@@ -184,3 +191,12 @@ class ExamPatch(ExamCreate):
         """
 
         orm_mode = True
+
+
+@dataclasses.dataclass
+class SendEmailMessage(typings.Message):
+    """
+    Dataclass for email sent to pubsub
+    """
+
+    grade: models.Grades

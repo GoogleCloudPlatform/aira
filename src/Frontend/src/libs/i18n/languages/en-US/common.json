@@ -3,7 +3,7 @@
     "sidebar": {
         "theme": "Theme",
         "language": "Language",
-        "exit": "Exit",
+        "exit": "Logout",
         "languages": {
             "en-US": "English",
             "pt-BR": "Portuguese",
@@ -20,9 +20,9 @@
             "admin": "Administration",
             "users": "Users",
             "roles": "Roles",
-            "groups": "Classes",
-            "organizations": "Organizations",
-            "apply_exams": "Apply Exams",
+            "groups": "Groups",
+            "organizations": "Schools",
+            "apply_exams": "Apply Exam",
             "results": "Results"
         }
     },
@@ -30,42 +30,45 @@
         "search": "Search",
         "no_data": "No data found",
         "select_a_group": "Select a group...",
-        "groups": "Classes"
+        "groups": "Groups"
     },
     "table": {
-        "headers":{
+        "headers": {
             "actions": "Actions",
             "name": "Name",
             "email": "Email",
             "grade": "Grade",
             "shift": "Shift",
-            "organization": "Organization",
+            "organization": "School",
             "created_at": "Created at",
             "updated_at": "Updated at",
-            "start_date":  "Start Date",
-            "end_date":  "End Date",
-            "region":  "Region",
-            "county":  "County",
-            "city":  "City"
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "region": "Region",
+            "county": "County",
+            "city": "City"
         },
-        "buttons":{
+        "buttons": {
             "import": "Import",
             "export": "Export",
             "create": "Create",
             "edit": "Edit",
-            "go_to_exams": "Go to Exams",
-            "go_to_results": "Go to Results",
-            "go_to_group": "Go to Groups",
-            "go_to_users": "Go to Users",
+            "go_to_exams": "View Exams",
+            "not_started": "Start Exam",
+            "in_progress": "Continue Exam",
+            "finished": "Finished",
+            "go_to_results": "View Results",
+            "go_to_group": "View Group",
+            "go_to_users": "View Users",
             "start_exam": "Start Exam",
             "delete": "Delete",
             "preview": "Preview"
         },
         "shifts": {
             "morning": "Morning",
-            "evening": "Evening",
+            "evening": "Afternoon",
             "night": "Night",
-            "allday": "Full-time"
+            "allday": "Full Day"
         },
         "messages": {
             "open": "Open menu",
@@ -83,5 +86,10 @@
     "pagination": {
         "previous": "Previous",
         "next": "Next"
-    }
+    },
+    "errors": {
+        "cant_delete_resource": "Resource cannot be deleted"
+    },
+    "group_has_users": "A group with learners cannot be deleted",
+    "organization_has_groups": "A school with groups cannot be deleted"
 }

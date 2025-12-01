@@ -1,5 +1,5 @@
 {
-    "loading": "Carreando",
+    "loading": "Cargando",
     "sidebar": {
         "theme": "Tema",
         "language": "Idioma",
@@ -12,7 +12,7 @@
         "options": {
             "home": "Inicio",
             "reports": "Informes",
-            "learners": "Estudiantes",
+            "learners": "Alumnos",
             "tutorials": "Tutoriales",
             "educators": "Educadores",
             "exams": "Exámenes",
@@ -20,9 +20,9 @@
             "admin": "Administración",
             "users": "Usuarios",
             "roles": "Roles",
-            "groups": "Clases",
-            "organizations": "Organizaciones",
-            "apply_exams": "Aplicar Exámenes",
+            "groups": "Grupos",
+            "organizations": "Escuelas",
+            "apply_exams": "Aplicar Examen",
             "results": "Resultados"
         }
     },
@@ -30,34 +30,37 @@
         "search": "Buscar",
         "no_data": "No se encontraron datos",
         "select_a_group": "Seleccione un grupo...",
-        "groups": "Clases"
+        "groups": "Grupos"
     },
     "table": {
-        "headers":{
+        "headers": {
             "actions": "Acciones",
             "name": "Nombre",
             "email": "Correo electrónico",
             "grade": "Grado",
             "shift": "Turno",
-            "organization": "Organización",
+            "organization": "Escuela",
             "created_at": "Creado en",
             "updated_at": "Actualizado en",
-            "start_date":  "Fecha de Inicio",
-            "end_date":  "Fecha de Término",
-            "region":  "Región",
-            "county":  " Município",
-            "city":  "Ciudad"
+            "start_date": "Fecha de Inicio",
+            "end_date": "Fecha de Finalización",
+            "region": "Región",
+            "county": "Municipio",
+            "city": "Ciudad"
         },
-        "buttons":{
+        "buttons": {
             "import": "Importar",
             "export": "Exportar",
             "create": "Crear",
             "edit": "Editar",
-            "go_to_exams": "Ir a Exámenes",
-            "go_to_results": "Ir a Resultados",
-            "go_to_group": "Ir a Clases",
-            "go_to_users": "Ir a Usuarios",
-            "start_exam": "Iniciar Avaliaçãon",
+            "go_to_exams": "Ver Exámenes",
+            "not_started": "Iniciar Examen",
+            "in_progress": "Continuar Examen",
+            "finished": "Completado",
+            "go_to_results": "Ver Resultados",
+            "go_to_group": "Ver Grupo",
+            "go_to_users": "Ver Usuarios",
+            "start_exam": "Iniciar Examen",
             "delete": "Eliminar",
             "preview": "Vista previa"
         },
@@ -65,7 +68,7 @@
             "morning": "Mañana",
             "evening": "Tarde",
             "night": "Noche",
-            "allday": "Integral"
+            "allday": "Todo el día"
         },
         "messages": {
             "open": "Abrir menú",
@@ -83,5 +86,10 @@
     "pagination": {
         "previous": "Anterior",
         "next": "Siguiente"
-    }
+    },
+    "errors": {
+        "cant_delete_resource": "No se puede eliminar el recurso"
+    },
+    "group_has_users": "No se puede eliminar un grupo con alumnos",
+    "organization_has_groups": "No se puede eliminar una escuela con grupos"
 }

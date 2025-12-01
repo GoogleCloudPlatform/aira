@@ -98,7 +98,17 @@ class GetSession(ports.GetSession):
         stmt = (
             sa.select(models.Session)
             .where(models.Session.id == session_id)
-            .options(sa_orm.joinedload(models.Session.user))
+            .options(
+                sa_orm.joinedload(models.Session.user)
+                .joinedload(models.User.groups)
+                .load_only(models.Group.id)
+                .load_only(models.Group.organization_id)
+                .joinedload(models.Group.organization)
+                .load_only(models.Organization.id),
+                sa_orm.joinedload(models.Session.user)
+                .joinedload(models.User.organizations)
+                .load_only(models.Organization.id),
+            )
         )
         session: sqlalchemy_aio.AsyncSession
         async with self._session_factory() as session:

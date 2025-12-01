@@ -33,6 +33,7 @@ import { ACTION_EDIT, ACTION_GET_BY_ID, ACTION_GET_BY_ID_REDIRECT } from "@/cons
 import { CATEGORY_EXAMS, MODE_CREATE, MODE_EDIT, MODE_VIEW } from "@/constants";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { LucideEdit, LucideEye, MoreHorizontal } from "lucide-react";
+import ExamFormHandler from "@/forms/exam/ExamFormHandler";
 
 const Exams : React.FC = () => {
     const [mounted, setMounted] = useState<boolean>(false);
@@ -253,15 +254,13 @@ const Exams : React.FC = () => {
                         :
                         null
                     }
+
+
                     <div className="py-5">
-                        {options.mode === MODE_CREATE && <FormCreateExam formData={options.formData} setOpen={setOpenSheet} />}
-                        {options.mode === MODE_VIEW && <FormEditExam {...options} setOpen={setOpenSheet} preview />}
-                        {options.mode === MODE_EDIT && <FormEditExam {...options} setOpen={setOpenSheet} />}
+                        <ExamFormHandler options={options} setOpen={setOpenSheet} />
                     </div>
                 </SheetContent>
             </Sheet>
-
-            {/* {options.mode === MODE_DELETE && <FormDeleteExam {...options} setOpen={setOpenSheet} />} */}
         </>
     );
 }

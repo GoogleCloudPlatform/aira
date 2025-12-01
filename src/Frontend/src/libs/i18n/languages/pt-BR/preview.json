@@ -5,6 +5,10 @@
             "preview_title_end": "será exibida."
         },
         "questions":{
+            "question_type": "Tipo de Questão",
+            "logical_situations": "Situação Lógica",
+            "understanding_check": "Validação de Entendimento",
+            "short_explanations": "Explicação Curta",
             "words": "Palavras",
             "complex_words": "Palavras Complexas",
             "phrases": "Texto Narrativo",

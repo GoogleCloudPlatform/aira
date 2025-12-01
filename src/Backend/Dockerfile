@@ -19,7 +19,9 @@ RUN curl -sSL https://install.python-poetry.org | python -
 
 WORKDIR /app
 COPY . ./
-RUN poetry self add poetry-plugin-export
+RUN poetry self add poetry-plugin-export==1.8.0
+RUN poetry add ddtrace
+RUN poetry lock --no-update
 RUN poetry install --only build
 
 RUN mkdir build
@@ -45,7 +47,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     pip uninstall -y pip
 
 ENV PORT=8080 \
-    UVICORN_WORKERS=1 \
+    GUNICORN_WORKERS=6 \
     VERSION=$VERSION
 
-CMD exec python stt.pex --host 0.0.0.0 --port $PORT --workers $UVICORN_WORKERS --timeout-keep-alive 0
+CMD exec python stt.pex --bind :$PORT --workers $GUNICORN_WORKERS --threads 1 --timeout 0 --worker-tmp-dir=/dev/shm

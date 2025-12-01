@@ -7,18 +7,21 @@ import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { LucideCircleCheck, LucideCircleX, LucideEdit, LucideTrash } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useQuestions } from '@/context/questions';
 
 type TAnswerEditorProps = {
     question: IQuestionEditor;
-    onChange: (answers: IAnswer[]) => void
+    preview?: boolean;
 }
 
-const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) => {
+const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, preview = false }) => {
     const [editState, setEditState] = useState<{index: number | null, isEditing: boolean}>({index: null, isEditing: false})
     const [answer, setAnswer] = useState<IAnswer>({
         answer: '',
         is_correct: false
     })
+
+    const { handleAnswersChange } = useQuestions()
 
     const t = useTranslations()
 
@@ -49,7 +52,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
             return
         }
         
-        onChange([...question.answers, answer])
+        handleAnswersChange([...question.answers, answer], Number(question.order))
         handleClear()
     }
     
@@ -66,7 +69,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
             return a
         } )
         
-        onChange(updateAnswers)
+        handleAnswersChange(updateAnswers, Number(question.order))
     }
     
     const handleRemoveAnswer = (index: number) => {
@@ -74,7 +77,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
         
         const removeAnswer = question.answers.filter( (a, i) => i !== index )
         
-        onChange(removeAnswer)
+        handleAnswersChange(removeAnswer, Number(question.order))
         handleClear()
     }
     
@@ -103,7 +106,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
             return a
         } )
         
-        onChange(updateAnswers)
+        handleAnswersChange(updateAnswers, Number(question.order))
         handleClear()
     }
 
@@ -121,6 +124,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
                                 id='switch-correct'
                                 checked={item.is_correct}
                                 onClick={() => handleToggleOption(index)}
+                                disabled={preview}
                             />
                             <Label htmlFor="switch-correct">{item.is_correct ? <LucideCircleCheck className="w-5 h-5 text-green-500" /> : <LucideCircleX className="w-5 h-5 text-destructive dark:text-darkDestructive" />}</Label>
                         </div>
@@ -129,15 +133,17 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
                             {item.answer} 
                         </span>
 
-                        <div>
-                            <Button className='p-2 mr-1' onClick={() => handleStartEdit(index)}>
-                                <LucideEdit className="w-5 h-5 text-white" />
-                            </Button>       
+                        {!preview && (
+                            <div>
+                                <Button className='p-2 mr-1' onClick={() => handleStartEdit(index)}>
+                                    <LucideEdit className="w-5 h-5 text-white" />
+                                </Button>       
 
-                            <Button className='!bg-destructive !dark:bg-darkDestructive p-2' onClick={() => handleRemoveAnswer(index)}>
-                                <LucideTrash className="w-5 h-5 text-white" />
-                            </Button>       
-                        </div>
+                                <Button className='!bg-destructive !dark:bg-darkDestructive p-2' onClick={() => handleRemoveAnswer(index)}>
+                                    <LucideTrash className="w-5 h-5 text-white" />
+                                </Button>       
+                            </div>
+                        )}
                     </div>
                 ))}  
             </ul>
@@ -150,15 +156,8 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
                             value={answer.answer}
                             onChange={(e)=> setAnswer(prev => ({...prev, answer: e.target.value}))}
                             className="resize-none h-[75px] dark:text-white"
+                            disabled={preview}
                         />
-                        {/* <div className='flex items-center gap-2 mt-2'>
-                            <Switch
-                                id='switch-correct'
-                                checked={answer.is_correct}
-                                onClick={() => setAnswer(prev => ({...prev, is_correct: !prev.is_correct}))}
-                            />
-                            <Label htmlFor="switch-correct">{answer.is_correct ? <LucideCircleCheck className="w-5 h-5 text-green-500" /> : <LucideCircleX className="w-5 h-5 text-destructive dark:text-darkDestructive" />}</Label>
-                        </div> */}
                     </div>
 
                     <div>
@@ -172,8 +171,7 @@ const AnswersEditor : React.FC<TAnswerEditorProps> = ({ question, onChange }) =>
                                 </Button>
                             </div>
                         ) : (
-
-                            <Button type='button' onClick={handleAddAnswer}>
+                            <Button type='button' onClick={handleAddAnswer} disabled={preview}>
                                 {t('form.exam.add_answer')}
                             </Button>
                         )}
