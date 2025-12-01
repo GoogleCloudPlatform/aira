@@ -17,11 +17,9 @@ from api import errors, models, ports
 
 CURRENT_DIR = Path(__file__).resolve().parent
 THEMES_DICT = {
-    models.QuestionTheme.FOOD_AND_BEVERAGES: "alimentos_e_bebidas.txt",
-    models.QuestionTheme.ELECTRONICS: "eletroeletronica.txt",
-    models.QuestionTheme.NON_METALLIC_MATERIALS: "materiais_nao_metalicos.txt",
-    models.QuestionTheme.TELECOMMUNICATIONS: "telecomunicacoes.txt",
-    models.QuestionTheme.SOFTWARE_IT: "ti_software.txt",
+    models.QuestionTheme.MONICA_AGUA_BOA: "monica_agua_boa.txt",
+    models.QuestionTheme.O_MENINO_MALUQUINHO: "o_menino_maluquinho.txt",
+    models.QuestionTheme.O_PEQUENO_PRINCIPE: "o_pequeno_principe.txt",
 }
 
 
