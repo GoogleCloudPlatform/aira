@@ -27,8 +27,10 @@ Open `src/Backend/src/api/models/exams.py` and add the new theme to the `Questio
 ```python
 class QuestionTheme(enum.StrEnum):
     # ... existing themes
-    MY_NEW_THEME = "my_new_theme" # Add this line
+    MY_NEW_THEME = "MY_NEW_THEME"  # Add this line (use UPPERCASE for the value)
 ```
+
+> **Important**: The enum value must be in UPPERCASE to match the enum member name. This ensures proper serialization with SQLAlchemy.
 
 ### 2.2. Map File
 
@@ -41,6 +43,31 @@ THEMES_DICT = {
 }
 ```
 
+### 2.3. Create Database Migration
+
+After updating the enum, you need to create a database migration to add the new value to the PostgreSQL enum type.
+
+1. **Generate migration file**:
+   ```bash
+   cd src/Backend
+   alembic revision -m "add_my_new_theme_to_questiontheme_enum"
+   ```
+
+2. **Edit the migration file** (located in `src/Backend/migrations/versions/`):
+
+   ```python
+   def upgrade() -> None:
+       # Add new value to the questiontheme enum
+       op.execute("ALTER TYPE questiontheme ADD VALUE 'MY_NEW_THEME'")
+
+   def downgrade() -> None:
+       # Note: PostgreSQL does not support removing enum values directly
+       # You would need to recreate the enum type without the value
+       pass
+   ```
+
+> **Important**: PostgreSQL does not allow removing enum values easily. The downgrade function is typically left empty or requires recreating the entire enum type.
+
 ## Step 3: Update Frontend Code
 
 You need to expose the new theme in the frontend so users can select it.
@@ -52,7 +79,7 @@ Open `src/Frontend/src/constants/enums.ts` and add the new theme to the `Questio
 ```typescript
 export enum QuestionTheme {
     // ... existing themes
-    MyNewTheme = "my_new_theme", // Add this line (value must match Backend enum)
+    MyNewTheme = "MY_NEW_THEME", // Add this line (value must match Backend enum in UPPERCASE)
 }
 ```
 
@@ -79,5 +106,6 @@ Update the translation files to provide a user-friendly name for the new theme. 
 - [ ] **Backend**: `.txt` file added to `themes/` folder.
 - [ ] **Backend**: `QuestionTheme` enum updated in `models/exams.py`.
 - [ ] **Backend**: `THEMES_DICT` updated in `generative_ai.py`.
+- [ ] **Backend**: Database migration created to add new enum value.
 - [ ] **Frontend**: `QuestionTheme` enum updated in `enums.ts`.
 - [ ] **Frontend**: Translation files (`form.json`) updated with the new key.
