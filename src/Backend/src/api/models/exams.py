@@ -76,9 +76,9 @@ class QuestionTheme(enum.StrEnum):
     Question Theme.
     """
 
-    MONICA_AGUA_BOA = "monica_agua_boa"
-    O_MENINO_MALUQUINHO = "o_menino_maluquinho"
-    O_PEQUENO_PRINCIPE = "o_pequeno_principe"
+    MONICA_AGUA_BOA = "MONICA_AGUA_BOA"
+    O_MENINO_MALUQUINHO = "O_MENINO_MALUQUINHO"
+    O_PEQUENO_PRINCIPE = "O_PEQUENO_PRINCIPE"
 
     @classmethod
     def _missing_(cls, value: object) -> enum.StrEnum | None:
