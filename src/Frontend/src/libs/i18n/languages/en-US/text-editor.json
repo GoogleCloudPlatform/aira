@@ -11,7 +11,7 @@
             "logical_situations": "Logical Situation",
             "understanding_check": "Understanding Check",
             "short_explanations": "Short Explanation",
-            "industry_areas": "Industry Areas"
+            "specific_knowledge": "specific knowledge"
         },
         "heading": {
             "size": "Size",
@@ -51,7 +51,7 @@
             "logical_situations": "logical situation",
             "understanding_check": "understanding check",
             "short_explanations": "short explanation",
-            "industry_areas": "industry areas"
+            "specific_knowledge": "specific knowledge"
         }
     }
 }

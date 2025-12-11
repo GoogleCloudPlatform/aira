@@ -343,7 +343,7 @@ const ExamResult : React.FC<TExamResult> = ({ exam_id, user_id }) => {
                 </fieldset>
             </div>
 
-            <Tabs defaultValue={`${proficiency ? 'lecture_proficiency' : textComprehensionQuestionsCount > 0 ? 'text_compreension' : criticalThinkingQuestionsCount > 0 ? 'critical_thinking' : communicationAndProblemSolvingQuestionsCount > 0 ? 'communication_and_problem_solving' : industryAreaQuestionsCount > 0 ? 'industry_areas' : ''}`} className="w-full">
+            <Tabs defaultValue={`${proficiency ? 'lecture_proficiency' : textComprehensionQuestionsCount > 0 ? 'text_compreension' : criticalThinkingQuestionsCount > 0 ? 'critical_thinking' : communicationAndProblemSolvingQuestionsCount > 0 ? 'communication_and_problem_solving' : industryAreaQuestionsCount > 0 ? 'specific_knowledge' : ''}`} className="w-full">
                 <TabsList className="bg-slate-100 dark:bg-slate-900 text-black dark:text-white rounded-lg p-1 w-full justify-start">
                     {proficiency ? (
                         <TabsTrigger value="lecture_proficiency" className="w-[20%] lg:w-auto">
@@ -370,8 +370,8 @@ const ExamResult : React.FC<TExamResult> = ({ exam_id, user_id }) => {
                     ) : null}
 
                     {industryAreaQuestionsCount ? (
-                        <TabsTrigger value="industry_areas" className="w-[20%] lg:w-auto">
-                            <span className="truncate">{t('results.industry_areas')}</span>
+                        <TabsTrigger value="specific_knowledge" className="w-[20%] lg:w-auto">
+                            <span className="truncate">{t('results.specific_knowledge')}</span>
                         </TabsTrigger>
                     ) : null}
                 </TabsList>
@@ -462,7 +462,7 @@ const ExamResult : React.FC<TExamResult> = ({ exam_id, user_id }) => {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="industry_areas" className="w-full p-4 bg-slate-100 dark:bg-slate-900 rounded-lg">
+                <TabsContent value="specific_knowledge" className="w-full p-4 bg-slate-100 dark:bg-slate-900 rounded-lg">
                     <div className="mt-10 mb-20">
                         <Scale 
                             selectedValue={checkResult(industryAreaQuestionsAccuracy)} 

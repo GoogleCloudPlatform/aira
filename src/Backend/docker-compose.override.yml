@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  api:
+    volumes:
+      - ./service-full.json:/secrets/service-full.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-full.json

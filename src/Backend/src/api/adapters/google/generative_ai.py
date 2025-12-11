@@ -149,7 +149,7 @@ class GenerativeAI(ports.GenAI):
                 query = self._get_logical_situations_query(user_input)
             case models.QuestionType.SHORT_EXPLANATIONS:
                 query = self._get_short_explanation_query(user_input)
-            case models.QuestionType.INDUSTRY_AREAS:
+            case models.QuestionType.SPECIFIC_KNOWLEDGE:
                 collection_name = THEMES_DICT[question_theme]
                 relevant_chunks.extend(
                     self._process_collection(collection_name, user_input)
@@ -192,7 +192,7 @@ class GenerativeAI(ports.GenAI):
                 query = self._evaluate_logical_situations()
             case models.QuestionType.SHORT_EXPLANATIONS:
                 query = self._evaluate_short_explanations()
-            case models.QuestionType.INDUSTRY_AREAS:
+            case models.QuestionType.SPECIFIC_KNOWLEDGE:
                 collection_name = THEMES_DICT[question_theme]
                 relevant_chunks.extend(self._process_collection(collection_name))
                 query = self._evaluate_themed_short_explanations()
@@ -283,7 +283,7 @@ O feedback deve ser **claro, objetivo e motivador**, sem formatações HTML ou m
                         feedback_list_short.append(
                             question["response"].get("ai_feedback")
                         )
-                    case models.QuestionType.INDUSTRY_AREAS:
+                    case models.QuestionType.SPECIFIC_KNOWLEDGE:
                         feedback_list_industry.append(
                             question["response"].get("ai_feedback")
                         )
