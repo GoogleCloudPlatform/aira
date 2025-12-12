@@ -41,11 +41,62 @@ THEMES_DICT = {
 }
 ```
 
-## Step 3: Update Frontend Code
+## Step 3: Create Database Migration
+
+Since `QuestionTheme` is a database ENUM, you must create a migration to update the database schema.
+
+1.  **Generate Migration**: Run `alembic revision -m "add_my_new_theme"`
+2.  **Edit Migration File**: Update the `upgrade` function to recreate the ENUM type.
+
+```python
+def upgrade() -> None:
+    # 1. Rename the existing type
+    op.execute("ALTER TYPE questiontheme RENAME TO questiontheme_old")
+
+    # 2. Create the new type with the added value
+    op.execute("""
+        CREATE TYPE questiontheme AS ENUM(
+            'EXISTING_THEME_1',
+            'EXISTING_THEME_2',
+            'MY_NEW_THEME' -- Add your new theme here
+        )
+    """)
+
+    # 3. Update the column to use the new type
+    op.execute("""
+        ALTER TABLE questions 
+        ALTER COLUMN theme TYPE questiontheme 
+        USING theme::text::questiontheme
+    """)
+
+    # 4. Drop the old type
+    op.execute("DROP TYPE questiontheme_old")
+
+def downgrade() -> None:
+    # Logic to revert the changes (remove the new theme)
+    op.execute("ALTER TYPE questiontheme RENAME TO questiontheme_old")
+    
+    op.execute("""
+        CREATE TYPE questiontheme AS ENUM(
+            'EXISTING_THEME_1',
+            'EXISTING_THEME_2'
+        )
+    """)
+
+    op.execute("""
+        ALTER TABLE questions 
+        ALTER COLUMN theme TYPE questiontheme 
+        USING theme::text::questiontheme
+    """)
+
+    op.execute("DROP TYPE questiontheme_old")
+```
+
+## Step 4: Update Frontend Code
 
 You need to expose the new theme in the frontend so users can select it.
 
-### 3.1. Update Enum
+### 4.1. Update Enum
 
 Open `src/Frontend/src/constants/enums.ts` and add the new theme to the `QuestionTheme` enum.
 
@@ -56,7 +107,7 @@ export enum QuestionTheme {
 }
 ```
 
-### 3.2. Update Translations
+### 4.2. Update Translations
 
 Update the translation files to provide a user-friendly name for the new theme. You need to update `form.json` for all supported languages (e.g., `pt-BR`, `en-US`, `es-ES`).
 
@@ -79,5 +130,6 @@ Update the translation files to provide a user-friendly name for the new theme. 
 - [ ] **Backend**: `.txt` file added to `themes/` folder.
 - [ ] **Backend**: `QuestionTheme` enum updated in `models/exams.py`.
 - [ ] **Backend**: `THEMES_DICT` updated in `generative_ai.py`.
+- [ ] **Database**: Migration created and applied to update `questiontheme` ENUM.
 - [ ] **Frontend**: `QuestionTheme` enum updated in `enums.ts`.
 - [ ] **Frontend**: Translation files (`form.json`) updated with the new key.
