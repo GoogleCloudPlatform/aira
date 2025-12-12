@@ -20,11 +20,11 @@ const Menu: React.FC = () => {
     const pathname = usePathname();
     const { locale } = useParams();
     const router = useRouter();
-    
+
     const { menu, setSettings }: ISettingsStore = useSettingsStore();
     const { hasScopePermission } = useRBAC();
     const { getIcon } = useIcon();
-    const { show_finished } : IPaginationStore = usePaginationStore();
+    const { show_finished }: IPaginationStore = usePaginationStore();
 
 
     const [mounted, setMounted] = useState<boolean>(false);
@@ -122,7 +122,7 @@ const Menu: React.FC = () => {
             name: 'results',
             icon: ICON_CLIPBOARD_CHECK,
             label: 'results',
-            render: hasScopePermission([SCOPE_USER_IMPERSONATE]),
+            render: hasScopePermission([SCOPE_USER_IMPERSONATE, SCOPE_USER]),
             route: '/users/results',
             highlight: [
                 '^\/users\/[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}\/results$', // this regex captures everything that starts with /users/<uuid>/results
@@ -179,11 +179,11 @@ const Menu: React.FC = () => {
         if (menu.items) {
             const newMenu = [...menuItems]
 
-            const newMenuItems = newMenu?.map((item: IMenuItem)=> {
+            const newMenuItems = newMenu?.map((item: IMenuItem) => {
                 if (item.name === menu.name) {
-                    return {...item, open: !item.open}
+                    return { ...item, open: !item.open }
                 } else {
-                    return {...item, open: false}
+                    return { ...item, open: false }
                 }
             });
 
@@ -192,13 +192,13 @@ const Menu: React.FC = () => {
         } else {
             const newMenu = [...menuItems]
 
-            const newMenuItems = newMenu?.map((item: IMenuItem)=> {
+            const newMenuItems = newMenu?.map((item: IMenuItem) => {
                 const selectedMenu = item.items?.find(submenu => submenu.route === menu.route)
 
                 if (selectedMenu) {
-                    return {...item, open: true}
-                }else {
-                    return {...item, open: false}
+                    return { ...item, open: true }
+                } else {
+                    return { ...item, open: false }
                 }
             })
 
@@ -237,22 +237,22 @@ const Menu: React.FC = () => {
             return highlight;
         };
 
-        const Tag : React.FC<any> = ({ children, ...props } : PropsWithChildren) => {
-            if(menuItem.items) {
+        const Tag: React.FC<any> = ({ children, ...props }: PropsWithChildren) => {
+            if (menuItem.items) {
                 return (
                     <button {...props} onClick={() => handleMenuClick(menuItem)}>
                         {children}
                     </button>
                 )
             }
-            
+
             return (
                 <Link {...props} href={menuItem.route} target='_blank'>
                     {children}
                 </Link>
             );
         }
-        
+
 
         return (
             <div
@@ -275,7 +275,7 @@ const Menu: React.FC = () => {
                         </div>
                     </div>
 
-                    <span 
+                    <span
                         //className={`ml-2 text-white ${!menu ? 'md:hidden' : ''} `}
                         className={cn(
                             'ml-2 text-white flex-1 text-start',

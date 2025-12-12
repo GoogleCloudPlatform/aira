@@ -60,7 +60,7 @@ class GenerativeAI(ports.GenAI):
         """
         Method genarates x amount of words.
         """
-        qty = qty_words + 40
+        qty = qty_words + 100
         query = ""
         # ruff: noqa: E501
         if block_words:
@@ -68,14 +68,45 @@ class GenerativeAI(ports.GenAI):
             query += f"Não utilize as palavras {block_words_joined}. "
         match question_type:
             case models.QuestionType.COMPLEX_WORDS:
-                query += f"Me gere {qty} palavras aleatórias com pelo menos três silabas, todas em minúsculas, separadas por espaço, atendendo aos seguintes critérios: - Diferentes extensões (número de letras e sílabas), com estruturas silábicas canônicas (CV) e não canônicas (CVC, VC, CCV); - Inclua palavras com regularidades e irregularidades ortográficas, considerando grafemas e fonemas com relação direta e indireta; - Evite repetições ou palavras correlacionadas entre si."
+                query += f"Me gere EXATAMENTE {qty} palavras ÚNICAS e DIFERENTES, aleatórias, com pelo menos três sílabas, todas em minúsculas, separadas por espaço. IMPORTANTE: Não repita palavras, cada palavra deve ser única. Critérios: - Diferentes extensões (número de letras e sílabas), com estruturas silábicas canônicas (CV) e não canônicas (CVC, VC, CCV); - Inclua palavras com regularidades e irregularidades ortográficas, considerando grafemas e fonemas com relação direta e indireta; - Evite palavras correlacionadas entre si. Retorne APENAS as palavras separadas por espaço, sem numeração ou formatação."
             case models.QuestionType.WORDS:
-                query += f"Me gere {qty} palavras aleatórias, todas em minúsculas, separadas por espaço, atendendo aos seguintes critérios: - Diferentes extensões (número de letras e sílabas), com estruturas silábicas canônicas (CV) e não canônicas (CVC, VC, CCV); - Familiaridade acessível para alunos em fase inicial de leitura, evitando palavras muito complexas ou técnicas; - Inclua palavras com regularidades e irregularidades ortográficas, considerando grafemas e fonemas com relação direta e indireta; - Evite repetições ou palavras correlacionadas entre si."
-        response = self.model.generate_content(query)
+                query += f"Me gere EXATAMENTE {qty} palavras ÚNICAS e DIFERENTES, aleatórias, todas em minúsculas, separadas por espaço. IMPORTANTE: Não repita palavras, cada palavra deve ser única. Critérios: - Diferentes extensões (número de letras e sílabas), com estruturas silábicas canônicas (CV) e não canônicas (CVC, VC, CCV); - Familiaridade acessível para alunos em fase inicial de leitura, evitando palavras muito complexas ou técnicas; - Inclua palavras com regularidades e irregularidades ortográficas, considerando grafemas e fonemas com relação direta e indireta; - Evite palavras correlacionadas entre si. Retorne APENAS as palavras separadas por espaço, sem numeração ou formatação."
+        import time
+        from google.api_core import exceptions as google_exceptions
+        
+        try:
+            response = self.model.generate_content(query)
+        except google_exceptions.ResourceExhausted:
+            # Se atingir rate limit na primeira tentativa, aguardar e tentar novamente
+            time.sleep(2)
+            response = self.model.generate_content(query)
         if question_type == models.QuestionType.PHRASES:
             return response.text
         words_list = list(set(response.text.split()))
-        sub_list = random.sample(words_list, qty_words)
+        
+        # Se não tivermos palavras suficientes, gerar mais com backoff exponencial
+        retry_count = 0
+        while len(words_list) < qty_words and retry_count < 3:
+            try:
+                # Aguardar antes de fazer nova requisição (exponential backoff)
+                wait_time = 2 ** retry_count  # 1s, 2s, 4s
+                time.sleep(wait_time)
+                
+                additional_qty = qty_words - len(words_list) + 20
+                additional_query = query.replace(f"{qty}", f"{additional_qty}")
+                additional_response = self.model.generate_content(additional_query)
+                words_list = list(set(words_list + additional_response.text.split()))
+                retry_count += 1
+            except google_exceptions.ResourceExhausted:
+                # Se atingir rate limit durante retry, parar e retornar o que temos
+                break
+            except Exception:
+                # Para qualquer outro erro, parar e retornar o que temos
+                break
+        
+        # Garantir que não excedemos o tamanho disponível
+        sample_size = min(qty_words, len(words_list))
+        sub_list = random.sample(words_list, sample_size)
 
         return sub_list
 
@@ -488,8 +519,12 @@ O feedback deve ser **claro, objetivo e motivador**, sem formatações HTML ou m
     def _process_collection(self, collection_name: str, user_input: str | None = None):
         self._load_txt_to_chroma(collection_name)
         if user_input:
+            # Obter o número de documentos disponíveis
+            collection_count = self.collections[collection_name].count()
+            # Usar o mínimo entre 5 e o número disponível para evitar erro
+            n_results = min(5, collection_count) if collection_count > 0 else 1
             results = self.collections[collection_name].query(
-                query_texts=[user_input], n_results=5
+                query_texts=[user_input], n_results=n_results
             )
             return results["documents"][0]
         else:

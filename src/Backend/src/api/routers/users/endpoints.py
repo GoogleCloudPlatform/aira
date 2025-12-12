@@ -157,7 +157,7 @@ async def list_resources(
 
 @router.get(
     "/exams",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "user.list"])],
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "user.list", "user"])],
 )
 async def list_resources_with_exams(
     groups: list[uuid.UUID] | None = fastapi.Query(default=None),
@@ -183,6 +183,25 @@ async def list_resources_with_exams(
     :param session_manager: implementation of session to get current user.
     """
     current_session = await session_manager.get_current_session()
+    scopes = current_session.user.role.scopes
+    
+    # Se for um estudante (scope "user"), retornar apenas seus próprios resultados
+    if "user" in scopes:
+        from . import schemas as user_schemas
+        return user_schemas.UserWithExamsList(
+            items=[{
+                "id": current_session.user_id,
+                "name": current_session.user.name,
+                "email_address": current_session.user.email,
+                "groups": current_session.user.groups,
+                "organizations": current_session.user.organizations,
+            }],
+            current_page=1,
+            total=1,
+            pages=1,
+        )
+    
+    # Para admin e user.list, comportamento normal
     groups = (
         [gp.id for gp in current_session.user.groups if not groups or gp.id in groups]
         if current_session.user.groups
@@ -824,6 +843,8 @@ async def send_question_data(
     if "user" in scopes and user_id == user_session.user_id:
         if not user_session.user.groups:
             raise errors.NotFound("group")
+        if not user_session.user.organizations:
+            raise errors.NotFound("organization")
         group_id = user_session.user.groups[0].id
         organization_id = user_session.user.organizations[0].id
     elif "user.impersonate" in scopes:
