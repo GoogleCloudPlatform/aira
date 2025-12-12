@@ -30,7 +30,7 @@
         "general_performance_description": "This means you got {accuracy}% of the objective questions correct. Details below.",
         "no_objective_questions": "This exam has no objective questions",
         "no_ai_feedback": "This exam has no AI feedback",
-        "specific_knowledge": "specific knowledge",
+        "specific_knowledge": "Specific Knowledge",
         "buttons": {
             "show_results": "View Results"
         },
