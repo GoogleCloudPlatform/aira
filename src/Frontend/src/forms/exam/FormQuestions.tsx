@@ -26,7 +26,7 @@ const FormQuestions: React.FC<IFormQuestions> = ({ isEditable = true, preview = 
     const questions = form.watch('questions')
     
     const industryAreasQuestions = questions.filter((question: IQuestionEditor) => question.type === QuestionType.IndustryAreas)
-    const lastTheme = industryAreasQuestions.length > 0 ? industryAreasQuestions[industryAreasQuestions.length - 1].theme : QuestionTheme.FoodAndBeverages
+    const lastTheme = industryAreasQuestions.length > 0 ? industryAreasQuestions[industryAreasQuestions.length - 1].theme : QuestionTheme.MonicaAguaBoa
 
     useEffect(() => {
         if (type === 'proficiency' && questions.length > 0) {   
@@ -46,7 +46,7 @@ const FormQuestions: React.FC<IFormQuestions> = ({ isEditable = true, preview = 
                     order,
                     name: type,
                     type: type,
-                    theme: type === QuestionType.IndustryAreas ? lastTheme ? lastTheme : QuestionTheme.FoodAndBeverages : null,
+                    theme: type === QuestionType.IndustryAreas ? lastTheme ? lastTheme : QuestionTheme.MonicaAguaBoa : null,
                     data: '',
                     formatted_data: '',
                     answers: []

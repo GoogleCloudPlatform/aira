@@ -180,7 +180,7 @@ const QuestionsEditor: React.FC<TQuestionEditorProps> = ({ question, field, inde
                     {question_type === QuestionType.IndustryAreas && (
                         <Select 
                             onValueChange={(theme) => handleChangeQuestionTheme(theme as QuestionTheme, field.value, Number(question.order))} 
-                            value={question.theme || QuestionTheme.FoodAndBeverages}
+                            value={question.theme || QuestionTheme.MonicaAguaBoa}
                             disabled={preview}
                         >
                             <SelectTrigger className="1/2">
