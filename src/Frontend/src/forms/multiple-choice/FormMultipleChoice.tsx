@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useExamsStore } from '@/store/exams';
 import { useRecordStore } from '@/store/record';
 import { useRBAC } from '@/context/rbac';
+import { useAuth } from '@/context/auth';
 import { IAnswer, IQuestionEditor } from '@/interfaces/question';
 import { SchemaMultipleChoiceAnswer, SchemaMultipleChoiceDefaultValues } from './schema';
 import { sendMultipleChoiceAnswer } from '@/services/exam';
@@ -27,23 +28,26 @@ type TAnswerVisorProps = {
     total_questions: number;
 }
 
-const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_questions }) => {
+const FormMultipleChoice: React.FC<TAnswerVisorProps> = ({ question, total_questions }) => {
     const [shuffledAnswers, setShuffledAnswers] = useState<IAnswer[]>([]);
-    const correctAnswersArray = question?.answers?.filter( answer => answer.is_correct === true)
+    const correctAnswersArray = question?.answers?.filter(answer => answer.is_correct === true)
     const singleAnswer = correctAnswersArray?.length === 1 ? true : false
-    
+
     const t = useTranslations()
     const router = useRouter()
     const params = useParams()
     const queryClient = useQueryClient()
     const { loading, setLoading } = useLoading()
-    const { questionIndex, setExams } : IExamsStore = useExamsStore()
-    const { setRecord } : IRecordStore = useRecordStore();
+    const { questionIndex, setExams }: IExamsStore = useExamsStore()
+    const { setRecord }: IRecordStore = useRecordStore();
     const { hasScopePermission } = useRBAC();
+    const { user } = useAuth();
 
     const isStudent = hasScopePermission([SCOPE_USER]);
     const exam_id = params.id as string
-    const user_id = params.user_id as string
+    // Estudiantes: usar su propio ID del contexto
+    // Educadores: usar el user_id de la URL (del alumno que está evaluando)
+    const user_id = isStudent ? (user?.user_id || '') : (params.user_id as string || '');
     const question_id = question.id as string
 
     const form = useForm<z.infer<typeof SchemaMultipleChoiceAnswer>>({
@@ -58,7 +62,7 @@ const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_ques
         }
     }, [question]);
 
-    
+
     const endExam = useCallback(() => {
         setLoading(true)
         setExams("expanded", false);
@@ -66,25 +70,25 @@ const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_ques
         setRecord("audioChunks", []);
         setRecord("canStop", false);
         setRecord("seconds", MAX_RECORD_SECONDS);
-        
+
         if (isStudent) {
             router.push(`/exams/${exam_id}/finish`);
-            return; 
+            return;
         }
-        
+
         router.push(`/users/${user_id}/exams/${exam_id}/finish`);
     }, [setExams, setRecord, setLoading, isStudent, router, exam_id, user_id]);
 
-    if (!exam_id || !question_id || (!isStudent && !user_id)) return null
+    if (!exam_id || !question_id || !user_id) return null
     if (!question.answers) return null
 
-    const onSubmit = async ({answers}: z.infer<typeof SchemaMultipleChoiceAnswer>)=>{
+    const onSubmit = async ({ answers }: z.infer<typeof SchemaMultipleChoiceAnswer>) => {
         try {
-            await sendMultipleChoiceAnswer( {exam_id , user_id, question_id, answers })
-            
+            await sendMultipleChoiceAnswer({ exam_id, user_id, question_id, answers })
+
             const hasNextQuestion = questionIndex < total_questions - 1;
             if (!hasNextQuestion) return endExam()
-                
+
             setExams("questionIndex", questionIndex + 1)
             queryClient.invalidateQueries({ queryKey: ['questions'] });
         } catch (error) {
@@ -112,21 +116,21 @@ const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_ques
                                         {shuffledAnswers.map((item, index) => (
                                             <FormItem key={index} className='dark:text-white flex items-center gap-3 p-2 bg-gray-100 dark:bg-darkPrimary/20 rounded min-h-10'>
                                                 <FormControl className='w-4 h-4'>
-                                                    <RadioGroupItem value={item.answer} className='w-4 h-4'/>
+                                                    <RadioGroupItem value={item.answer} className='w-4 h-4' />
                                                 </FormControl>
                                                 <FormLabel className="!mt-0 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 overflow-hidden break-words h-max">
                                                     {item.answer}
                                                 </FormLabel>
                                             </FormItem>
                                         ))}
-                                    
+
                                     </RadioGroup>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                ): (
+                ) : (
                     <FormField
                         control={form.control}
                         name="answers"
@@ -174,12 +178,12 @@ const FormMultipleChoice : React.FC<TAnswerVisorProps> = ({ question, total_ques
 
                 <div className="flex w-full gap-2 justify-end">
                     <Button type="submit" variant={"secondary"} disabled={loading}>
-                        { !loading ?  t('form.multiple_choice.submit') : <Loading style="horizontal" text={true} size={16}/>}
+                        {!loading ? t('form.multiple_choice.submit') : <Loading style="horizontal" text={true} size={16} />}
                     </Button>
                 </div>
             </form>
         </Form>
-        
+
     )
 }
 

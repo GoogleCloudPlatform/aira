@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_VERSION=1.8.2 \
+    POETRY_VERSION=2.0.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_NO_INTERACTION=1 \
     PATH="/opt/poetry/bin:$PATH"
@@ -21,7 +21,7 @@ WORKDIR /app
 COPY . ./
 RUN poetry self add poetry-plugin-export==1.8.0
 RUN poetry add ddtrace
-RUN poetry lock --no-update
+RUN poetry lock
 RUN poetry install --only build
 
 RUN mkdir build

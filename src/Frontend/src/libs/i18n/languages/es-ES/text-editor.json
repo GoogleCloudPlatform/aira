@@ -11,7 +11,7 @@
             "logical_situations": "Situación Lógica",
             "understanding_check": "Validación de Comprensión",
             "short_explanations": "Explicación Corta",
-            "industry_areas": "Áreas de la Industria"
+            "specific_knowledge": "Conocimientos Específicos"
         },
         "heading": {
             "size": "Tamaño",
@@ -51,7 +51,7 @@
             "logical_situations": "situación lógica",
             "understanding_check": "validación de comprensión",
             "short_explanations": "explicación corta",
-            "industry_areas": "áreas de la industria"
+            "specific_knowledge": "conocimientos específicos"
         }
     }
 }

@@ -60,7 +60,7 @@ class QuestionType(enum.StrEnum):
     UNDERSTANDING_CHECK = "understanding_check"
     LOGICAL_SITUATIONS = "logical_situations"
     SHORT_EXPLANATIONS = "short_explanations"
-    INDUSTRY_AREAS = "industry_areas"
+    SPECIFIC_KNOWLEDGE = "specific_knowledge"
 
     @classmethod
     def _missing_(cls, value: object) -> enum.StrEnum | None:

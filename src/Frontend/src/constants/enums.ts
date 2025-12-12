@@ -163,7 +163,7 @@ export enum QuestionType {
     LogicalSituations = 'logical_situations',
     UnderstantindCheck = 'understanding_check',
     ShortExplanations = 'short_explanations',
-    IndustryAreas = 'industry_areas',
+    IndustryAreas = 'specific_knowledge',
 }
 
 export enum QuestionTheme {

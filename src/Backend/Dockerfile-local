@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_VERSION=1.8.2 \
+    POETRY_VERSION=2.0.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_NO_INTERACTION=1 \
     PATH="/opt/poetry/bin:$PATH"
@@ -19,11 +19,18 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
         ffmpeg \
         espeak
 
-RUN curl -sSL https://install.python-poetry.org | python -
+RUN python -m pip install --upgrade pip setuptools && \
+    python -m pip install "poetry==2.0.1" && \
+    poetry --version
+ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
-RUN poetry install --only main --no-root
+RUN poetry lock --no-update || true
+RUN which poetry || true && \
+    poetry --version || true && \
+    poetry debug info || true && \
+    poetry install --only main --no-root
 
 COPY . /app
 RUN poetry install --only main

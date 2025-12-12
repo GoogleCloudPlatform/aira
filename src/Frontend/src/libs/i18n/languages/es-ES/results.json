@@ -30,7 +30,7 @@
         "general_performance_description": "Significa que respondió correctamente el {accuracy}% de las preguntas objetivas. Detalles a continuación.",
         "no_objective_questions": "Este examen no tiene preguntas objetivas",
         "no_ai_feedback": "Este examen no tiene retroalimentación de la IA",
-        "industry_areas": "Áreas de la Industria",
+        "specific_knowledge": "Conocimientos Específicos",
         "buttons": {
             "show_results": "Ver Resultados"
         },
@@ -48,7 +48,7 @@
         },
         "emptyState": {
             "title": "No se Encontraron Resultados",
-            "message": "Complete un examen, espere un momento e intente nuevamente.",
+            "message": "Complete una evaluación, espere un momento e intente nuevamente.",
             "linkText": "Volver a la Lista de Evaluaciones"
         }
     }
