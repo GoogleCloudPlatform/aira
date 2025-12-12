@@ -21,7 +21,7 @@ WORKDIR /app
 COPY . ./
 RUN poetry self add poetry-plugin-export==1.8.0
 RUN poetry add ddtrace
-RUN poetry lock --no-update
+RUN poetry lock
 RUN poetry install --only build
 
 RUN mkdir build
