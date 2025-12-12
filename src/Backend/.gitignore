@@ -1,2 +1,4 @@
 service-full.json
 .env
+__pycache__/
+*.pyc
