@@ -194,10 +194,10 @@ async def create(
         exam_model = await uow.exam_repository.create(exam)
         await uow.commit()
 
-        await publisher.publish(
-            schemas.SendEmailMessage(grade=body.grade),
-            topic=settings.get("pubsub_send_email_topic"),
-        )
+        # await publisher.publish(
+        #     schemas.SendEmailMessage(grade=body.grade),
+        #     topic=settings.get("pubsub_send_email_topic"),
+        # )
     return schemas.ExamGet.from_orm(exam_model)
 
 

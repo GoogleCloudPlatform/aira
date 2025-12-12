@@ -16,7 +16,7 @@
             "logical_situations_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
             "understanding_check_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
             "short_explanations_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
-            "industry_areas_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
+            "specific_knowledge_message": "When ready, carefully read the question below. Then, <strong>record your answer</strong>. Note: you only have 1 minute to respond.",
             "bottom_message": "After finishing the recording, click the 'Stop Recording' button and then 'Next'",
             "success_message": "Success",
             "audio_success_record": "your audios have been successfully recorded",

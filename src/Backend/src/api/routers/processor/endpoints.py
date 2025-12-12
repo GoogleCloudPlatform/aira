@@ -222,7 +222,7 @@ async def process(
             models.QuestionType.UNDERSTANDING_CHECK
             | models.QuestionType.LOGICAL_SITUATIONS
             | models.QuestionType.SHORT_EXPLANATIONS
-            | models.QuestionType.INDUSTRY_AREAS
+            | models.QuestionType.SPECIFIC_KNOWLEDGE
         ):
             ai_is_correct, ai_feedback = gen_ai.evaluate_test(
                 data.question_type,

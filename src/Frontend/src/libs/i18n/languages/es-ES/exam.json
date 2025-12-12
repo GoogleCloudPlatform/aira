@@ -16,7 +16,7 @@
             "logical_situations_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
             "understanding_check_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
             "short_explanations_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
-            "industry_areas_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
+            "specific_knowledge_message": "Cuando esté listo, lea atentamente la pregunta a continuación. Luego, <strong>grabe su respuesta</strong>. Atención: solo tiene 1 minuto para responder.",
             "bottom_message": "Al finalizar la grabación, haga clic en el botón 'Detener Grabación' y luego en 'Siguiente'",
             "success_message": "Éxito",
             "audio_success_record": "sus audios se han grabado correctamente",

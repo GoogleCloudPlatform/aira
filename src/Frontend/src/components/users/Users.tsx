@@ -2,14 +2,15 @@
 
 import { getUsersWithExams, getExportedUsers, getUserById, getUsers, deleteUserById } from "@/services/user";
 import { useEffect, useState } from "react";
-import { 
-    ColumnDef 
-} from "@tanstack/react-table"; 
+import { useAuth } from "@/context/auth";
+import {
+    ColumnDef
+} from "@tanstack/react-table";
 import { IUser } from "@/interfaces/auth";
-import { SCOPE_ADMIN, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
+import { SCOPE_ADMIN, SCOPE_USER, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RBACWrapper, useRBAC } from "@/context/rbac";
-import { ActionTable  } from "@/components";
+import { ActionTable } from "@/components";
 import { SchemaCreateUserDefaultValues, SchemaCreateUserForm, SchemaEditUserForm, SchemaImportUser, SchemaImportUserDefaultValues } from "@/forms/user/schema";
 import { TActionSheetOptions } from "@/interfaces/component";
 import { isEmpty } from "lodash";
@@ -35,8 +36,8 @@ import { getAllGroups } from "@/services/group";
 import FormDeleteUser from "@/forms/user/FormDeleteUser";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { LucideBookCopy, LucideEdit, LucideLineChart, LucideTrash2, MoreHorizontal } from "lucide-react";
-  
-const Users : React.FC = () => {
+
+const Users: React.FC = () => {
     const [mounted, setMounted] = useState<boolean>(false);
     const [openSheet, setOpenSheet] = useState<boolean>(false);
     const [options, setOptions] = useState<TActionSheetOptions>({} as TActionSheetOptions);
@@ -46,11 +47,21 @@ const Users : React.FC = () => {
     const { hasScopePermission } = useRBAC();
     const pathname = usePathname();
     const router = useRouter();
-    const searchParams = useSearchParams();    
+    const searchParams = useSearchParams();
     const { setUser } = useUserStore();
     const { page, page_size, query, show_finished, setPagination } = usePaginationStore();
 
     const groups = searchParams.get("groups") || "";
+    const { user } = useAuth(); // Import useAuth to get user info
+
+    useEffect(() => {
+        // Redirecionar estudantes diretamente para a página de resultados
+        if (hasScopePermission([SCOPE_USER]) && !hasScopePermission([SCOPE_USER_IMPERSONATE, SCOPE_ADMIN])) {
+            if (user?.user_id) {
+                router.push(`/users/${user.user_id}/results`);
+            }
+        }
+    }, [hasScopePermission, user, router]);
 
     useEffect(() => {
         if (mounted) {
@@ -66,20 +77,20 @@ const Users : React.FC = () => {
             setMounted(false);
         }
     }, [setPagination]);
-    
+
     const { data, isLoading } = useQuery({
-        queryKey: [CATEGORY_USERS, page], 
-        queryFn: hasScopePermission([SCOPE_ADMIN]) ? getUsers : getUsersWithExams, 
+        queryKey: [CATEGORY_USERS, page],
+        queryFn: hasScopePermission([SCOPE_ADMIN]) ? getUsers : getUsersWithExams,
         retryOnMount: false, retry: false,
         enabled: mounted
     });
-    
-    const { data: groupsOptions, isLoading: isLoadingGroups } = useQuery<IGroupsResponse | null>({ 
-        queryKey: [CATEGORY_GROUPS], 
+
+    const { data: groupsOptions, isLoading: isLoadingGroups } = useQuery<IGroupsResponse | null>({
+        queryKey: [CATEGORY_GROUPS],
         queryFn: () => hasScopePermission([SCOPE_USER_IMPERSONATE]) ? getAllGroups() : null,
         retryOnMount: false, retry: false,
     });
-    
+
     useEffect(() => {
 
         if (pathname.includes('/users/results')) {
@@ -93,15 +104,15 @@ const Users : React.FC = () => {
     if (isLoading || isLoadingGroups) return <SkeletonUsers />;
     if (!mounted || !data) return null;
     if (hasScopePermission([SCOPE_USER_IMPERSONATE]) && !groupsOptions) return null;
-    
+
 
     const handleGroupChange = (value: any) => {
         if (value === VALUE_NONE) {
-            router.push("/users/exams")    
+            router.push("/users/exams")
             return;
         }
 
-        router.push(`${pathname}?groups=${value}`);        
+        router.push(`${pathname}?groups=${value}`);
     }
 
     const create = async () => {
@@ -145,14 +156,14 @@ const Users : React.FC = () => {
         });
         setOpenSheet(true);
     };
-    
-    const impersonate = (user : Partial<IUser>) => router.push(`/users/${user.id}/exams`);
 
-    const results = (user : Partial<IUser>) => {
+    const impersonate = (user: Partial<IUser>) => router.push(`/users/${user.id}/exams`);
+
+    const results = (user: Partial<IUser>) => {
         setUser("user", user)
         router.push(`/users/${user.id}/results`);
     }
-    
+
     const exportUsers = async () => {
         const data = await getExportedUsers();
         if (!data) return;
@@ -170,12 +181,12 @@ const Users : React.FC = () => {
             }
         });
     };
-    
+
     const calculateDisabledExams = (item: any) => {
         if (!item || !item.exams || !item.exams.length) return true;
 
         let isDisabled = true;
-        const hasExamToFinish = item.exams.find((exam : { status: string }) => exam.status !== ENUM_EXAM_STATUS_FINISHED);
+        const hasExamToFinish = item.exams.find((exam: { status: string }) => exam.status !== ENUM_EXAM_STATUS_FINISHED);
         if (hasExamToFinish) isDisabled = false;
 
         return isDisabled;
@@ -185,12 +196,12 @@ const Users : React.FC = () => {
         if (!item || !item.exams || !item.exams.length) return true;
 
         let isDisabled = true;
-        const canViewResults = item.exams.find((exam : { status: string }) => exam.status !== ENUM_EXAM_STATUS_NOT_STARTED && exam.status !== ENUM_EXAM_STATUS_IN_PROGRESS);
+        const canViewResults = item.exams.find((exam: { status: string }) => exam.status !== ENUM_EXAM_STATUS_NOT_STARTED && exam.status !== ENUM_EXAM_STATUS_IN_PROGRESS);
         if (canViewResults) isDisabled = false;
 
         return isDisabled;
     }
-    
+
     const columns: ColumnDef<TTableHeader>[] = [
         {
             accessorKey: "name",
@@ -209,7 +220,7 @@ const Users : React.FC = () => {
                 return (
                     <>
                         <div className="flex justify-center">
-                            <RBACWrapper requiredScopes={[SCOPE_USER_IMPERSONATE]}>
+                            <RBACWrapper requiredScopes={[SCOPE_USER_IMPERSONATE, SCOPE_USER]}>
                                 {pathname.includes('results') ?
                                     <Button
                                         variant={"secondary"}
@@ -273,7 +284,7 @@ const Users : React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-2 justify-between w-full">
                     <div className='w-full sm:w-80'>
                         <Search />
-                    </div>    
+                    </div>
                     <RBACWrapper requiredScopes={[SCOPE_USER_IMPERSONATE]}>
                         <div className="flex space-x-5 w-full sm:w-fit">
                             {/* <div className="flex items-center space-x-2 sm:ml-3">
@@ -293,9 +304,9 @@ const Users : React.FC = () => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value={VALUE_NONE}>{t('search.select_a_group')}</SelectItem>    
-                                            {groupsOptions && groupsOptions.items.map(item => 
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>    
+                                            <SelectItem value={VALUE_NONE}>{t('search.select_a_group')}</SelectItem>
+                                            {groupsOptions && groupsOptions.items.map(item =>
+                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                             )}
                                         </SelectGroup>
                                     </SelectContent>
@@ -319,21 +330,21 @@ const Users : React.FC = () => {
                     </div>
                 </RBACWrapper>
             </div>
-            
+
             <section className="sm:container pt-5 2xl:pt-10">
-                
-                <ActionTable 
-                    columns={columns} 
-                    data={data} 
+
+                <ActionTable
+                    columns={columns}
+                    data={data}
                     pagination
                 />
-            
+
             </section>
-    
-            {openSheet && 
+
+            {openSheet &&
                 <Sheet open={openSheet} onOpenChange={setOpenSheet}>
                     <SheetContent className="overflow-auto w-full sm:min-w-[420px]">
-                        {!isEmpty(options) ? 
+                        {!isEmpty(options) ?
                             <SheetHeader>
                                 <SheetTitle>{t(options.title)}</SheetTitle>
                                 <SheetDescription>{t(options.subtitle)}</SheetDescription>

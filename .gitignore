@@ -5,3 +5,4 @@ src/IAC/.terraform/providers/registry.terraform.io/hashicorp/google/7.5.0/darwin
 /src/IAC/.terraform
 src/IAC/terraform.tfstate
 src/IAC/terraform.tfstate.backup
+src/Backend/chroma_data/chroma.sqlite3
