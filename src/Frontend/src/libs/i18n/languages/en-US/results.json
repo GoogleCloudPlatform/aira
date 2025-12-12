@@ -48,7 +48,7 @@
         },
         "emptyState": {
             "title": "No Results Found",
-            "message": "Complete an exam, wait a moment, and try again.",
+            "message": "Complete an assessment, wait a moment, and try again.",
             "linkText": "Back to Assessments List"
         }
     }

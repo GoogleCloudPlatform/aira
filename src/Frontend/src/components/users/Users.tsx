@@ -2,6 +2,7 @@
 
 import { getUsersWithExams, getExportedUsers, getUserById, getUsers, deleteUserById } from "@/services/user";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/auth";
 import {
     ColumnDef
 } from "@tanstack/react-table";
@@ -51,6 +52,16 @@ const Users: React.FC = () => {
     const { page, page_size, query, show_finished, setPagination } = usePaginationStore();
 
     const groups = searchParams.get("groups") || "";
+    const { user } = useAuth(); // Import useAuth to get user info
+
+    useEffect(() => {
+        // Redirecionar estudantes diretamente para a página de resultados
+        if (hasScopePermission([SCOPE_USER]) && !hasScopePermission([SCOPE_USER_IMPERSONATE, SCOPE_ADMIN])) {
+            if (user?.user_id) {
+                router.push(`/users/${user.user_id}/results`);
+            }
+        }
+    }, [hasScopePermission, user, router]);
 
     useEffect(() => {
         if (mounted) {

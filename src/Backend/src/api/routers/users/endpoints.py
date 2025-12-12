@@ -183,24 +183,6 @@ async def list_resources_with_exams(
     :param session_manager: implementation of session to get current user.
     """
     current_session = await session_manager.get_current_session()
-    scopes = current_session.user.role.scopes
-    
-    # Se for um estudante (scope "user"), retornar apenas seus próprios resultados
-    if "user" in scopes:
-        from . import schemas as user_schemas
-        return user_schemas.UserWithExamsList(
-            items=[{
-                "id": current_session.user_id,
-                "name": current_session.user.name,
-                "email_address": current_session.user.email,
-                "groups": current_session.user.groups,
-                "organizations": current_session.user.organizations,
-            }],
-            current_page=1,
-            total=1,
-            pages=1,
-        )
-    
     # Para admin e user.list, comportamento normal
     groups = (
         [gp.id for gp in current_session.user.groups if not groups or gp.id in groups]

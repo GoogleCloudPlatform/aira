@@ -48,7 +48,7 @@
         },
         "emptyState": {
             "title": "Nenhum resultado encontrado",
-            "message": "Complete um exame, espere um momento e tente novamente.",
+            "message": "Complete uma avaliação, espere um momento e tente novamente.",
             "linkText": "Voltar para a lista de avaliações"
         }
     }
