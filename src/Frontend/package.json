@@ -57,7 +57,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.0.1",
     "firebase": "^10.8.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lucide-react": "^0.358.0",
     "negotiator": "^0.6.3",
     "next": "14.2.2",
