@@ -89,7 +89,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "eslint": "^8",
+    "eslint": "^9",
     "eslint-config-next": "14.1.3",
     "react-table": "link:@types/@tanstack/react-table",
     "typescript": "^5"
