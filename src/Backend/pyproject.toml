@@ -16,7 +16,7 @@ google-auth = "^2.22.0"
 fastapi = "^0.115.0"
 fastapi-injector = "^0.6.0"
 uvicorn = {extras = ["standard"], version = "^0.30.0"}
-aiohttp = "^3.9.4"
+aiohttp = "^3.13.4"
 injector = "^0.20.1"
 structlog = "^23.1.0"
 pydantic = {extras = ["email"], version = "^1.10.9"}
