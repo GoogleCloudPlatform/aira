@@ -89,6 +89,7 @@
           "create_user": "Error creating User, please try again.",
           "create_group": "Error creating Class, please try again.",
           "edit_organization": "Error editing School, please try again.",
+          "delete_organization": "Error deleting School, please try again.",
           "edit_exam": "Error editing Exam, please try again.",
           "edit_user": "Error editing User, please try again.",
           "edit_group": "Error editing Class, please try again.",

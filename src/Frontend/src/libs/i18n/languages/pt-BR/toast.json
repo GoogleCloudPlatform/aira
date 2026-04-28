@@ -89,6 +89,7 @@
                 "create_user":"Erro ao criar Usuário, por favor tente novamente.",
                 "create_group":"Erro ao criar Turma, por favor tente novamente.",
                 "edit_organization":"Erro ao alterar Escola, por favor tente novamente.",
+                "delete_organization":"Erro ao excluir Escola, por favor tente novamente.",
                 "edit_exam":"Erro ao alterar Avaliação, por favor tente novamente.",
                 "edit_user":"Erro ao alterar Usuário, por favor tente novamente.",
                 "edit_group":"Erro ao alterar Turma, por favor tente novamente.",

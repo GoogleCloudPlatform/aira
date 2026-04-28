@@ -39,9 +39,19 @@ class SettingsModule(injector.Module):
         """
         Provide settings from environment.
         """
-        settings = {
+        settings = {}
+        if os.path.exists(".env"):
+            with open(".env") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        if k.startswith("_"):
+                            settings[k[1:].lower()] = v
+        
+        settings.update({
             k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")
-        }
+        })
 
         return Settings(settings)
 
@@ -655,12 +665,35 @@ def create_container(mods: tuple[injector.Module] | None = None) -> injector.Inj
 
     :return: configured dependency injection container.
     """
-    modules = mods or (
+    if mods:
+        return injector.Injector(mods)
+
+    # Read _ENV from environment or .env file
+    env = os.environ.get("_ENV")
+    if not env and os.path.exists(".env"):
+        try:
+            with open(".env") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        if k == "_ENV":
+                            env = v
+                            break
+        except Exception:
+            pass
+
+    google_module = GoogleModule()
+    if env == "local":
+        logger.info("Using InternetlessModule for local environment")
+        google_module = InternetlessModule()
+
+    modules = (
         SettingsModule(),
         EngineSQLAlchemy(),
         SQLAlchemyModule(),
         SyncModule(),
-        GoogleModule(),
+        google_module,
         UtilModule(),
         TracingModule(),
     )

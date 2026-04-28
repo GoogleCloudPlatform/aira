@@ -89,6 +89,7 @@
           "create_user": "Error al crear Usuario, por favor inténtelo de nuevo.",
           "create_group": "Error al crear Clase, por favor inténtelo de nuevo.",
           "edit_organization": "Error al modificar Escuela, por favor inténtelo de nuevo.",
+          "delete_organization": "Error al eliminar Escuela, por favor inténtelo de nuevo.",
           "edit_exam": "Error al modificar Evaluación, por favor inténtelo de nuevo.",
           "edit_user": "Error al modificar Usuario, por favor inténtelo de nuevo.",
           "edit_group": "Error al modificar Clase, por favor inténtelo de nuevo.",
