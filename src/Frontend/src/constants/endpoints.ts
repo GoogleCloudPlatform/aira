@@ -19,6 +19,8 @@ export const ENDPOINT_RESULTS = 'exams-results';
 
 export const ENDPOINT_GROUPS = 'groups';
 
+export const ENDPOINT_SERIES = 'series';
+
 export const ENDPOINT_ROLES = 'roles';
 
 export const ENDPOINT_USERS = 'users';

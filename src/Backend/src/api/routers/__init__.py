@@ -8,6 +8,7 @@ from .exams.endpoints import router as exams_router
 from .groups.endpoints import router as groups_router
 from .locations.endpoints import router as locations_router
 from .organizations.endpoints import router as organizations_router
+from .series.endpoints import router as series_router
 from .processor.endpoints import router as processor_router
 from .roles.endpoints import router as roles_router
 from .schemas import PubsubMessage, PubsubRequest
@@ -22,6 +23,7 @@ __all__ = (
     "organizations_router",
     "processor_router",
     "roles_router",
+    "series_router",
     "users_router",
     "PubsubRequest",
     "PubsubMessage",

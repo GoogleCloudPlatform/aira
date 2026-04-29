@@ -22,6 +22,7 @@ import { SchemaEditExamDefaultValues } from "./schema";
 import { isEmpty } from "lodash";
 import { updateExamById } from "@/services/exam";
 import { IQuestion } from "@/interfaces/question";
+import { getSeries } from "@/services/series";
 import { TimePicker } from "@/components/ui/time-picker";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
 import Loading from "@/components/loading/Loading";
@@ -46,6 +47,11 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
     const { locale } = useParams();
     const queryClient = useQueryClient();
     const { data, isLoading, isFetching} = useQuery<IExamResponse | z.infer<typeof formData.schema>>({ queryKey: ['exam'], queryFn: formData.defaultValues });
+
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
 
     const { form, resetForm } = useQuestions()
 
@@ -185,8 +191,8 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_GRADE_OPTIONS.map((option, index) => (
-                                        <SelectItem key={index} value={option.value}>
+                                    {seriesData?.items?.map((option: any, index: number) => (
+                                        <SelectItem key={index} value={option.name}>
                                             {option.name}
                                         </SelectItem>
                                     ))}

@@ -75,6 +75,26 @@
                 "loading": "Cargando ..."
             }
         },
+        "series": {
+            "list_title": "Series",
+            "list_subtitle": "Gestionar las series en el sistema.",
+            "create": {
+                "create_series": "Crear Serie",
+                "create_subtitle_series": "Complete los campos a continuación para crear una nueva serie.",
+                "name": "Nombre",
+                "code": "Código"
+            },
+            "edit": {
+                "edit_series": "Editar Serie",
+                "edit_subtitle_series": "Actualice los campos a continuación para editar la serie.",
+                "name": "Nombre",
+                "code": "Código"
+            },
+            "delete": {
+                "title": "Eliminar Serie",
+                "subtitle": "¿Está seguro de que desea eliminar esta serie?"
+            }
+        },
         "country": {
             "list_title": "Países",
             "list_subtitle": "Gestione los países en el sistema.",

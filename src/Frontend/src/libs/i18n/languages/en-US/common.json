@@ -18,6 +18,7 @@
             "exams": "Exams",
             "dashboard": "Dashboard",
             "admin": "Administration",
+            "series": "Grades",
             "users": "Users",
             "roles": "Roles",
             "groups": "Groups",

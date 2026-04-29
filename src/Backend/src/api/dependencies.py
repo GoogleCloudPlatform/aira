@@ -19,6 +19,7 @@ from .adapters.sqlalchemy import (
     location,
     organization,
     role,
+    series,
     session_query,
     unit_of_work,
     user,
@@ -171,6 +172,26 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
         Provides sqlalchemy list groups.
         """
         return organization.GetOrganization(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_series(self, session_factory: SessionFactory) -> ports.ListSeries:
+        """
+        Provides sqlalchemy list series.
+        """
+        return series.ListSeries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_series(self, session_factory: SessionFactory) -> ports.GetSeries:
+        """
+        Provides sqlalchemy get series.
+        """
+        return series.GetSeries(
             session_factory=session_factory,
         )
 

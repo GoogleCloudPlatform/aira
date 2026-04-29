@@ -8,6 +8,7 @@ import Users from "./users/Users";
 import Countries from "./locations/Countries";
 import States from "./locations/States";
 import Cities from "./locations/Cities";
+import Series from "./series/Series";
 
 export {
     ActionTable,
@@ -19,5 +20,6 @@ export {
     Users,
     Countries,
     States,
-    Cities
+    Cities,
+    Series
 }

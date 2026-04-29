@@ -41,7 +41,10 @@
           "state_deleted": "State successfully deleted",
           "city_created": "City successfully created",
           "city_updated": "City successfully updated",
-          "city_deleted": "City successfully deleted"
+          "city_deleted": "City successfully deleted",
+          "series_created": "Series successfully created",
+          "series_updated": "Series successfully updated",
+          "series_deleted": "Series successfully deleted"
         }
       },
       "errors": {

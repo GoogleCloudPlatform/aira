@@ -41,7 +41,10 @@
           "state_deleted": "Estado eliminado con éxito",
           "city_created": "Ciudad creada con éxito",
           "city_updated": "Ciudad actualizada con éxito",
-          "city_deleted": "Ciudad eliminada con éxito"
+          "city_deleted": "Ciudad eliminada con éxito",
+          "series_created": "Serie creada con éxito",
+          "series_updated": "Serie actualizada con éxito",
+          "series_deleted": "Serie eliminada con éxito"
         }
       },
       "errors": {

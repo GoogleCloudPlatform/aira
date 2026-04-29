@@ -13,7 +13,7 @@ from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
 from api import db
 
-from . import exam, group, location, organization, result, role, session_query, user
+from . import exam, group, location, organization, result, role, series, session_query, user
 
 
 # pylint: disable=too-few-public-methods
@@ -54,6 +54,7 @@ class UnitOfWork(abc.ABC):
     country_repository: location.CountryRepository
     state_repository: location.StateRepository
     city_repository: location.CityRepository
+    series_repository: series.SeriesRepository
     closed: bool
     _session: sqlalchemy_aio.AsyncSession
     committed: bool

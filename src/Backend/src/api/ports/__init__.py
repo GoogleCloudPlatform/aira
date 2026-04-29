@@ -50,6 +50,7 @@ from .organization import (
 )
 from .result import ResultRepository
 from .role import GetRole, GetRoleByName, ListRoles, RoleRepository
+from .series import GetSeries, ListSeries, SeriesRepository
 from .secret_manager import SecretManager, Secrets
 from .session_query import GetSession, SessionRepository
 from .speech import SpeechToText
@@ -122,4 +123,7 @@ __all__ = (
     "UserRepository",
     "ExamUserQuestionRepository",
     "ExamUserRepository",
+    "GetSeries",
+    "ListSeries",
+    "SeriesRepository",
 )

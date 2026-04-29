@@ -75,6 +75,26 @@
                 "loading": "Loading ..."
             }
         },
+        "series": {
+            "list_title": "Series",
+            "list_subtitle": "Manage series (grades) in the system.",
+            "create": {
+                "create_series": "Create Series",
+                "create_subtitle_series": "Fill in the fields below to create a new series.",
+                "name": "Name",
+                "code": "Code"
+            },
+            "edit": {
+                "edit_series": "Edit Series",
+                "edit_subtitle_series": "Update the fields below to edit the series.",
+                "name": "Name",
+                "code": "Code"
+            },
+            "delete": {
+                "title": "Delete Series",
+                "subtitle": "Are you sure you want to delete this series?"
+            }
+        },
         "country": {
             "list_title": "Countries",
             "list_subtitle": "Manage countries in the system.",

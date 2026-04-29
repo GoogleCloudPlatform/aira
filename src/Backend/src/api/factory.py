@@ -63,6 +63,7 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     app.include_router(routers.roles_router, prefix="/api/v1/roles")
     app.include_router(routers.exams_router, prefix="/api/v1/exams")
     app.include_router(routers.locations_router, prefix="/api/v1/locations")
+    app.include_router(routers.series_router, prefix="/api/v1/series")
 
     app.add_exception_handler(
         errors.BaseError,

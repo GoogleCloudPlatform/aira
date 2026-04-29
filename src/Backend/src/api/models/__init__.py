@@ -14,6 +14,7 @@ from .exams import (
 )
 from .groups import Grades, Group, Shifts
 from .locations import City, Country, State
+from .series import Series
 from .organizations import Organization
 from .roles import Role
 from .sessions import Session
@@ -27,6 +28,7 @@ __all__ = (
     "ExamUser",
     "Grades",
     "Group",
+    "Series",
     "Organization",
     "Question",
     "QuestionType",
