@@ -20,7 +20,7 @@ export default function App({ children } : PropsWithChildren) {
     
     const app = (
         <>
-            <ThemeProvider attribute="class" enableSystem={true}>
+            <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
                 <LoadingProvider>
                     <AuthProvider>
                         <PrivateRoute>

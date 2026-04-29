@@ -9,6 +9,8 @@ import * as auth from '@/services/auth';
 import { clearCookie, getCookie, setCookie } from "@/utils/auth";
 import { useLoading } from "./loading";
 import { ROUTES_ALLOWED_PATHS } from "@/constants/routes";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 type TAuthProvider = {
     children: ReactNode
@@ -19,6 +21,7 @@ const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 const AuthProvider: React.FC<TAuthProvider> = ({ children } : PropsWithChildren<{}>) => {
     const router = useRouter();   
     const { loading, setLoading } = useLoading();
+    const tToast = useTranslations('toast');
 
     const [user, setUser] = useState<IUser | null>(null);
     const [mounted, setMounted] = useState<boolean>(false);

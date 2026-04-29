@@ -6,4 +6,5 @@ src/IAC/.terraform/providers/registry.terraform.io/hashicorp/google/7.5.0/darwin
 src/IAC/terraform.tfstate
 src/IAC/terraform.tfstate.backup
 src/Backend/chroma_data/chroma.sqlite3
-src/Backend/psxc-platform-6a4f0a685c02.json
+src/Backend/aira-demo-eaed8-8f3bfad5df4a.json
+_ORIGIN=*
