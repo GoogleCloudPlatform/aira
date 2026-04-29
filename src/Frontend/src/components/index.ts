@@ -5,6 +5,9 @@ import Sidebar from "./sidebar/Sidebar";
 import Toast from "./toast/Toast";
 import SignIn from "./sign-in/SignIn";
 import Users from "./users/Users";
+import Countries from "./locations/Countries";
+import States from "./locations/States";
+import Cities from "./locations/Cities";
 
 export {
     ActionTable,
@@ -13,5 +16,8 @@ export {
     Sidebar,
     SignIn,
     Toast,
-    Users
+    Users,
+    Countries,
+    States,
+    Cities
 }

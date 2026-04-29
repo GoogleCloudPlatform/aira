@@ -6,12 +6,14 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { Pagination, PaginationButton, PaginationButtonNext, PaginationButtonPrevious, PaginationContent, PaginationEllipsis, PaginationItem } from "../ui/pagination";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { useQueryClient } from "@tanstack/react-query";
 
-const PaginationTable : React.FC<IActionTablePagination> = ({ items, pages, total }) => {
+const PaginationTable : React.FC<IActionTablePagination & { category?: string }> = ({ items, pages, total, category }) => {
     const t = useTranslations();
 
     const [mounted, setMounted] = useState<boolean>(false);
     const { page, page_size, setPagination } : IPaginationStore = usePaginationStore();
+    const queryClient = useQueryClient();
     
     const options = ["5", "10", "15", "20", "25", "50"];
 
@@ -54,7 +56,7 @@ const PaginationTable : React.FC<IActionTablePagination> = ({ items, pages, tota
                     <div>
                         <Select 
                             onValueChange={(value) => {
-                                setPagination("page_size", value)
+                                setPagination("page_size", parseInt(value, 10))
                             }} 
                             defaultValue={page_size.toString()}
                         >

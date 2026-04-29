@@ -110,6 +110,10 @@ class User(db.Base, db.DefaultColumns):
     state: Mapped[str | None] = mapped_column(sa.String(2), nullable=True)
     region: Mapped[str | None] = mapped_column(sa.String(50), nullable=True)
     county: Mapped[str | None] = mapped_column(sa.String(50), nullable=True)
+    city_id: Mapped[db.UuidDefault | None] = mapped_column(
+        sa.ForeignKey("cities.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     groups: Mapped[list[groups.Group]] = relationship(
         groups.Group,

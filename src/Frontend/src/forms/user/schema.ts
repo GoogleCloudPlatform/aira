@@ -40,22 +40,27 @@ export const SchemaCreateUserPasswordForm = z.object({
         const data : string[] = groups.map(o => typeof o === 'string' ? o : o.value);
         return data;
     }),
-    state: z.string().optional().transform(state => {
-        if (!state || isEmpty(state)) return undefined;
-
-        return state;
+    country_id: z.string().optional().transform(country_id => {
+        if (!country_id || isEmpty(country_id)) return undefined;
+        return country_id;
     }),
-    county: z.string().optional().transform(county => {
-        if (!county || isEmpty(county)) return undefined;
-
-        return county;
+    state_id: z.string().optional().transform(state_id => {
+        if (!state_id || isEmpty(state_id)) return undefined;
+        return state_id;
+    }),
+    city_id: z.string().optional().transform(city_id => {
+        if (!city_id || isEmpty(city_id)) return undefined;
+        return city_id;
     }),
     region: z.string().optional().transform(region => {
         if (!region || isEmpty(region)) return undefined;
-
         return region;
+    }),
+    county: z.string().optional().transform(county => {
+        if (!county || isEmpty(county)) return undefined;
+        return county;
     })
-}).superRefine(async ({ type, confirm_password, password, role_id, organizations, groups, state, county, region }, ctx) => {
+}).superRefine(async ({ type, confirm_password, password, role_id, organizations, groups, country_id, state_id, city_id, region, county }, ctx) => {
     if (!roles) {
         roles = await getOptions("roles");
     }
@@ -97,11 +102,11 @@ export const SchemaCreateUserPasswordForm = z.object({
         }           
 
         if (ROLE_COUNTY_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(county)) {
+            if (isEmpty(city_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["county"],
+                    path: ["city_id"],
                 });
             }           
         }           
@@ -117,21 +122,12 @@ export const SchemaCreateUserPasswordForm = z.object({
         }           
 
         if (ROLE_STATE_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(state)) {
+            if (isEmpty(state_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["state"],
+                    path: ["state_id"],
                 });
-            } else {
-                const state = (value: string) => ENUM_STATE_OPTIONS.some(option => option.value === value)
-                if (!state) {
-                    ctx.addIssue({
-                        code: "custom",
-                        message: "toast.errors.form.invalid_state",
-                        path: ["state"],
-                    });
-                }
             }       
         }           
     }
@@ -162,22 +158,27 @@ export const SchemaCreateUserFirebaseForm = z.object({
         const data : string[] = groups.map(o => typeof o === 'string' ? o : o.value);
         return data;
     }),
-    state: z.string().optional().transform(state => {
-        if (!state || isEmpty(state)) return undefined;
-
-        return state;
+    country_id: z.string().optional().transform(country_id => {
+        if (!country_id || isEmpty(country_id)) return undefined;
+        return country_id;
     }),
-    county: z.string().optional().transform(county => {
-        if (!county || isEmpty(county)) return undefined;
-
-        return county;
+    state_id: z.string().optional().transform(state_id => {
+        if (!state_id || isEmpty(state_id)) return undefined;
+        return state_id;
+    }),
+    city_id: z.string().optional().transform(city_id => {
+        if (!city_id || isEmpty(city_id)) return undefined;
+        return city_id;
     }),
     region: z.string().optional().transform(region => {
         if (!region || isEmpty(region)) return undefined;
-
         return region;
+    }),
+    county: z.string().optional().transform(county => {
+        if (!county || isEmpty(county)) return undefined;
+        return county;
     })
-}).superRefine(async ({ role_id, organizations, groups, county, state, region }, ctx) => {
+}).superRefine(async ({ role_id, organizations, groups, country_id, state_id, city_id, region, county }, ctx) => {
     if (!roles) {
         roles = await getOptions("roles");
     }
@@ -219,11 +220,11 @@ export const SchemaCreateUserFirebaseForm = z.object({
         }           
 
         if (ROLE_COUNTY_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(county)) {
+            if (isEmpty(city_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["county"],
+                    path: ["city_id"],
                 });
             }           
         }           
@@ -239,21 +240,12 @@ export const SchemaCreateUserFirebaseForm = z.object({
         }           
 
         if (ROLE_STATE_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(state)) {
+            if (isEmpty(state_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["state"],
+                    path: ["state_id"],
                 });
-            } else {
-                const state = (value: string) => ENUM_STATE_OPTIONS.some(option => option.value === value)
-                if (!state) {
-                    ctx.addIssue({
-                        code: "custom",
-                        message: "toast.errors.form.invalid_state",
-                        path: ["state"],
-                    });
-                }
             }       
         }           
     }
@@ -278,22 +270,27 @@ export const SchemaEditUserForm = z.object({
         const data : string[] = groups.map(g => typeof g === 'string' ? g : g.value);
         return data;
     }),
-    state: z.string().nullable().transform(state => {
-        if (!state || isEmpty(state)) return undefined;
-
-        return state;
+    country_id: z.string().nullable().transform(country_id => {
+        if (!country_id || isEmpty(country_id)) return undefined;
+        return country_id;
     }),
-    county: z.string().nullable().transform(county => {
-        if (!county || isEmpty(county)) return undefined;
-
-        return county;
+    state_id: z.string().nullable().transform(state_id => {
+        if (!state_id || isEmpty(state_id)) return undefined;
+        return state_id;
+    }),
+    city_id: z.string().nullable().transform(city_id => {
+        if (!city_id || isEmpty(city_id)) return undefined;
+        return city_id;
     }),
     region: z.string().nullable().transform(region => {
         if (!region || isEmpty(region)) return undefined;
-
         return region;
+    }),
+    county: z.string().nullable().transform(county => {
+        if (!county || isEmpty(county)) return undefined;
+        return county;
     })
-}).superRefine(async ({ role_id, organizations, groups, county, state, region }, ctx) => {
+}).superRefine(async ({ role_id, organizations, groups, country_id, state_id, city_id, region, county }, ctx) => {
     if (!roles) {
         roles = await getOptions("roles");
     }
@@ -335,11 +332,11 @@ export const SchemaEditUserForm = z.object({
         }           
 
         if (ROLE_COUNTY_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(county)) {
+            if (isEmpty(city_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["county"],
+                    path: ["city_id"],
                 });
             }           
         }           
@@ -355,21 +352,12 @@ export const SchemaEditUserForm = z.object({
         }           
 
         if (ROLE_STATE_MANAGER_ARRAY.includes(roleItem.label)) {
-            if (isEmpty(state)) {
+            if (isEmpty(state_id)) {
                 ctx.addIssue({
                     code: "custom",
                     message: "toast.errors.form.required_field",
-                    path: ["state"],
+                    path: ["state_id"],
                 });
-            } else {
-                const state = (value: string) => ENUM_STATE_OPTIONS.some(option => option.value === value)
-                if (!state) {
-                    ctx.addIssue({
-                        code: "custom",
-                        message: "toast.errors.form.invalid_state",
-                        path: ["state"],
-                    });
-                }
             }       
         }           
     }
@@ -419,9 +407,10 @@ export const SchemaCreateUserDefaultValues : z.infer<typeof SchemaCreateUserForm
     role_id: '',
     organizations: [],
     groups: [],
-    state: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
     region: '',
-    county: '',
 }
 
 export const SchemaEditUserDefaultValues : z.infer<typeof SchemaEditUserForm> & { id: string, email_address: string, role_id: string } = {
@@ -431,9 +420,10 @@ export const SchemaEditUserDefaultValues : z.infer<typeof SchemaEditUserForm> & 
     role_id: '',
     organizations: [],
     groups: [],
-    state: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
     region: '',
-    county: '',
 }
 
 export const SchemaImportUserDefaultValues : z.infer<typeof SchemaImportUser> = {

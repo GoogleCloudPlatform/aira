@@ -24,6 +24,8 @@
             "already_have_account": "¿Ya tienes una cuenta? Inicia sesión"
         },
         "organization": {
+            "list_title": "Escuelas",
+            "list_subtitle": "Gestione las escuelas en el sistema.",
             "create": {
                 "create_organization": "Crear Escuelas",
                 "create_subtitle_organization": "Complete los campos a continuación para crear una nueva escuela. Toda la información es obligatoria para que la escuela se registre correctamente en el sistema.",
@@ -73,7 +75,96 @@
                 "loading": "Cargando ..."
             }
         },
+        "country": {
+            "list_title": "Países",
+            "list_subtitle": "Gestione los países en el sistema.",
+            "create": {
+                "create_country": "Crear País",
+                "create_subtitle_country": "Complete los campos a continuación para crear un nuevo país.",
+                "name": "Nombre",
+                "code": "Código",
+                "is_default": "País Predeterminado",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_country": "Editar País",
+                "edit_subtitle_country": "Actualice los campos a continuación para editar the país.",
+                "name": "Nombre",
+                "code": "Código",
+                "is_default": "País Predeterminado",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Eliminar País",
+                "subtitle": "Eliminar País",
+                "message": "¿Está seguro de que desea eliminar este país?",
+                "close": "Cerrar",
+                "confirm": "Confirmar"
+            }
+        },
+        "state": {
+            "list_title": "Estados",
+            "list_subtitle": "Gestione los estados en el sistema.",
+            "create": {
+                "create_state": "Crear Estado",
+                "create_subtitle_state": "Complete los campos a continuación para crear un nuevo estado.",
+                "name": "Nombre",
+                "code": "Código",
+                "country": "País",
+                "select_country": "Seleccione un país",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_state": "Editar Estado",
+                "edit_subtitle_state": "Actualice los campos a continuación para editar el estado.",
+                "name": "Nombre",
+                "code": "Código",
+                "country": "País",
+                "select_country": "Seleccione un país",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Eliminar Estado",
+                "subtitle": "Eliminar Estado",
+                "message": "¿Está seguro de que desea eliminar este estado?",
+                "close": "Cerrar",
+                "confirm": "Confirmar"
+            }
+        },
+        "city": {
+            "list_title": "Ciudades",
+            "list_subtitle": "Gestione las ciudades en el sistema.",
+            "create": {
+                "create_city": "Crear Ciudad",
+                "create_subtitle_city": "Complete los campos a continuación para crear una nueva ciudad.",
+                "name": "Nombre",
+                "state": "Estado",
+                "country": "País",
+                "select_state": "Seleccione un estado",
+                "select_country": "Seleccione un país",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_city": "Editar Ciudad",
+                "edit_subtitle_city": "Actualice los campos a continuación para editar la ciudad.",
+                "name": "Nombre",
+                "state": "Estado",
+                "country": "País",
+                "select_state": "Seleccione un estado",
+                "select_country": "Seleccione un país",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Eliminar Ciudad",
+                "subtitle": "Eliminar Ciudad",
+                "message": "¿Está seguro de que desea eliminar esta ciudad?",
+                "close": "Cerrar",
+                "confirm": "Confirmar"
+            }
+        },
         "group": {
+            "list_title": "Clases",
+            "list_subtitle": "Gestione las clases en el sistema.",
             "create": {
                 "create_group": "Crear Clase",
                 "create_subtitle_group": "Complete los campos a continuación para crear una nueva clase. Toda la información es obligatoria para que la clase se registre correctamente en el sistema.",
@@ -127,6 +218,8 @@
             }
         },
         "exam": {
+            "list_title": "Evaluaciones",
+            "list_subtitle": "Gestione las evaluaciones en el sistema.",
             "questions": "Preguntas",
             "words": "Palabras",
             "complex_words": "Palabras Complejas",
@@ -217,6 +310,8 @@
             }
         },
         "user": {
+            "list_title": "Usuarios",
+            "list_subtitle": "Gestione los usuarios en el sistema.",
             "create": {
                 "create_user": "Crear Usuario",
                 "create_subtitle_user": "Complete los campos a continuación para crear un nuevo usuario. Toda la información es obligatoria para registrar correctamente al usuario en el sistema.",

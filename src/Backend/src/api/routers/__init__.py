@@ -6,6 +6,7 @@ from .auth.endpoints import router as auth_router
 from .endpoints import router as base_router
 from .exams.endpoints import router as exams_router
 from .groups.endpoints import router as groups_router
+from .locations.endpoints import router as locations_router
 from .organizations.endpoints import router as organizations_router
 from .processor.endpoints import router as processor_router
 from .roles.endpoints import router as roles_router
@@ -17,6 +18,7 @@ __all__ = (
     "base_router",
     "exams_router",
     "groups_router",
+    "locations_router",
     "organizations_router",
     "processor_router",
     "roles_router",

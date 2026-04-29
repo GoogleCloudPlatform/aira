@@ -12,21 +12,16 @@ const initialPaginationState : Partial<IPaginationStore> = {
 
 const usePaginationStore = create<IPaginationStore>()(
     devtools(
-        persist(
-            (set, get) => ({
-                page_size: PAGE_SIZE,
-                page: 1,
-                query: "",
-                show_finished: false,
-                getPagination: () => get(),
-                setPagination: (prop : any, newValue: any) => set((state) => ({ ...state, [prop]: newValue })),
-                updatePagination: (newState : IPaginationStore) => set(() => ({ ...newState })),
-                resetPagination: () => set((state) => ({ ...state, ...initialPaginationState }))
-            }),
-            {
-                name: 'pagination-storage',
-            }
-        )
+        (set, get) => ({
+            page_size: PAGE_SIZE,
+            page: 1,
+            query: "",
+            show_finished: false,
+            getPagination: () => get(),
+            setPagination: (prop : any, newValue: any) => set((state) => ({ ...state, [prop]: newValue })),
+            updatePagination: (newState : IPaginationStore) => set(() => ({ ...newState })),
+            resetPagination: () => set((state) => ({ ...state, ...initialPaginationState }))
+        })
     )
 );
 

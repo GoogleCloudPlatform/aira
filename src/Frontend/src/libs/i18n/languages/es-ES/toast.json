@@ -32,7 +32,16 @@
   
           "import_organization": "Escuela(s) importada(s) con éxito.",
           "import_group": "Clase(s) importada(s) con éxito.",
-          "import_user": "Usuario(s) importado(s) con éxito."
+          "import_user": "Usuario(s) importado(s) con éxito.",
+          "country_created": "País creado con éxito",
+          "country_updated": "País actualizado con éxito",
+          "country_deleted": "País eliminado con éxito",
+          "state_created": "Estado creado con éxito",
+          "state_updated": "Estado actualizado con éxito",
+          "state_deleted": "Estado eliminado con éxito",
+          "city_created": "Ciudad creada con éxito",
+          "city_updated": "Ciudad actualizada con éxito",
+          "city_deleted": "Ciudad eliminada con éxito"
         }
       },
       "errors": {
@@ -111,7 +120,17 @@
           "password_must_have_special": "La contraseña debe contener al menos un carácter especial.",
           "passwords_do_not_match": "Las contraseñas no coinciden.",
           "group_has_users": "No es posible eliminar una clase con alumnos",
-          "organization_has_groups": "No es posible eliminar una escuela con clases"
+          "organization_has_groups": "No es posible eliminar una escuela con clases",
+          "create_country": "Error al crear País, por favor intente de nuevo.",
+          "edit_country": "Error al editar País, por favor intente de nuevo.",
+          "delete_country": "Error al eliminar País, por favor intente de nuevo.",
+          "create_state": "Error al crear Estado, por favor intente de nuevo.",
+          "edit_state": "Error al editar Estado, por favor intente de nuevo.",
+          "delete_state": "Error al eliminar Estado, por favor intente de nuevo.",
+          "create_city": "Error al crear Ciudad, por favor intente de nuevo.",
+          "edit_city": "Error al editar Ciudad, por favor intente de nuevo.",
+          "delete_city": "Error al eliminar Ciudad, por favor intente de nuevo.",
+          "action_failed": "La acción falló, por favor intente de nuevo."
         },
         "exam": {
           "error_record": "No fue posible grabar",

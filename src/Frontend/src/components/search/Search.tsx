@@ -22,10 +22,10 @@ const Search : React.FC = () => {
 
     useEffect(() => {
         setText("");
-        return () => {
-            setPagination("page", 1)
-            setPagination("query", "")
-        }
+        // return () => {
+        //     setPagination("page", 1)
+        //     setPagination("query", "")
+        // }
     }, [router, setPagination]);
 
     const handleChange = (event : ChangeEvent<HTMLInputElement>) => {

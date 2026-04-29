@@ -19,6 +19,7 @@ class Organization(pydantic.BaseModel):
     city: str
     region: str | None
     county: str
+    city_id: uuid.UUID | None
 
     class Config:
         """
@@ -60,6 +61,7 @@ class OrganizationCreate(pydantic.BaseModel):
     state: str
     region: str | None
     county: str
+    city_id: uuid.UUID | None
 
     class Config:
         """

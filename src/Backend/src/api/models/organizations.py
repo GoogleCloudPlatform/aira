@@ -23,3 +23,7 @@ class Organization(db.Base, db.DefaultColumns):
     city: Mapped[db.Str50]
     state: Mapped[str] = mapped_column(sa.String(2))
     county: Mapped[db.Str50]
+    city_id: Mapped[db.UuidDefault | None] = mapped_column(
+        sa.ForeignKey("cities.id", ondelete="SET NULL"),
+        nullable=True,
+    )

@@ -21,6 +21,7 @@ import { IRolesResponse } from "@/interfaces/roles";
 import { getAllRoles } from "@/services/role";
 import { getAllOrganizations, getOrganizationsUtils } from "@/services/organization";
 import { getAllGroups } from "@/services/group";
+import { getCountries, getStates, getCities } from "@/services/location";
 import { CATEGORY_GROUPS, CATEGORY_ORGANIZATIONS, CATEGORY_ORGANIZATIONS_UTILS, CATEGORY_ROLES, CATEGORY_USERS } from "@/constants";
 import { IOrganizationsResponse, IOrganizationsUtilsResponse } from "@/interfaces/organization";
 import { IGroupsResponse } from "@/interfaces/group";
@@ -59,6 +60,41 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
     const { data: groupsOptions, isLoading: isLoadingGroups } = useQuery<IGroupsResponse>({ queryKey: [CATEGORY_GROUPS], queryFn: getAllGroups });
     const { data: organizationUtilsOptions, isLoading: isLoadingOrganizationUtils } = useQuery<IOrganizationsUtilsResponse>({ queryKey: [CATEGORY_ORGANIZATIONS_UTILS], queryFn: getOrganizationsUtils });
 
+    const [selectedCountry, setSelectedCountry] = useState<string>('');
+    const [selectedState, setSelectedState] = useState<string>('');
+
+    const { data: countriesData } = useQuery({
+        queryKey: ['countries', 1],
+        queryFn: getCountries,
+    });
+
+    const { data: statesData } = useQuery({
+        queryKey: ['states', selectedCountry],
+        queryFn: () => getStates(selectedCountry),
+        enabled: !!selectedCountry
+    });
+
+    const { data: citiesData } = useQuery({
+        queryKey: ['cities', selectedState],
+        queryFn: () => getCities(selectedState),
+        enabled: !!selectedState
+    });
+
+    const form = useForm<z.infer<typeof formData.schema>>({
+        resolver: zodResolver(formData.schema),
+        defaultValues: formData.defaultValues || SchemaCreateUserDefaultValues
+    });
+
+    useEffect(() => {
+        if (countriesData?.items) {
+            const defaultCountry = countriesData.items.find(c => c.is_default);
+            if (defaultCountry && !selectedCountry) {
+                setSelectedCountry(defaultCountry.id);
+                form.setValue('country_id', defaultCountry.id);
+            }
+        }
+    }, [countriesData, selectedCountry, form]);
+
     useEffect(() => {
         const getDataOptions = async () => {
             if (!rolesOptions || !organizationsOptions || !groupsOptions || !organizationUtilsOptions) return;
@@ -75,10 +111,7 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
         getDataOptions();
     }, [rolesOptions, organizationsOptions, groupsOptions, organizationUtilsOptions]);
 
-    const form = useForm<z.infer<typeof formData.schema>>({
-        resolver: zodResolver(formData.schema),
-        defaultValues: formData.defaultValues || SchemaCreateUserDefaultValues
-    });
+
 
     const [type, role_id, organizations, groups] = form.watch(['type', 'role_id', 'organizations', 'groups']);
 
@@ -486,31 +519,37 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
             );
         }
 
-        if (fieldName === 'state') {
-            if (isEmpty(role_id) || !isStateManagerRole()) return null;
+        if (fieldName === 'country_id') {
+            if (isEmpty(role_id) || (!isStateManagerRole() && !isCountyManagerRole())) return null;
 
             return (
                 <FormField
                     control={form.control}
-                    name={fieldName}
+                    name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
                             <FormLabel>{t(`form.user.create.${field.name}`)}</FormLabel>
                             <Select
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCountry(value);
+                                    setSelectedState('');
+                                    form.setValue('state_id', '');
+                                    form.setValue('city_id', '');
+                                }}
                                 defaultValue={field.value}
                                 value={field.value}
                                 disabled={field.disabled}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={t(`form.user.create.${field.name}`)} />
+                                        <SelectValue placeholder={`${t(`form.user.create.${field.name}`)}`} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {defaultOptions['organizations_utils']['state'].map((option, index) => (
-                                        <SelectItem key={index} value={option}>
-                                            {option}
+                                    {countriesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -519,7 +558,83 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
                         </FormItem>
                     )}
                 />
-            );
+            )
+        }
+
+        if (fieldName === 'state_id') {
+            if (isEmpty(role_id) || (!isStateManagerRole() && !isCountyManagerRole())) return null;
+
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.user.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedState(value);
+                                    form.setValue('city_id', '');
+                                }}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled || !selectedCountry}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.user.create.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {statesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
+        }
+
+        if (fieldName === 'city_id') {
+            if (isEmpty(role_id) || !isCountyManagerRole()) return null;
+
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.user.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled || !selectedState}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.user.create.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {citiesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
         }
 
         if (fieldName === 'region') {
@@ -545,42 +660,6 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
                                 </FormControl>
                                 <SelectContent>
                                     {defaultOptions['organizations_utils']['region'].map((option, index) => (
-                                        <SelectItem key={index} value={option}>
-                                            {option}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            );
-        }
-
-        if (fieldName === 'county') {
-            if (isEmpty(role_id) || !isCountyManagerRole()) return null;
-
-            return (
-                <FormField
-                    control={form.control}
-                    name={fieldName}
-                    render={({ field }) => (
-                        <FormItem className="space-y-2">
-                            <FormLabel>{t(`form.user.create.${field.name}`)}</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                value={field.value}
-                                disabled={field.disabled}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={t(`form.user.create.${field.name}`)} />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {defaultOptions['organizations_utils']['county'].map((option, index) => (
                                         <SelectItem key={index} value={option}>
                                             {option}
                                         </SelectItem>

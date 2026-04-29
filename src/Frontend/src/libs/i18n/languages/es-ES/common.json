@@ -23,7 +23,10 @@
             "groups": "Grupos",
             "organizations": "Escuelas",
             "apply_exams": "Aplicar Examen",
-            "results": "Resultados"
+            "results": "Resultados",
+            "countries": "Países",
+            "states": "Estados",
+            "cities": "Ciudades"
         }
     },
     "search": {
@@ -46,7 +49,10 @@
             "end_date": "Fecha de Finalización",
             "region": "Región",
             "county": "Municipio",
-            "city": "Ciudad"
+            "city": "Ciudad",
+            "code": "Código",
+            "is_default": "Predeterminado",
+            "country": "País"
         },
         "buttons": {
             "import": "Importar",
@@ -86,6 +92,11 @@
     "pagination": {
         "previous": "Anterior",
         "next": "Siguiente"
+    },
+    "common": {
+        "yes": "Sí",
+        "no": "No",
+        "confirm": "Confirmar"
     },
     "errors": {
         "cant_delete_resource": "No se puede eliminar el recurso"

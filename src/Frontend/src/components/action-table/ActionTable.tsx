@@ -20,7 +20,7 @@ import { useTranslations } from "next-intl";
 import PaginationTable from "../pagination-table/PaginationTable";
 import { ActionTableProps } from "@/interfaces/table";
 
-const ActionTable : React.FC<ActionTableProps> = ({ columns, data, pagination }) => {
+const ActionTable : React.FC<ActionTableProps> = ({ columns, data, pagination, category }) => {
     const t = useTranslations();
 
     const { items } = data;
@@ -80,7 +80,7 @@ const ActionTable : React.FC<ActionTableProps> = ({ columns, data, pagination })
                     <TableFooter>
                         <TableRow>
                             <TableCell colSpan={columns.length + 1}>
-                                <PaginationTable {...data} />
+                                <PaginationTable {...data} category={category} />
                             </TableCell>
                         </TableRow>
                     </TableFooter>

@@ -24,6 +24,8 @@
             "already_have_account": "Already have an account? Sign In"
         },
         "organization": {
+            "list_title": "Schools",
+            "list_subtitle": "Manage schools in the system.",
             "create": {
                 "create_organization": "Create Schools",
                 "create_subtitle_organization": "Fill in the fields below to create a new school. All information below is required for the school to be correctly registered in the system.",
@@ -73,7 +75,96 @@
                 "loading": "Loading ..."
             }
         },
+        "country": {
+            "list_title": "Countries",
+            "list_subtitle": "Manage countries in the system.",
+            "create": {
+                "create_country": "Create Country",
+                "create_subtitle_country": "Fill in the fields below to create a new country.",
+                "name": "Name",
+                "code": "Code",
+                "is_default": "Default Country",
+                "confirm": "Confirm"
+            },
+            "edit": {
+                "edit_country": "Edit Country",
+                "edit_subtitle_country": "Update the fields below to edit the country.",
+                "name": "Name",
+                "code": "Code",
+                "is_default": "Default Country",
+                "confirm": "Confirm"
+            },
+            "delete": {
+                "title": "Delete Country",
+                "subtitle": "Delete Country",
+                "message": "Are you sure you want to delete this country?",
+                "close": "Close",
+                "confirm": "Confirm"
+            }
+        },
+        "state": {
+            "list_title": "States",
+            "list_subtitle": "Manage states in the system.",
+            "create": {
+                "create_state": "Create State",
+                "create_subtitle_state": "Fill in the fields below to create a new state.",
+                "name": "Name",
+                "code": "Code",
+                "country": "Country",
+                "select_country": "Select a country",
+                "confirm": "Confirm"
+            },
+            "edit": {
+                "edit_state": "Edit State",
+                "edit_subtitle_state": "Update the fields below to edit the state.",
+                "name": "Name",
+                "code": "Code",
+                "country": "Country",
+                "select_country": "Select a country",
+                "confirm": "Confirm"
+            },
+            "delete": {
+                "title": "Delete State",
+                "subtitle": "Delete State",
+                "message": "Are you sure you want to delete this state?",
+                "close": "Close",
+                "confirm": "Confirm"
+            }
+        },
+        "city": {
+            "list_title": "Cities",
+            "list_subtitle": "Manage cities in the system.",
+            "create": {
+                "create_city": "Create City",
+                "create_subtitle_city": "Fill in the fields below to create a new city.",
+                "name": "Name",
+                "state": "State",
+                "country": "Country",
+                "select_state": "Select a state",
+                "select_country": "Select a country",
+                "confirm": "Confirm"
+            },
+            "edit": {
+                "edit_city": "Edit City",
+                "edit_subtitle_city": "Update the fields below to edit the city.",
+                "name": "Name",
+                "state": "State",
+                "country": "Country",
+                "select_state": "Select a state",
+                "select_country": "Select a country",
+                "confirm": "Confirm"
+            },
+            "delete": {
+                "title": "Delete City",
+                "subtitle": "Delete City",
+                "message": "Are you sure you want to delete this city?",
+                "close": "Close",
+                "confirm": "Confirm"
+            }
+        },
         "group": {
+            "list_title": "Classes",
+            "list_subtitle": "Manage classes in the system.",
             "create": {
                 "create_group": "Create Class",
                 "create_subtitle_group": "Fill in the fields below to create a new class. All information below is required for the class to be correctly registered in the system.",
@@ -127,6 +218,8 @@
             }
         },
         "exam": {
+            "list_title": "Assessments",
+            "list_subtitle": "Manage assessments in the system.",
             "questions": "Questions",
             "words": "Words",
             "complex_words": "Complex Words",
@@ -217,6 +310,8 @@
             }
         },
         "user": {
+            "list_title": "Users",
+            "list_subtitle": "Manage users in the system.",
             "create": {
                 "create_user": "Create User",
                 "create_subtitle_user": "Fill in the fields below to create a new user. All information below is required to correctly register the user in the system.",

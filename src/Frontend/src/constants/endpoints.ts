@@ -5,6 +5,7 @@ export const ENDPOINT_AUTH_FORGOT_PASSWORD = 'auth/forgot';
 export const ENDPOINT_AUTH_RESET = 'auth/reset';
 
 export const ENDPOINT_ORGANIZATIONS = 'organizations';
+export const ENDPOINT_LOCATIONS = 'locations';
 
 export const ENDPOINT_PROCESSOR_SIGNED = 'processor/signed';
 export const ENDPOINT_PROCESSOR_GENERATE_WORDS = 'processor/generate_words';

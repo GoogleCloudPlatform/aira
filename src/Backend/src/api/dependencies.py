@@ -16,6 +16,7 @@ from .adapters import google, memory, sendgrid, sere
 from .adapters.sqlalchemy import (
     exam,
     group,
+    location,
     organization,
     role,
     session_query,
@@ -409,6 +410,60 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
             session_factory=session_factory,
         )
 
+    @injector.provider
+    @injector.singleton
+    def provide_list_countries(
+        self, session_factory: SessionFactory
+    ) -> ports.ListCountries:
+        return location.ListCountries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_country(
+        self, session_factory: SessionFactory
+    ) -> ports.GetCountry:
+        return location.GetCountry(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_states(
+        self, session_factory: SessionFactory
+    ) -> ports.ListStates:
+        return location.ListStates(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_state(
+        self, session_factory: SessionFactory
+    ) -> ports.GetState:
+        return location.GetState(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_cities(
+        self, session_factory: SessionFactory
+    ) -> ports.ListCities:
+        return location.ListCities(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_city(
+        self, session_factory: SessionFactory
+    ) -> ports.GetCity:
+        return location.GetCity(
+            session_factory=session_factory,
+        )
+
 
 class SyncModule(injector.Module):
     """
@@ -553,6 +608,18 @@ class InternetlessModule(injector.Module):
     """
     Google module.
     """
+
+    @injector.provider
+    @injector.singleton
+    def provide_storage(self, settings: Settings) -> ports.Storage:
+        """
+        Provide the Storage.
+        """
+        return google.CloudStorage(
+            project_id=settings.get("project_id", ""),
+            storage_path=settings.get("bucket_path", ""),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+        )
 
     @injector.provider
     @injector.singleton

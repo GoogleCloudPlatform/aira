@@ -23,7 +23,10 @@
             "groups": "Groups",
             "organizations": "Schools",
             "apply_exams": "Apply Exam",
-            "results": "Results"
+            "results": "Results",
+            "countries": "Countries",
+            "states": "States",
+            "cities": "Cities"
         }
     },
     "search": {
@@ -46,7 +49,10 @@
             "end_date": "End Date",
             "region": "Region",
             "county": "County",
-            "city": "City"
+            "city": "City",
+            "code": "Code",
+            "is_default": "Default",
+            "country": "Country"
         },
         "buttons": {
             "import": "Import",
@@ -86,6 +92,11 @@
     "pagination": {
         "previous": "Previous",
         "next": "Next"
+    },
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "confirm": "Confirm"
     },
     "errors": {
         "cant_delete_resource": "Resource cannot be deleted"

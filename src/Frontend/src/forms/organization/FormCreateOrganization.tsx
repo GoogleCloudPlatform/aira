@@ -2,18 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ENUM_STATE_OPTIONS } from "@/constants/enums";
 import { TFormCreateProps } from "@/interfaces/component";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createOrganization } from "@/services/organization";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { CATEGORY_ORGANIZATIONS } from "@/constants";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
 import Loading from "@/components/loading/Loading";
+import { useState, useEffect } from "react";
+import { getCountries, getStates, getCities } from "@/services/location";
 
 const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen }) => {
     const { loading, setLoading } = useLoading()
@@ -24,6 +25,36 @@ const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen
         resolver: zodResolver(formData.schema),
         defaultValues: formData.defaultValues
     });
+
+    const [selectedCountry, setSelectedCountry] = useState<string>('');
+    const [selectedState, setSelectedState] = useState<string>('');
+
+    const { data: countriesData } = useQuery({
+        queryKey: ['countries', 1],
+        queryFn: getCountries,
+    });
+
+    const { data: statesData } = useQuery({
+        queryKey: ['states', selectedCountry],
+        queryFn: () => getStates(selectedCountry),
+        enabled: !!selectedCountry
+    });
+
+    const { data: citiesData } = useQuery({
+        queryKey: ['cities', selectedState],
+        queryFn: () => getCities(selectedState),
+        enabled: !!selectedState
+    });
+
+    useEffect(() => {
+        if (countriesData?.items) {
+            const defaultCountry = countriesData.items.find(c => c.is_default);
+            if (defaultCountry && !selectedCountry) {
+                setSelectedCountry(defaultCountry.id);
+                form.setValue('country_id', defaultCountry.id);
+            }
+        }
+    }, [countriesData, selectedCountry, form]);
 
     const onSubmit = async (values: z.infer<typeof formData.schema>) => {
         setLoading(true)
@@ -88,7 +119,85 @@ const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen
             )
         }
 
-        if (fieldName === 'state') {
+        if (fieldName === 'country_id') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.organization.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCountry(value);
+                                    setSelectedState('');
+                                    form.setValue('state_id', '');
+                                    form.setValue('city_id', '');
+                                }}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.organization.create.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {countriesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
+        }
+
+        if (fieldName === 'state_id') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.organization.create.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedState(value);
+                                    form.setValue('city_id', '');
+                                }}
+                                defaultValue={field.value}
+                                value={field.value}
+                                disabled={field.disabled || !selectedCountry}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.organization.create.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {statesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
+        }
+
+        if (fieldName === 'city_id') {
             return (
                 <FormField
                     control={form.control}
@@ -100,7 +209,7 @@ const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
                                 value={field.value}
-                                disabled={field.disabled}
+                                disabled={field.disabled || !selectedState}
                             >
                                 <FormControl>
                                     <SelectTrigger>
@@ -108,9 +217,9 @@ const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_STATE_OPTIONS.map((option, index) => (
-                                        <SelectItem key={index} value={option.value}>
-                                            {option.label}
+                                    {citiesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -119,10 +228,10 @@ const FormCreateOrganization : React.FC<TFormCreateProps> = ({ formData, setOpen
                         </FormItem>
                     )}
                 />
-            )  
+            )
         }
 
-        if (['name', 'region', 'city', 'county'].includes(fieldName)) {
+        if (['name', 'region', 'county'].includes(fieldName)) {
             return (
                 <FormField
                     control={form.control}

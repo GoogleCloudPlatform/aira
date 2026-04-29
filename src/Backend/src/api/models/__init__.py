@@ -13,12 +13,15 @@ from .exams import (
     UserRating,
 )
 from .groups import Grades, Group, Shifts
+from .locations import City, Country, State
 from .organizations import Organization
 from .roles import Role
 from .sessions import Session
 from .users import User, UserGroup, UserOrganization, UserType
 
 __all__ = (
+    "City",
+    "Country",
     "Exam",
     "ExamStatus",
     "ExamUser",
@@ -31,6 +34,7 @@ __all__ = (
     "Role",
     "Session",
     "Shifts",
+    "State",
     "User",
     "ExamUserQuestion",
     "UserGroup",

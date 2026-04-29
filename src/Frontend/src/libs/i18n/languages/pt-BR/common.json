@@ -23,7 +23,10 @@
             "groups": "Turmas",
             "organizations": "Escolas",
             "apply_exams": "Aplicar Avaliação",
-            "results": "Resultados"
+            "results": "Resultados",
+            "countries": "Países",
+            "states": "Estados",
+            "cities": "Cidades"
         }
     },
     "search": {
@@ -46,7 +49,10 @@
             "end_date":  "Data de Término",
             "region":  "Região",
             "county":  "Município",
-            "city":  "Cidade"
+            "city":  "Cidade",
+            "code": "Código",
+            "is_default": "Padrão",
+            "country": "País"
         },
         "buttons":{
             "import": "Importar",
@@ -87,6 +93,11 @@
     "pagination": {
         "previous": "Anterior",
         "next": "Próximo"
+    },
+    "common": {
+        "yes": "Sim",
+        "no": "Não",
+        "confirm": "Confirmar"
     },
     "errors": {
         "cant_delete_resource": "Não é possível deletar o recurso"
