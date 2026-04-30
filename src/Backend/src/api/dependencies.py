@@ -20,6 +20,7 @@ from .adapters.sqlalchemy import (
     organization,
     role,
     series,
+    shifts,
     session_query,
     unit_of_work,
     user,
@@ -192,6 +193,26 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
         Provides sqlalchemy get series.
         """
         return series.GetSeries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_shifts(self, session_factory: SessionFactory) -> ports.ListShifts:
+        """
+        Provides sqlalchemy list shifts.
+        """
+        return shifts.ListShifts(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_shift(self, session_factory: SessionFactory) -> ports.GetShift:
+        """
+        Provides sqlalchemy get shift.
+        """
+        return shifts.GetShift(
             session_factory=session_factory,
         )
 

@@ -44,7 +44,10 @@
           "city_deleted": "Ciudad eliminada con éxito",
           "series_created": "Serie creada con éxito",
           "series_updated": "Serie actualizada con éxito",
-          "series_deleted": "Serie eliminada con éxito"
+          "series_deleted": "Serie eliminada con éxito",
+          "shift_created": "Turno creado con éxito",
+          "shift_updated": "Turno actualizado con éxito",
+          "shift_deleted": "Turno eliminado con éxito"
         }
       },
       "errors": {

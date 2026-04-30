@@ -51,6 +51,7 @@ from .organization import (
 from .result import ResultRepository
 from .role import GetRole, GetRoleByName, ListRoles, RoleRepository
 from .series import GetSeries, ListSeries, SeriesRepository
+from .shifts import ListShifts, GetShift, WorkShiftRepository
 from .secret_manager import SecretManager, Secrets
 from .session_query import GetSession, SessionRepository
 from .speech import SpeechToText
@@ -126,4 +127,7 @@ __all__ = (
     "GetSeries",
     "ListSeries",
     "SeriesRepository",
+    "ListShifts",
+    "GetShift",
+    "WorkShiftRepository",
 )

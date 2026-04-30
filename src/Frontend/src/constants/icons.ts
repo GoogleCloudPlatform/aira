@@ -46,3 +46,4 @@ export const ICON_GLOBE = 'globe';
 export const ICON_MAP = 'map';
 export const ICON_BUILDING = 'building';
 export const ICON_LIST_ORDERED = 'list-ordered';
+export const ICON_CLOCK = 'clock';

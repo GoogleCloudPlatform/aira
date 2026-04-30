@@ -19,6 +19,7 @@
             "dashboard": "Dashboard",
             "admin": "Administration",
             "series": "Grades",
+            "shifts": "Shifts",
             "users": "Users",
             "roles": "Roles",
             "groups": "Groups",

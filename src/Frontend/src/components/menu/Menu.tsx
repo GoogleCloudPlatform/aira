@@ -1,6 +1,6 @@
 'use client'
 
-import { ICON_ACADEMIC_CAP, ICON_BOOK_OPEN, ICON_BUILDING_LIBRARY, ICON_CHART_PIE, ICON_CHEVRON_DOWN, ICON_CHEVRON_UP, ICON_CLIPBOARD_CHECK, ICON_COG, ICON_DOCUMENT_TEXT, ICON_HOME, ICON_NOTEPAD_TEXT, ICON_PRESENTATION_CHART_BAR, ICON_TABLE_CELLS, ICON_USER, ICON_USER_GROUP, ICON_GLOBE, ICON_MAP, ICON_BUILDING, ICON_LIST_ORDERED } from '@/constants/icons';
+import { ICON_ACADEMIC_CAP, ICON_BOOK_OPEN, ICON_BUILDING_LIBRARY, ICON_CHART_PIE, ICON_CHEVRON_DOWN, ICON_CHEVRON_UP, ICON_CLIPBOARD_CHECK, ICON_COG, ICON_DOCUMENT_TEXT, ICON_HOME, ICON_NOTEPAD_TEXT, ICON_PRESENTATION_CHART_BAR, ICON_TABLE_CELLS, ICON_USER, ICON_USER_GROUP, ICON_GLOBE, ICON_MAP, ICON_BUILDING, ICON_LIST_ORDERED, ICON_CLOCK } from '@/constants/icons';
 import { SCOPE_ADMIN, SCOPE_DASHBOARD_VIEWER, SCOPE_EXAM_LIST, SCOPE_GROUP_LIST, SCOPE_ORGANIZATION_LIST, SCOPE_USER, SCOPE_USER_IMPERSONATE, SCOPE_USER_LIST } from '@/constants/rbac';
 import { useRBAC } from '@/context/rbac';
 import useIcon from '@/hooks/useIcon';
@@ -90,12 +90,20 @@ const Menu: React.FC = () => {
                     order: 4,
                 },
                 {
+                    name: 'shifts',
+                    icon: ICON_CLOCK,
+                    label: 'shifts',
+                    render: hasScopePermission([SCOPE_ADMIN]),
+                    route: '/admin/shifts',
+                    order: 5,
+                },
+                {
                     name: 'organizations',
                     icon: ICON_BUILDING_LIBRARY,
                     label: 'organizations',
                     render: hasScopePermission([SCOPE_ORGANIZATION_LIST, SCOPE_ADMIN]),
                     route: '/admin/organizations',
-                    order: 5,
+                    order: 6,
                 },
                 {
                     name: 'groups',
@@ -103,7 +111,7 @@ const Menu: React.FC = () => {
                     label: 'groups',
                     render: hasScopePermission([SCOPE_GROUP_LIST, SCOPE_ADMIN]),
                     route: '/admin/groups',
-                    order: 6,
+                    order: 7,
                 },
                 {
                     name: 'roles',
@@ -111,7 +119,7 @@ const Menu: React.FC = () => {
                     label: 'roles',
                     render: false,
                     route: '/admin/roles',
-                    order: 7,
+                    order: 8,
                 },
                 {
                     name: 'users',
@@ -119,7 +127,7 @@ const Menu: React.FC = () => {
                     label: 'users',
                     render: hasScopePermission([SCOPE_USER_LIST, SCOPE_ADMIN]),
                     route: '/admin/users',
-                    order: 8,
+                    order: 9,
                 },
                 {
                     name: 'exams',
@@ -127,7 +135,7 @@ const Menu: React.FC = () => {
                     label: 'exams',
                     render: hasScopePermission([SCOPE_EXAM_LIST, SCOPE_ADMIN]),
                     route: '/admin/exams',
-                    order: 9,
+                    order: 10,
                 },
             ],
             open: pathname.includes('admin'),

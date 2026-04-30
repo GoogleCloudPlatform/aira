@@ -21,7 +21,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllRoles } from "@/services/role";
 import { getAllOrganizations, getOrganizationsUtils } from "@/services/organization";
 import { getAllGroups } from "@/services/group";
-import { getCountries, getStates, getCities } from "@/services/location";
+import { getCountries, getAllStates, getCities } from "@/services/location";
 import { IRolesResponse } from "@/interfaces/roles";
 import { CATEGORY_GROUPS, CATEGORY_ORGANIZATIONS, CATEGORY_ORGANIZATIONS_UTILS, CATEGORY_ROLES, CATEGORY_USERS } from "@/constants";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
@@ -70,7 +70,7 @@ const FormEditUser: React.FC<TFormEditProps> = ({ formData, setOpen }) => {
 
     const { data: statesData } = useQuery({
         queryKey: ['states', selectedCountry],
-        queryFn: () => getStates(selectedCountry),
+        queryFn: () => getAllStates(selectedCountry),
         enabled: !!selectedCountry
     });
 
@@ -504,7 +504,7 @@ const FormEditUser: React.FC<TFormEditProps> = ({ formData, setOpen }) => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {statesData?.items.map((option) => (
+                                    {statesData?.map((option: any) => (
                                         <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>

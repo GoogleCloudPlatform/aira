@@ -107,6 +107,32 @@
                 "confirm": "Excluir"
             }
         },
+        "shift": {
+            "list_title": "Turnos",
+            "list_subtitle": "Gerencie os turnos no sistema.",
+            "create": {
+                "create_shift": "Criar Turno",
+                "create_subtitle_shift": "Preencha os campos abaixo para criar um novo turno.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Criar",
+                "cancel": "Cancelar"
+            },
+            "edit": {
+                "edit_shift": "Editar Turno",
+                "edit_subtitle_shift": "Atualize os campos abaixo para editar o turno.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Salvar",
+                "cancel": "Cancelar"
+            },
+            "delete": {
+                "title": "Excluir Turno",
+                "message": "Tem certeza de que deseja excluir este turno?",
+                "close": "Cancelar",
+                "confirm": "Excluir"
+            }
+        },
         "country": {
             "list_title": "Países",
             "list_subtitle": "Gerencie os países no sistema.",

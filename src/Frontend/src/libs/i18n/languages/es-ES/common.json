@@ -19,6 +19,7 @@
             "dashboard": "Panel",
             "admin": "Administración",
             "series": "Series",
+            "shifts": "Turnos",
             "users": "Usuarios",
             "roles": "Roles",
             "groups": "Grupos",

@@ -21,7 +21,7 @@ import { IRolesResponse } from "@/interfaces/roles";
 import { getAllRoles } from "@/services/role";
 import { getAllOrganizations, getOrganizationsUtils } from "@/services/organization";
 import { getAllGroups } from "@/services/group";
-import { getCountries, getStates, getCities } from "@/services/location";
+import { getCountries, getAllStates, getCities } from "@/services/location";
 import { CATEGORY_GROUPS, CATEGORY_ORGANIZATIONS, CATEGORY_ORGANIZATIONS_UTILS, CATEGORY_ROLES, CATEGORY_USERS } from "@/constants";
 import { IOrganizationsResponse, IOrganizationsUtilsResponse } from "@/interfaces/organization";
 import { IGroupsResponse } from "@/interfaces/group";
@@ -70,7 +70,7 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
 
     const { data: statesData } = useQuery({
         queryKey: ['states', selectedCountry],
-        queryFn: () => getStates(selectedCountry),
+        queryFn: () => getAllStates(selectedCountry),
         enabled: !!selectedCountry
     });
 
@@ -586,7 +586,7 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {statesData?.items.map((option) => (
+                                    {statesData?.map((option: any) => (
                                         <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>

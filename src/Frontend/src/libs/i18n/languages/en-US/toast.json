@@ -44,7 +44,10 @@
           "city_deleted": "City successfully deleted",
           "series_created": "Series successfully created",
           "series_updated": "Series successfully updated",
-          "series_deleted": "Series successfully deleted"
+          "series_deleted": "Series successfully deleted",
+          "shift_created": "Shift successfully created",
+          "shift_updated": "Shift successfully updated",
+          "shift_deleted": "Shift successfully deleted"
         }
       },
       "errors": {

@@ -15,6 +15,7 @@ import { ENUM_GRADE_OPTIONS, ENUM_SHIFTS } from "@/constants/enums";
 import { CATEGORY_GROUPS } from "@/constants";
 import { createGroup } from "@/services/group";
 import { getSeries } from "@/services/series";
+import { getAllShifts } from "@/services/shift";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
@@ -39,6 +40,11 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
     const { data: seriesData } = useQuery({
         queryKey: ['series'],
         queryFn: () => getSeries(),
+    });
+
+    const { data: shiftsData } = useQuery({
+        queryKey: ['shifts'],
+        queryFn: () => getAllShifts(),
     });
 
     if (isLoading) return <>Loading...</>;
@@ -136,9 +142,9 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
                                 )}
                                 {fieldName === 'shift' && (
                                     <SelectContent>
-                                        {ENUM_SHIFTS.map((option) => (
-                                            <SelectItem key={option.id} value={option.value}>
-                                                {t(`form.group.create.${option.name}`)}
+                                        {shiftsData?.items.map((option: any) => (
+                                            <SelectItem key={option.id} value={option.code.toLowerCase()}>
+                                                {option.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

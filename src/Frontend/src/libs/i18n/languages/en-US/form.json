@@ -107,6 +107,32 @@
                 "confirm": "Confirm"
             }
         },
+        "shift": {
+            "list_title": "Shifts",
+            "list_subtitle": "Manage shifts in the system.",
+            "create": {
+                "create_shift": "Create Shift",
+                "create_subtitle_shift": "Fill in the fields below to create a new shift.",
+                "name": "Name",
+                "code": "Code",
+                "confirm": "Create",
+                "cancel": "Cancel"
+            },
+            "edit": {
+                "edit_shift": "Edit Shift",
+                "edit_subtitle_shift": "Update the fields below to edit the shift.",
+                "name": "Name",
+                "code": "Code",
+                "confirm": "Save",
+                "cancel": "Cancel"
+            },
+            "delete": {
+                "title": "Delete Shift",
+                "message": "Are you sure you want to delete this shift?",
+                "close": "Close",
+                "confirm": "Confirm"
+            }
+        },
         "country": {
             "list_title": "Countries",
             "list_subtitle": "Manage countries in the system.",

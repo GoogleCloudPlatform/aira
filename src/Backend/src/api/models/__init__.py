@@ -15,6 +15,7 @@ from .exams import (
 from .groups import Grades, Group, Shifts
 from .locations import City, Country, State
 from .series import Series
+from .shifts import WorkShift
 from .organizations import Organization
 from .roles import Role
 from .sessions import Session
@@ -29,6 +30,7 @@ __all__ = (
     "Grades",
     "Group",
     "Series",
+    "WorkShift",
     "Organization",
     "Question",
     "QuestionType",
