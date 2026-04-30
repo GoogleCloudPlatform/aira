@@ -52,7 +52,6 @@ const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
         setLoading(true)
         try {
             await createExam(values);
-            toast.success(t('toast.success.form.exam_created'))
             resetForm()
             setOpen(false)
         } catch (error) {

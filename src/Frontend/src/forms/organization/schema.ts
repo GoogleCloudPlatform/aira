@@ -9,7 +9,6 @@ export const SchemaCreateOrganization = z.object({
     state_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     city_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     region: z.string().optional(),
-    county: z.string().optional(),
 });
 
 export const SchemaEditOrganization = z.object({
@@ -19,10 +18,9 @@ export const SchemaEditOrganization = z.object({
     state_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     city_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     region: z.string().optional(),
-    county: z.string().optional(),
     created_at: z.date(),
     updated_at: z.date(),
-}).pick({ name: true, country_id: true, state_id: true, city_id: true, region: true, county: true });
+}).pick({ name: true, country_id: true, state_id: true, city_id: true, region: true });
 
 export const SchemaImportOrganization = z.object({
     file: typeof window === 'undefined' ? z.any() : z.instanceof(FileList).optional(),
@@ -63,8 +61,7 @@ export const SchemaCreateOrganizationDefaultValues : z.infer<typeof SchemaCreate
     country_id: '',
     state_id: '',
     city_id: '',
-    region: '',
-    county: ''
+    region: ''
 }
 
 export const SchemaEditOrganizationDefaultValues : z.infer<typeof SchemaEditOrganization> & { id: string, created_at: Date, updated_at: Date } = {
@@ -74,7 +71,6 @@ export const SchemaEditOrganizationDefaultValues : z.infer<typeof SchemaEditOrga
     state_id: '',
     city_id: '',
     region: '',
-    county: '',
     created_at: new Date(),
     updated_at: new Date()
 }

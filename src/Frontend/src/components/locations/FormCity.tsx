@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createCity, updateCityById, getCountries, getStates } from "@/services/location";
+import { createCity, updateCityById, getCountries, getAllStates } from "@/services/location";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
@@ -41,14 +41,18 @@ const FormCity: React.FC<FormCityProps> = ({ mode, formData, setOpen }) => {
 
     const { data: statesData } = useQuery({
         queryKey: ['states', selectedCountry],
-        queryFn: () => getStates(1, selectedCountry),
-        enabled: !!selectedCountry
+        queryFn: () => getAllStates(selectedCountry),
+        enabled: !!selectedCountry,
+        retry: false
     });
 
     useEffect(() => {
         if (mode === MODE_EDIT && typeof formData.defaultValues === 'function') {
              formData.defaultValues().then((data: any) => {
                  form.reset(data);
+                 if (data.state && data.state.country_id) {
+                     setSelectedCountry(data.state.country_id);
+                 }
              });
         }
     }, [mode, formData, form]);
@@ -111,7 +115,7 @@ const FormCity: React.FC<FormCityProps> = ({ mode, formData, setOpen }) => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {statesData?.items.map((state) => (
+                                    {statesData?.map((state: any) => (
                                         <SelectItem key={state.id} value={state.id}>
                                             {state.name}
                                         </SelectItem>

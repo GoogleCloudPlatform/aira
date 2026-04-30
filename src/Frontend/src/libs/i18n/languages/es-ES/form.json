@@ -30,6 +30,9 @@
                 "create_organization": "Crear Escuelas",
                 "create_subtitle_organization": "Complete los campos a continuación para crear una nueva escuela. Toda la información es obligatoria para que la escuela se registre correctamente en el sistema.",
                 "name": "Nombre",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Ciudad",
                 "state": "Estado",
                 "region": "Región",
                 "city": "Ciudad",
@@ -42,6 +45,9 @@
                 "edit_subtitle_organization": "Actualice los campos a continuación para editar la información de la escuela. Modifique solo los campos necesarios y asegúrese de que toda la información sea correcta antes de guardar los cambios.",
                 "id": "ID",
                 "name": "Nombre",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Ciudad",
                 "state": "Estado",
                 "region": "Región",
                 "city": "Ciudad",
@@ -82,17 +88,23 @@
                 "create_series": "Crear Serie",
                 "create_subtitle_series": "Complete los campos a continuación para crear una nueva serie.",
                 "name": "Nombre",
-                "code": "Código"
+                "code": "Código",
+                "confirm": "Crear",
+                "cancel": "Cancelar"
             },
             "edit": {
                 "edit_series": "Editar Serie",
                 "edit_subtitle_series": "Actualice los campos a continuación para editar la serie.",
                 "name": "Nombre",
-                "code": "Código"
+                "code": "Código",
+                "confirm": "Guardar",
+                "cancel": "Cancelar"
             },
             "delete": {
                 "title": "Eliminar Serie",
-                "subtitle": "¿Está seguro de que desea eliminar esta serie?"
+                "message": "¿Está seguro de que desea eliminar esta serie?",
+                "close": "Cancelar",
+                "confirm": "Eliminar"
             }
         },
         "country": {

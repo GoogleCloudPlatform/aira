@@ -112,7 +112,6 @@ class UserGet(User):
     """
 
     state: str | None
-    county: str | None
     region: str | None
     external_id: str | None
     last_login: datetime.datetime | None
@@ -135,7 +134,6 @@ class UserCreate(pydantic.BaseModel):
     password: pydantic.StrictStr | None = None
     external_id: str | None = None
     state: str | None = None
-    county: str | None = None
     region: str | None = None
 
     class Config:
@@ -183,5 +181,4 @@ class UserPatch(pydantic.BaseModel, orm_mode=True):
     groups: list[uuid.UUID] | None
     organizations: list[uuid.UUID] | None
     state: str | None
-    county: str | None
     region: str | None

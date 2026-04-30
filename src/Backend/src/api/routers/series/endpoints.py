@@ -1,7 +1,8 @@
 import uuid
 import fastapi
 import fastapi_injector
-from api import auth, errors, models, ports
+from api import errors, models, ports
+from api.helpers import auth
 from . import schemas
 
 router = fastapi.APIRouter(tags=["series"])
@@ -18,6 +19,19 @@ async def list_series(
 ):
     items, metadata = await list_series_query(page=page, page_size=page_size, query=q)
     return {"items": items, "pages": metadata.total_pages, "total": metadata.total_items, "current_page": metadata.current_page}
+
+@router.get(
+    "/{series_id}",
+    dependencies=[fastapi.Security(auth.get_token, scopes=["admin"])],
+    response_model=schemas.SeriesGet,
+)
+async def get_series(
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(ports.UnitOfWorkBuilder),
+    series_id: uuid.UUID = fastapi.Path(...),
+) -> schemas.SeriesGet:
+    async with uow_builder() as uow:
+        series = await uow.series_repository.get(series_id)
+        return schemas.SeriesGet.from_orm(series)
 
 @router.post(
     "",

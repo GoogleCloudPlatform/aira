@@ -9,6 +9,7 @@ import uuid
 
 import fastapi
 import fastapi_injector
+import sqlalchemy as sa
 
 from api import dependencies, errors, models, ports
 from api.helpers import auth
@@ -136,6 +137,20 @@ async def list_states(
         pages=pagination_metadata.total_pages,
     )
 
+@router.get("/states/all", response_model=list[schemas.StateGet])
+async def list_all_states(
+    country_id: uuid.UUID | None = fastapi.Query(default=None),
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
+) -> list[schemas.StateGet]:
+    async with uow_builder() as uow:
+        stmt = sa.select(models.State).options(sa.orm.joinedload(models.State.country)).order_by(models.State.name.asc())
+        if country_id:
+            stmt = stmt.where(models.State.country_id == country_id)
+        result = await uow._session.execute(stmt)
+        states = result.scalars().unique().all()
+        return [schemas.StateGet.from_orm(s) for s in states]
 
 @router.get(
     "/states/{state_id}",

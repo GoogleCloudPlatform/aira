@@ -306,7 +306,6 @@ async def process(
             school_name=user_question.organization.name,
             school_region=user_question.organization.region,
             school_state=user_question.organization.state,
-            school_county=user_question.organization.county,
             student_name=user_question.user.name,
             student_uuid=user_question.user_id,
             student_customer_id=user_question.user.customer_id,
@@ -502,7 +501,6 @@ async def sync_database(  # noqa: PLR0915
                 region=str(organization.get("descNre")),
                 city=str(organization.get("descMun")),
                 state="PR",
-                county=str(organization.get("descMun")),
             )
             updated_org = await uow.organization_repository.create_or_update(
                 sync_org, cached_orgs
@@ -569,7 +567,6 @@ async def sync_database(  # noqa: PLR0915
                     customer_id=student.get("cgm"),
                     type=models.UserType.PASSWORD,
                     role_id=student_role.id,
-                    county=None,
                     region=None,
                     state=None,
                     orgs_customer_id=None,
@@ -607,7 +604,6 @@ async def sync_database(  # noqa: PLR0915
                     customer_id=professor.get("cpfProfessor"),
                     type=models.UserType.PASSWORD,
                     role_id=professor_role.id,
-                    county=None,
                     region=None,
                     state=None,
                     groups_customer_id=[str(professor.get("codTurma"))],

@@ -17,7 +17,7 @@ import { getFormattedDate } from "@/utils";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCountries, getStates, getCities } from "@/services/location";
+import { getCountries, getAllStates, getCities } from "@/services/location";
 import { updateOrganizationById } from "@/services/organization";
 import { CATEGORY_ORGANIZATIONS } from "@/constants";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
@@ -49,7 +49,7 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
 
     const { data: statesData } = useQuery({
         queryKey: ['states', selectedCountry],
-        queryFn: () => getStates(selectedCountry),
+        queryFn: () => getAllStates(selectedCountry),
         enabled: !!selectedCountry
     });
 
@@ -77,7 +77,6 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
         setLoading(true)
         try {
             await updateOrganizationById(data.id, values);
-            toast.success(t('toast.success.form.organization_updated'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.edit_organization'))
@@ -202,7 +201,7 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {statesData?.items.map((option) => (
+                                    {statesData?.map((option: any) => (
                                         <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>
@@ -249,7 +248,7 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
             )
         }
 
-        if (['name', 'region', 'county'].includes(fieldName)) {
+        if (['name', 'region'].includes(fieldName)) {
             return (
                 <FormField
                     control={form.control}

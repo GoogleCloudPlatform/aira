@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ENUM_GRADE_OPTIONS, ENUM_SHIFTS } from "@/constants/enums";
 import { CATEGORY_GROUPS, CATEGORY_ORGANIZATIONS } from "@/constants";
 import { updateGroupById } from "@/services/group";
+import { getSeries } from "@/services/series";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
@@ -36,6 +37,11 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
 
     const { data, isLoading, isFetching } = useQuery<z.infer<typeof formData.schema>>({ queryKey: ['group'], queryFn: formData.defaultValues });
 
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
     const form = useForm<z.infer<typeof formData.schema>>({
         resolver: zodResolver(formData.schema),
         defaultValues: data || SchemaEditGroupDefaultValues
@@ -52,7 +58,6 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
         setLoading(true)
         try {
             await updateGroupById(data.id, values);
-            toast.success(t('toast.success.form.group_updated'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.edit_group'))
@@ -135,8 +140,8 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_GRADE_OPTIONS.map((option) => (
-                                        <SelectItem key={option.id} value={option.value}>
+                                    {seriesData?.items.map((option: any) => (
+                                        <SelectItem key={option.id} value={option.name}>
                                             {option.name}
                                         </SelectItem>
                                     ))}

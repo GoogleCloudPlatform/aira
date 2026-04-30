@@ -61,7 +61,6 @@ class CreateOrUpdateOrganization:
     region: str | None
     city: str
     state: str
-    county: str
 
 
 @dataclasses.dataclass
@@ -86,6 +85,5 @@ class CreateOrUpdateUser:
     email_address: str
     state: str | None
     region: str | None
-    county: str | None
     orgs_customer_id: list[str] | None
     groups_customer_id: list[str] | None

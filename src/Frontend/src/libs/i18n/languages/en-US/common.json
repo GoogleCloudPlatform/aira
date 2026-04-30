@@ -53,7 +53,8 @@
             "city": "City",
             "code": "Code",
             "is_default": "Default",
-            "country": "Country"
+            "country": "Country",
+            "state": "State"
         },
         "buttons": {
             "import": "Import",
@@ -103,5 +104,8 @@
         "cant_delete_resource": "Resource cannot be deleted"
     },
     "group_has_users": "A group with learners cannot be deleted",
-    "organization_has_groups": "A school with groups cannot be deleted"
+    "organization_has_groups": "A school with groups cannot be deleted",
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save"
 }

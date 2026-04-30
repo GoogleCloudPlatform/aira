@@ -92,14 +92,30 @@ export async function deleteCountryById(id : string) : Promise<void> {
 
 // States
 
-export async function getStates(page: number = 1, countryId?: string) : Promise<IStatesResponse> {
+export async function getStates(page: number = 1, countryId?: string, pageSize?: number) : Promise<IStatesResponse> {
     return new Promise<IStatesResponse>(async (resolve, reject) => {
         try {
             const pagination = usePaginationStore.getState();
             const url = getURL(`${ENDPOINT_LOCATIONS}/states`, { 
                 page: page, 
-                page_size: pagination.page_size, 
+                page_size: pageSize || pagination.page_size, 
                 q: pagination.query,
+                country_id: countryId
+            });
+            await api.get(url).then(response => {
+                resolve(response.data);
+            });
+        } catch (e) {
+            if (process.env.NODE_ENV === 'development') console.error('PROMISE ERROR: ' + e);
+            reject(null);
+        }
+    });
+}
+
+export async function getAllStates(countryId?: string) : Promise<IStateResponse[]> {
+    return new Promise<IStateResponse[]>(async (resolve, reject) => {
+        try {
+            const url = getURL(`${ENDPOINT_LOCATIONS}/states/all`, { 
                 country_id: countryId
             });
             await api.get(url).then(response => {

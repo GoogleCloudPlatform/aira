@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ENUM_GRADE_OPTIONS, ENUM_SHIFTS } from "@/constants/enums";
 import { CATEGORY_GROUPS } from "@/constants";
 import { createGroup } from "@/services/group";
+import { getSeries } from "@/services/series";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
@@ -35,6 +36,11 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
         retryOnMount: false, retry: false,
     });
 
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
     if (isLoading) return <>Loading...</>;
     if (!organizations || isEmpty(organizations)) return null;
 
@@ -42,7 +48,6 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
         setLoading(true)
         try {
             await createGroup(values);
-            toast.success(t('toast.success.form.group_created'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.create_group'))
@@ -122,8 +127,8 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
                                 </FormControl>
                                 {fieldName === 'grade' && (
                                     <SelectContent>
-                                        {ENUM_GRADE_OPTIONS.map((option) => (
-                                            <SelectItem key={option.id} value={option.value}>
+                                        {seriesData?.items.map((option: any) => (
+                                            <SelectItem key={option.id} value={option.name}>
                                                 {option.name}
                                             </SelectItem>
                                         ))}

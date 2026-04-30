@@ -53,7 +53,8 @@
             "city": "Ciudad",
             "code": "Código",
             "is_default": "Predeterminado",
-            "country": "País"
+            "country": "País",
+            "state": "Estado"
         },
         "buttons": {
             "import": "Importar",
@@ -103,5 +104,8 @@
         "cant_delete_resource": "No se puede eliminar el recurso"
     },
     "group_has_users": "No se puede eliminar un grupo con alumnos",
-    "organization_has_groups": "No se puede eliminar una escuela con grupos"
+    "organization_has_groups": "No se puede eliminar una escuela con grupos",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "save": "Guardar"
 }

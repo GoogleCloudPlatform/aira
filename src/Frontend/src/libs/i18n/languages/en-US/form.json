@@ -30,6 +30,9 @@
                 "create_organization": "Create Schools",
                 "create_subtitle_organization": "Fill in the fields below to create a new school. All information below is required for the school to be correctly registered in the system.",
                 "name": "Name",
+                "country_id": "Country",
+                "state_id": "State",
+                "city_id": "City",
                 "state": "State",
                 "region": "Region",
                 "city": "City",
@@ -42,6 +45,9 @@
                 "edit_subtitle_organization": "Update the fields below to edit the school information. Modify only the necessary fields and make sure all information is correct before saving the changes.",
                 "id": "ID",
                 "name": "Name",
+                "country_id": "Country",
+                "state_id": "State",
+                "city_id": "City",
                 "state": "State",
                 "region": "Region",
                 "city": "City",
@@ -82,17 +88,23 @@
                 "create_series": "Create Series",
                 "create_subtitle_series": "Fill in the fields below to create a new series.",
                 "name": "Name",
-                "code": "Code"
+                "code": "Code",
+                "confirm": "Create",
+                "cancel": "Cancel"
             },
             "edit": {
                 "edit_series": "Edit Series",
                 "edit_subtitle_series": "Update the fields below to edit the series.",
                 "name": "Name",
-                "code": "Code"
+                "code": "Code",
+                "confirm": "Save",
+                "cancel": "Cancel"
             },
             "delete": {
                 "title": "Delete Series",
-                "subtitle": "Are you sure you want to delete this series?"
+                "message": "Are you sure you want to delete this series?",
+                "close": "Close",
+                "confirm": "Confirm"
             }
         },
         "country": {

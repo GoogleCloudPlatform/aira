@@ -18,7 +18,6 @@ class Organization(pydantic.BaseModel):
     name: str
     city: str
     region: str | None
-    county: str
     city_id: uuid.UUID | None
 
     class Config:
@@ -48,6 +47,8 @@ class OrganizationGet(Organization):
     state: str
     created_at: datetime.datetime
     updated_at: datetime.datetime
+    country_id: uuid.UUID | None
+    state_id: uuid.UUID | None
 
 
 class OrganizationCreate(pydantic.BaseModel):
@@ -57,10 +58,7 @@ class OrganizationCreate(pydantic.BaseModel):
 
     customer_id: str | None
     name: str
-    city: str
-    state: str
     region: str | None
-    county: str
     city_id: uuid.UUID | None
 
     class Config:

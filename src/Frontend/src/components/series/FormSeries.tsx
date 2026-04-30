@@ -93,10 +93,10 @@ const FormSeries: React.FC<FormSeriesProps> = ({ mode, formData, setOpen }) => {
                 />
                 <div className="flex justify-end space-x-2">
                     <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                        {t("common.cancel")}
+                        {t(`form.series.${mode}.cancel`)}
                     </Button>
                     <Button type="submit">
-                        {mode === MODE_CREATE ? t("common.create") : t("common.save")}
+                        {t(`form.series.${mode}.confirm`)}
                     </Button>
                 </div>
             </form>

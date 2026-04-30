@@ -9,6 +9,8 @@ import uuid
 
 import fastapi
 import fastapi_injector
+import sqlalchemy as sa
+from sqlalchemy.orm import joinedload
 
 from api import dependencies, errors, models, ports
 from api.helpers import auth, data
@@ -80,7 +82,6 @@ async def export_organizations(
             "region",
             "city",
             "state",
-            "county",
         ],
         user_id=current_session.user.id,
         exp_type="organizations",
@@ -148,8 +149,24 @@ async def create(
     :param uow_builder: implementation organization get query.
     :param body: parsed data for organization creation.
     """
-    organization = models.Organization(**body.dict())
     async with uow_builder() as uow:
+        if not body.city_id:
+            raise errors.InvalidField("city_id")
+            
+        stmt = sa.select(models.City).options(joinedload(models.City.state)).where(models.City.id == body.city_id)
+        result = await uow._session.execute(stmt)
+        city = result.scalars().one_or_none()
+        if not city:
+            raise errors.NotFound("city")
+            
+        organization = models.Organization(
+            name=body.name,
+            customer_id=body.customer_id,
+            region=body.region,
+            city_id=body.city_id,
+            city=city.name,
+            state=city.state.code[:2],
+        )
         organization_model = await uow.organization_repository.create(organization)
         await uow.commit()
 
@@ -208,11 +225,30 @@ async def update(
     :param body: parsed data for organization patch.
     """
     async with uow_builder() as uow:
-        organization = await uow.organization_repository.get(organization_id)
+        stmt = sa.select(models.Organization).options(
+            joinedload(models.Organization.city_rel).joinedload(models.City.state)
+        ).where(
+            models.Organization.id == organization_id
+        )
+        result = await uow._session.execute(stmt)
+        organization = result.scalars().one_or_none()
+        if not organization:
+            raise errors.NotFound()
+            
+        if body.city_id and body.city_id != organization.city_id:
+            stmt = sa.select(models.City).options(joinedload(models.City.state)).where(models.City.id == body.city_id)
+            result = await uow._session.execute(stmt)
+            city = result.scalars().one_or_none()
+            if not city:
+                raise errors.NotFound("city")
+            
+            organization.city = city.name
+            organization.state = city.state.code[:2]
+            
         organization = crud.update_org(organization, body)
         await uow.commit()
 
-    return schemas.OrganizationGet.from_orm(organization)
+        return schemas.OrganizationGet.from_orm(organization)
 
 
 @router.put(

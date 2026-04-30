@@ -182,7 +182,6 @@ const FormEditUser: React.FC<TFormEditProps> = ({ formData, setOpen }) => {
         setLoading(true)
         try {
             await updateUserById(data.id, values);
-            toast.success(t('toast.success.form.user_updated'))
             setOpen(false)
         } catch (error: any) {
             toast.error(t('toast.errors.form.edit_user'))

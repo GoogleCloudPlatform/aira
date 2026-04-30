@@ -204,7 +204,9 @@ class GetOrganization(ports.GetOrganization):
         :param organization_id: the organization identifier.
         """
 
-        stmt = sa.select(models.Organization).where(
+        stmt = sa.select(models.Organization).options(
+            sa.orm.joinedload(models.Organization.city_rel).joinedload(models.City.state)
+        ).where(
             models.Organization.id == organization_id
         )
         async with self._session_factory() as session:

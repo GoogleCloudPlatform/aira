@@ -30,6 +30,9 @@
                 "create_organization": "Criar Escolas",
                 "create_subtitle_organization": "Preencha os campos abaixo para realizar a criação de uma nova escola. Todas as informações abaixo são obrigatórias para que a escola seja registrada corretamente no sistema.",
                 "name": "Nome",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Cidade",
                 "state": "Estado",
                 "region": "Região",
                 "city": "Cidade",
@@ -42,6 +45,9 @@
                 "edit_subtitle_organization": "Atualize os campos abaixo para editar as informações da escola. Modifique apenas os campos necessários e verifique se todas as informações estão corretas antes de salvar as alterações.",
                 "id": "ID",
                 "name": "Nome",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Cidade",
                 "state": "Estado",
                 "region": "Região",
                 "city": "Cidade",
@@ -82,17 +88,23 @@
                 "create_series": "Criar Série",
                 "create_subtitle_series": "Preencha os campos abaixo para criar uma nova série.",
                 "name": "Nome",
-                "code": "Código"
+                "code": "Código",
+                "confirm": "Criar",
+                "cancel": "Cancelar"
             },
             "edit": {
                 "edit_series": "Editar Série",
                 "edit_subtitle_series": "Atualize os campos abaixo para editar a série.",
                 "name": "Nome",
-                "code": "Código"
+                "code": "Código",
+                "confirm": "Salvar",
+                "cancel": "Cancelar"
             },
             "delete": {
                 "title": "Excluir Série",
-                "subtitle": "Tem certeza de que deseja excluir esta série?"
+                "message": "Tem certeza de que deseja excluir esta série?",
+                "close": "Cancelar",
+                "confirm": "Excluir"
             }
         },
         "country": {

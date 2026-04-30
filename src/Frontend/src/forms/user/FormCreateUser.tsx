@@ -186,7 +186,6 @@ const FormCreateUser: React.FC<TFormCreateProps> = ({ setOpen, formData }) => {
         setLoading(true)
         try {
             await createUser(values);
-            toast.success(t('toast.success.form.user_created'))
             setOpen(false)
         } catch (error: any) {
             if (error.response.status === 409) {

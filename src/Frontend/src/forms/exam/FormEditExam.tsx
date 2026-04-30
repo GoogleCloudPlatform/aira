@@ -86,8 +86,6 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
         setLoading(true)
         try {
             await updateExamById(data.id, values);
-            toast.success(t('toast.success.form.exam_updated'))
-
             resetForm()
             setOpen(false)
         } catch (error) {
