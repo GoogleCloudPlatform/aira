@@ -12,6 +12,7 @@ from api.helpers import util
 from api.routers.exams import schemas as exam_schemas
 from api.routers.groups import schemas as group_schemas
 from api.routers.organizations import schemas as org_schemas
+from api.routers.roles import schemas as role_schemas
 
 
 class User(pydantic.BaseModel):
@@ -25,6 +26,7 @@ class User(pydantic.BaseModel):
     groups: list[group_schemas.Group]
     organizations: list[org_schemas.Organization]
     role_id: uuid.UUID
+    role: role_schemas.Role | None = None
 
     class Config:
         """

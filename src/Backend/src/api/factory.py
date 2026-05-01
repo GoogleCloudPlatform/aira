@@ -81,3 +81,6 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
         start_middleware(app)
 
     return app
+
+# Trigger reload after .env change (5)
+

@@ -42,6 +42,7 @@
             "actions": "Actions",
             "name": "Name",
             "email": "Email",
+            "role": "Type",
             "grade": "Grade",
             "shift": "Shift",
             "organization": "School",

@@ -229,15 +229,13 @@ class ListOrganizationUtils(ports.ListOrganizationUtils):
     async def __call__(
         self,
     ) -> dict[str, list[str]]:
-        county = sa.select(sa.distinct(models.Organization.county))
         state = sa.select(sa.distinct(models.Organization.state))
         region = sa.select(sa.distinct(models.Organization.region))
         async with self._session_factory() as session:
-            result_county = await session.execute(county)
             result_state = await session.execute(state)
             result_region = await session.execute(region)
         return {
-            "county": list(result_county.scalars().all()),
+            "county": [],
             "state": list(result_state.scalars().all()),
             "region": list(result_region.scalars().all()),  # type: ignore[arg-type]
         }

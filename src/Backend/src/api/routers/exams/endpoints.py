@@ -233,7 +233,10 @@ async def update_exam(
         body_data = body.dict()
         body_data.pop("questions")
         for q in exam.questions:
-            await speech.delete_phrase_set(q.phrase_id)
+            try:
+                await speech.delete_phrase_set(q.phrase_id)
+            except Exception as e:
+                logger.warning(f"Failed to delete phrase set {q.phrase_id}: {e}")
         exam.questions.clear()
         for question in body.questions:
             phrase_id = await crud.build_question_phrase(question, speech)

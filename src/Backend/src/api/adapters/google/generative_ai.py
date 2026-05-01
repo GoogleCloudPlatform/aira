@@ -27,9 +27,14 @@ class GenerativeAI(ports.GenAI):
     Implementation of google's cloud storage.
     """
 
-    def __init__(self, project_id: str, location: str = "us-central1", embedding_model="text-embedding-004"):
-        vertexai.init(project=project_id, location=location)
-        self.model = GenerativeModel("gemini-2.0-flash-exp")
+    def __init__(self, project_id: str, model_version: str, creds_path: str | None = None, location: str = "us-central1", embedding_model="text-embedding-004"):
+        from google.oauth2 import service_account
+        credentials = None
+        if creds_path:
+            credentials = service_account.Credentials.from_service_account_file(creds_path)
+            
+        vertexai.init(project=project_id, location=location, credentials=credentials)
+        self.model = GenerativeModel(model_version)
         self.embedding_model = embedding_model
         self.project_id = project_id
         self.location = location
@@ -159,9 +164,9 @@ class GenerativeAI(ports.GenAI):
         """
         Method genarates a readable text.
         """
-        query = f'Crie um texto narrativo curto, com cerca de 140 palavras, destinado à avaliação de leitura para alunos em fase inicial. O tema do texto é: "{subject}". - O texto deve incluir um título atrativo relacionado ao tema. - Utilize vocabulário simples e acessível, priorizando palavras adequadas ao nível de leitura inicial. - Inclua palavras que apresentem diferentes estruturas silábicas (como CV, CVC, VC, CCV) e explore variações ortográficas regulares e irregulares de forma equilibrada. - Mantenha a narrativa envolvente e estruturada, com uma introdução, um breve desenvolvimento e um desfecho claro '
+        query = f'Crie um texto narrativo curto, com cerca de 140 palavras, destinado à avaliação de leitura para alunos em fase inicial. O tema do texto é: "{subject}". - O texto deve incluir um título atrativo relacionado ao tema na primeira linha. - Utilize vocabulário simples e acessível, priorizando palavras adequadas ao nível de leitura inicial. - Inclua palavras que apresentem diferentes estruturas silábicas (como CV, CVC, VC, CCV) e explore variações ortográficas regulares e irregulares de forma equilibrada. - Mantenha a narrativa envolvente e estruturada, com uma introdução, um breve desenvolvimento e um desfecho claro. IMPORTANTE: Não utilize nenhuma formatação markdown (como ## para títulos, asteriscos para negrito, etc.). O título deve ser apenas texto puro na primeira linha.'
         response = self.model.generate_content(query)
-        return response.text
+        return response.text.strip()
 
     def generate_question(
         self,

@@ -112,16 +112,19 @@ class User(db.Base, db.DefaultColumns):
     city_id: Mapped[db.UuidDefault | None] = mapped_column(
         sa.ForeignKey("cities.id", ondelete="SET NULL"),
         nullable=True,
+        default=None,
     )
 
     groups: Mapped[list[groups.Group]] = relationship(
         groups.Group,
         secondary=UserGroup.__table__,
+        init=False,
     )
 
     organizations: Mapped[list[organizations.Organization]] = relationship(
         organizations.Organization,
         secondary=UserOrganization.__table__,
+        init=False,
     )
 
     role: Mapped[Role] = relationship(

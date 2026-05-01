@@ -133,10 +133,10 @@ class BigQuery(ports.AnalyticalResult):
 
         job_config = bigquery.QueryJobConfig(query_parameters=query_parameters)
         query = (
-            "SELECT * "
-            "FROM `rad-stt-dev.dataset_lia.student_results` "
-            f"{where_clause}"
-            "LIMIT 1000"
+            f"SELECT * "
+            f"FROM `{self.project_id}.{self.dataset}.{self.table_name}` "
+            f"{where_clause} "
+            f"LIMIT 1000"
         )
 
         query_job = await asyncio.to_thread(

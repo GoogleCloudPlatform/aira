@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { IUser } from "@/interfaces/auth";
 import { SCOPE_ADMIN, SCOPE_USER, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RBACWrapper, useRBAC } from "@/context/rbac";
 import { ActionTable } from "@/components";
 import { SchemaCreateUserDefaultValues, SchemaCreateUserForm, SchemaEditUserForm, SchemaImportUser, SchemaImportUserDefaultValues } from "@/forms/user/schema";
@@ -48,6 +48,7 @@ const Users: React.FC = () => {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
     const { setUser } = useUserStore();
     const { page, page_size, query, show_finished, setPagination } = usePaginationStore();
 
@@ -157,7 +158,13 @@ const Users: React.FC = () => {
         setOpenSheet(true);
     };
 
-    const impersonate = (user: Partial<IUser>) => router.push(`/users/${user.id}/exams`);
+    const impersonate = (user: Partial<IUser>) => {
+        if (params.id) {
+            router.push(`/users/${user.id}/exams/${params.id}/questions`);
+        } else {
+            router.push(`/users/${user.id}/exams`);
+        }
+    };
 
     const results = (user: Partial<IUser>) => {
         setUser("user", user)
@@ -210,6 +217,16 @@ const Users: React.FC = () => {
         {
             accessorKey: "email_address",
             header: t("table.headers.email"),
+        },
+        {
+            accessorKey: "role",
+            header: t("table.headers.role") || "Tipo",
+            cell: ({ row }) => {
+                const user = row.original as any;
+                const locale = (params.locale as string) || 'pt-BR';
+                const displayName = user.role?.display_name;
+                return displayName ? (displayName[locale] || displayName['pt-BR']) : '-';
+            }
         },
         {
             accessorKey: "actions",
@@ -281,8 +298,12 @@ const Users: React.FC = () => {
     return (
         <>
             <div className="sm:container pt-5 2xl:pt-10 mb-10">
-                <h1 className="font-semibold text-2xl md:text-3xl text-primary dark:text-white mb-1">{t('form.user.list_title')}</h1>
-                <h2 className="text-black/80 dark:text-white/80 text-base md:text-xl">{t('form.user.list_subtitle')}</h2>
+                <h1 className="font-semibold text-2xl md:text-3xl text-primary dark:text-white mb-1">
+                    {params.id ? "Selecionar Estudante" : t('form.user.list_title')}
+                </h1>
+                <h2 className="text-black/80 dark:text-white/80 text-base md:text-xl">
+                    {params.id ? "Selecione um estudante para aplicar a avaliação" : t('form.user.list_subtitle')}
+                </h2>
             </div>
             <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 sm:container">
                 <div className="flex flex-col sm:flex-row gap-2 justify-between w-full">

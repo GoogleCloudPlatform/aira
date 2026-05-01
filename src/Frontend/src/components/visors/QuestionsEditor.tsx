@@ -167,7 +167,7 @@ const QuestionsEditor: React.FC<TQuestionEditorProps> = ({ question, field, inde
                     
                     {question_type !== QuestionType.LogicalSituations && question_type !== QuestionType.ShortExplanations && question_type !== QuestionType.IndustryAreas && (
                         <div className='flex items-center gap-2'>
-                            <span className='dark:text-white'>{useReference ? t('form.exam.use_reference') : t('form.exam.dont_use_reference')}</span>
+                            <span className='text-sm dark:text-white'>{useReference ? t('form.exam.use_reference') : t('form.exam.dont_use_reference')}</span>
                             <Switch
                                 id='switch-use-reference'
                                 checked={useReference}

@@ -556,6 +556,9 @@ class GoogleModule(injector.Module):
         """
         return google.GenerativeAI(
             project_id=settings.get("project_id", ""),
+            model_version=settings.get("model_version", "gemini-1.5-flash"),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+            location=settings.get("gcp_location", "us-central1"),
         )
 
     @injector.provider
@@ -589,7 +592,7 @@ class GoogleModule(injector.Module):
         """
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", ""),
+            creds_path=settings.get("gcp_fb_credentials", "") or settings.get("gcp_storage_credentials", ""),
         )
 
     @injector.provider
@@ -671,6 +674,9 @@ class InternetlessModule(injector.Module):
         """
         return google.GenerativeAI(
             project_id=settings.get("project_id", ""),
+            model_version=settings.get("model_version", "gemini-1.5-flash"),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+            location=settings.get("gcp_location", "us-central1"),
         )
 
     @injector.provider
@@ -689,7 +695,7 @@ class InternetlessModule(injector.Module):
         """
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", ""),
+            creds_path=settings.get("gcp_fb_credentials", "") or settings.get("gcp_storage_credentials", ""),
         )
 
     @injector.provider
@@ -830,17 +836,18 @@ def get_speech_to_text(
     """
     Get the speech to text.
     """
+    creds_path = settings.get("gcp_stt_credentials", "") or settings.get("gcp_storage_credentials", "")
     match version:
         case "v2":
             return google.SpeechToTextV2(
                 project_id=settings.get("project_id", ""),
-                creds_path=settings.get("gcp_stt_credentials", ""),
+                creds_path=creds_path,
                 storage=storage,
             )
         case "v1":
             return google.SpeechToText(
                 project_id=settings.get("project_id", ""),
-                creds_path=settings.get("gcp_stt_credentials", ""),
+                creds_path=creds_path,
                 storage=storage,
             )
         case "v2chirp":

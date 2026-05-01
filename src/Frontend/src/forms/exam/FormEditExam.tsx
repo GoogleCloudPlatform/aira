@@ -48,7 +48,7 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
     const queryClient = useQueryClient();
     const { data, isLoading, isFetching} = useQuery<IExamResponse | z.infer<typeof formData.schema>>({ queryKey: ['exam'], queryFn: formData.defaultValues });
 
-    const { data: seriesData } = useQuery({
+    const { data: seriesData, isLoading: isLoadingSeries } = useQuery({
         queryKey: ['series'],
         queryFn: () => getSeries(),
     });
@@ -59,7 +59,7 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
     console.log(form.formState.errors);
     
     useEffect(() => {
-        if (data && !isEmpty(data)) {
+        if (data && !isEmpty(data) && seriesData) {
             const transformDateStringInDate = { 
                 ...data, 
                 start_date: new Date(data.start_date), 
@@ -75,9 +75,12 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
             const newData = Object.assign({}, transformDateStringInDate);
 
             form.reset(newData)
+            if (data.grade) {
+                form.setValue('grade', data.grade || "5º Ano", { shouldValidate: true })
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [data, seriesData]);
 
     const watchQuestions = form.watch('questions')
     const { errors } = form.formState
@@ -103,7 +106,7 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
         onChange(day)
     }
 
-    if ( !data || isEmpty(data) || isLoading || isFetching ) { return <SkeletonSheet/> }
+    if ( !data || isEmpty(data) || isLoading || isFetching || isLoadingSeries ) { return <SkeletonSheet/> }
 
     const today = new Date();
     const start_date = new Date(data.start_date);
@@ -178,10 +181,11 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
                         <FormItem className="space-y-2">
                             <FormLabel>{t(`form.exam.create.${field.name}`)}</FormLabel>
                             <Select
+                                key={field.value}
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
                                 value={field.value}
-                                disabled={field.disabled}
+                                disabled={field.disabled || preview}
                             >
                                 <FormControl>
                                     <SelectTrigger>
