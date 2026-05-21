@@ -35,7 +35,7 @@ resource "google_identity_platform_config" "default" {
         "localhost",
         "${var.project_id}.firebaseapp.com",
         "${var.project_id}.web.app",
-        var.frontend_url,
+        replace(replace(var.frontend_url, "https://", ""), "http://", ""),
       ]
   sign_in {
     allow_duplicate_emails = false
@@ -85,6 +85,7 @@ resource "google_storage_bucket" "default" {
   project  = var.project_id
   name     = "${var.project_id}-fb-webapp"
   location = "US"
+  uniform_bucket_level_access = true
   
   # This depends_on is useful if google_project_service.project enables storage.googleapis.com
   depends_on = [

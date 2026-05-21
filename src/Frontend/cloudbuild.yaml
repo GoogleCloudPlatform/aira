@@ -54,6 +54,7 @@ steps:
         "--set-env-vars=NEXT_PUBLIC_FIREBASE_PROJECT_ID=${PROJECT_ID},NEXT_PUBLIC_LOOKER=url.cloud.looker.com,NEXT_PUBLIC_LOOKER_GENERAL_DASHBOARD_ID=1,NEXT_PUBLIC_LOOKER_LEARNERS_DASHBOARD_ID=2,NEXT_PUBLIC_TUTORIAL_BUCKET=${PROJECT_ID}-store-public-files",
         "--allow-unauthenticated",
         "--vpc-connector=vpc-con",
+        "--port", "3000"
       ]
 
 images:

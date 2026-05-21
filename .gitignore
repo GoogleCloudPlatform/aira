@@ -8,3 +8,6 @@ src/IAC/terraform.tfstate.backup
 src/Backend/chroma_data/chroma.sqlite3
 src/Backend/aira-demo-eaed8-8f3bfad5df4a.json
 _ORIGIN=*
+src/IAC/backend.tf
+src/IAC/terraform.tfvars
+src/IAC/variables.tf

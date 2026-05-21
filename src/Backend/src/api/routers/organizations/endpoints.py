@@ -139,6 +139,9 @@ async def create(
     uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
         ports.UnitOfWorkBuilder
     ),
+    get_organization: ports.GetOrganization = fastapi_injector.Injected(
+        ports.GetOrganization
+    ),
     body: schemas.OrganizationCreate = fastapi.Body(...),
 ) -> schemas.OrganizationGet:
     """
@@ -170,7 +173,9 @@ async def create(
         organization_model = await uow.organization_repository.create(organization)
         await uow.commit()
 
-    return schemas.OrganizationGet.from_orm(organization_model)
+    return schemas.OrganizationGet.from_orm(
+        await get_organization(organization_id=organization_model.id)
+    )
 
 
 @router.delete(
