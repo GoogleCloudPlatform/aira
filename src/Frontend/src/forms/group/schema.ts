@@ -5,18 +5,18 @@ import { z } from "zod";
 
 export const SchemaCreateGroup = z.object({
     name: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    grade: z.string().min(2, { message: "toast.errors.form.required_field" }),
-    shift: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    series_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    shift_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     organization_id: z.string().min(1, { message: "toast.errors.form.required_field" })
 });
 
 export const SchemaEditGroup = z.object({
     id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     name: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    grade: z.string().min(2, { message: "toast.errors.form.required_field" }),
-    shift: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    series_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    shift_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
     organization_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
-}).pick({ name: true, grade: true, shift: true, organization_id: true });
+}).pick({ name: true, series_id: true, shift_id: true, organization_id: true });
 
 export const SchemaImportGroup = z.object({
     file:typeof window === 'undefined' ? z.any() : z.instanceof(FileList).optional(),
@@ -54,16 +54,16 @@ export const SchemaImportGroup = z.object({
 
 export const SchemaCreateGroupDefaultValues : z.infer<typeof SchemaCreateGroup> = {
     name: '',
-    grade: '',
-    shift: '',
+    series_id: '',
+    shift_id: '',
     organization_id: ''
 }
 
 export const SchemaEditGroupDefaultValues : z.infer<typeof SchemaEditGroup> & { id: string } = {
     id: '',
     name: '',
-    grade: '',
-    shift: '',
+    series_id: '',
+    shift_id: '',
     organization_id: ''
 }
 

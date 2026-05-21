@@ -258,35 +258,35 @@ export const SchemaEditUserForm = z.object({
     email_address: z.string().min(1, { message: "toast.errors.form.required_field" }).email("toast.errors.form_invalid_email"),
     name: z.string(),
     role_id: z.string(),
-    organizations: z.union([z.array(z.string()), z.array(OptionSchema)]).nullable().transform(organizations => {
+    organizations: z.union([z.array(z.string()), z.array(OptionSchema)]).nullable().optional().transform(organizations => {
         if (!organizations || isEmpty(organizations)) return undefined;
 
         const data : string[] = organizations.map(o => typeof o === 'string' ? o : o.value);
         return data;
     }),
-    groups: z.union([z.array(z.string()), z.array(OptionSchema)]).nullable().transform(groups => {
+    groups: z.union([z.array(z.string()), z.array(OptionSchema)]).nullable().optional().transform(groups => {
         if (!groups || isEmpty(groups)) return undefined;
 
         const data : string[] = groups.map(g => typeof g === 'string' ? g : g.value);
         return data;
     }),
-    country_id: z.string().nullable().transform(country_id => {
+    country_id: z.string().nullable().optional().transform(country_id => {
         if (!country_id || isEmpty(country_id)) return undefined;
         return country_id;
     }),
-    state_id: z.string().nullable().transform(state_id => {
+    state_id: z.string().nullable().optional().transform(state_id => {
         if (!state_id || isEmpty(state_id)) return undefined;
         return state_id;
     }),
-    city_id: z.string().nullable().transform(city_id => {
+    city_id: z.string().nullable().optional().transform(city_id => {
         if (!city_id || isEmpty(city_id)) return undefined;
         return city_id;
     }),
-    region: z.string().nullable().transform(region => {
+    region: z.string().nullable().optional().transform(region => {
         if (!region || isEmpty(region)) return undefined;
         return region;
     }),
-    county: z.string().nullable().transform(county => {
+    county: z.string().nullable().optional().transform(county => {
         if (!county || isEmpty(county)) return undefined;
         return county;
     })

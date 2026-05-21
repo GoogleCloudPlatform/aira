@@ -37,7 +37,7 @@ class ResultRepository(ports.ResultRepository):
                 orm.joinedload(models.ExamUserQuestion.user),
             )
             .options(
-                orm.joinedload(models.ExamUserQuestion.group),
+                orm.joinedload(models.ExamUserQuestion.group).joinedload(models.Group.series),
             )
             .options(
                 orm.joinedload(models.ExamUserQuestion.exam),

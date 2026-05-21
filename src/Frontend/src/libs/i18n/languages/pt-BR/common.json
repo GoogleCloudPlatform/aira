@@ -76,7 +76,8 @@
         },
         "shifts": {
             "morning": "Manhã",
-            "evening": "Tarde",
+            "afternoon": "Tarde",
+            "evening": "Noite",
             "night": "Noite",
             "allday": "Integral"
         },

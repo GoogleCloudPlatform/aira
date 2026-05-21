@@ -56,10 +56,10 @@ class OrganizationCreate(pydantic.BaseModel):
     Schema related to the creation of a Organization.
     """
 
-    customer_id: str | None
+    customer_id: str | None = None
     name: str
-    region: str | None
-    city_id: uuid.UUID | None
+    region: str | None = None
+    city_id: uuid.UUID | None = None
 
     class Config:
         """

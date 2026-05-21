@@ -34,9 +34,9 @@ const FormCountry: React.FC<FormCountryProps> = ({ mode, formData, setOpen }) =>
 
     useEffect(() => {
         if (mode === MODE_EDIT && typeof formData.defaultValues === 'function') {
-             formData.defaultValues().then((data: any) => {
-                 form.reset(data);
-             });
+            formData.defaultValues().then((data: any) => {
+                form.reset(data);
+            });
         }
     }, [mode, formData, form]);
 

@@ -179,8 +179,8 @@ class UserPatch(pydantic.BaseModel, orm_mode=True):
     Schema related to the User patch.
     """
 
-    name: str | None
-    groups: list[uuid.UUID] | None
-    organizations: list[uuid.UUID] | None
-    state: str | None
-    region: str | None
+    name: str | None = None
+    groups: list[uuid.UUID] | None = None
+    organizations: list[uuid.UUID] | None = None
+    state: str | None = None
+    region: str | None = None

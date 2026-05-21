@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 )
 async def list_resources(
     shift: str | None = fastapi.Query(default=None),
-    grade: models.Grades | None = fastapi.Query(default=None),
+    grade: str | None = fastapi.Query(default=None),
     organizations: list[uuid.UUID] | None = fastapi.Query(default=None),
     list_data: util_schemas.ListSchema = fastapi.Depends(),
     list_groups: ports.ListGroups = fastapi_injector.Injected(ports.ListGroups),

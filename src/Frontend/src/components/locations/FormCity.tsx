@@ -48,12 +48,12 @@ const FormCity: React.FC<FormCityProps> = ({ mode, formData, setOpen }) => {
 
     useEffect(() => {
         if (mode === MODE_EDIT && typeof formData.defaultValues === 'function') {
-             formData.defaultValues().then((data: any) => {
-                 form.reset(data);
-                 if (data.state && data.state.country_id) {
-                     setSelectedCountry(data.state.country_id);
-                 }
-             });
+            formData.defaultValues().then((data: any) => {
+                form.reset(data);
+                if (data.state && data.state.country_id) {
+                    setSelectedCountry(data.state.country_id);
+                }
+            });
         }
     }, [mode, formData, form]);
 

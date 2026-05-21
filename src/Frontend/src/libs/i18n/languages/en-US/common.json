@@ -76,7 +76,8 @@
         },
         "shifts": {
             "morning": "Morning",
-            "evening": "Afternoon",
+            "afternoon": "Afternoon",
+            "evening": "Evening",
             "night": "Night",
             "allday": "Full Day"
         },

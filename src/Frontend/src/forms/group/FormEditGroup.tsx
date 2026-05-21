@@ -55,7 +55,12 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
 
     useEffect(() => {
         if (data && !isEmpty(data)) {
-            const newData = Object.assign({}, { ...data, organization_id: data.organization.id });
+            const newData = Object.assign({}, {
+                ...data,
+                organization_id: data.organization.id,
+                series_id: data.series_id,
+                shift_id: data.shift_id
+            });
             form.reset(newData);
         }
     }, [data, form]);
@@ -127,27 +132,27 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
             )
         }
 
-        if (fieldName === 'grade') {
+        if (fieldName === 'series_id') {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`form.group.edit.${field.name}`)}</FormLabel>
+                            <FormLabel>{t('form.group.edit.grade')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                value={field.value || data.grade}
+                                value={field.value || data.series_id}
                                 disabled={field.disabled}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={`form.group.edit.${field.name}`} />
+                                        <SelectValue placeholder={t('form.group.edit.grade')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {seriesData?.items.map((option: any) => (
-                                        <SelectItem key={option.id} value={option.name}>
+                                        <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>
                                     ))}
@@ -160,27 +165,27 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
             )  
         }
 
-        if (fieldName === 'shift') {
+        if (fieldName === 'shift_id') {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`form.group.edit.${field.name}`)}</FormLabel>
+                            <FormLabel>{t('form.group.edit.shift')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                value={field.value || data.shift}
+                                value={field.value || data.shift_id}
                                 disabled={field.disabled}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={t(`form.group.edit.${field.name}`)} />
+                                        <SelectValue placeholder={t('form.group.edit.shift')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {shiftsData?.items.map((option: any) => (
-                                        <SelectItem key={option.id} value={option.code.toLowerCase()}>
+                                        <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>
                                     ))}

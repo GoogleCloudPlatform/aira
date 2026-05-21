@@ -34,6 +34,8 @@ class GroupRepository(ports.GroupRepository):
             sa.select(models.Group)
             .options(
                 orm.joinedload(models.Group.organization),
+                orm.joinedload(models.Group.series),
+                orm.joinedload(models.Group.work_shift),
             )
             .where(models.Group.id == group_id)
         )
@@ -60,7 +62,7 @@ class GroupRepository(ports.GroupRepository):
         except exc.IntegrityError as exception:
             raise errors.AlreadyExists() from exception
 
-        await self._session.refresh(group_model, ["organization"])
+        await self._session.refresh(group_model, ["organization", "series", "work_shift"])
         return group_model
 
     async def delete(self, group_model: models.Group) -> None:
@@ -89,23 +91,40 @@ class GroupRepository(ports.GroupRepository):
             if not organization:
                 return None
         org_id = organization.id
+
+        series_stmt = sa.select(models.Series).where(models.Series.name == sync_group.grade)
+        series_result = await self._session.execute(series_stmt)
+        series = series_result.unique().scalar_one_or_none()
+        if not series:
+            logger.warning(f"Series not found for grade: {sync_group.grade}")
+            return None
+
+        shift_stmt = sa.select(models.WorkShift).where(models.WorkShift.code == sync_group.shift)
+        shift_result = await self._session.execute(shift_stmt)
+        shift = shift_result.unique().scalar_one_or_none()
+        if not shift:
+            logger.warning(f"WorkShift not found for shift: {sync_group.shift}")
+            return None
+
         group = next(
             (g for g in cached_groups if g.customer_id == sync_group.customer_id), None
         )
         if group:
             group.name = sync_group.name
-            group.grade = sync_group.grade
-            group.shift = sync_group.shift
+            group.series_id = series.id
+            group.shift_id = shift.id
             group.organization_id = org_id
         else:
             group = models.Group(
                 name=sync_group.name,
                 customer_id=sync_group.customer_id,
                 organization_id=org_id,
-                grade=sync_group.grade,
-                shift=sync_group.shift,
+                series_id=series.id,
+                shift_id=shift.id,
             )
             group.organization = organization
+            group.series = series
+            group.work_shift = shift
             self._session.add(group)
 
         return group
@@ -157,8 +176,8 @@ class ListGroups(ports.ListGroups):
             orm.load_only(
                 group.id,
                 group.name,
-                group.grade,
-                group.shift,
+                group.series_id,
+                group.shift_id,
                 group.created_at,
                 group.updated_at,
                 group.customer_id,
@@ -167,16 +186,22 @@ class ListGroups(ports.ListGroups):
             orm.joinedload(group.organization).load_only(
                 models.Organization.id, models.Organization.name
             ),
+            orm.joinedload(group.series).load_only(
+                models.Series.id, models.Series.name
+            ),
+            orm.joinedload(group.work_shift).load_only(
+                models.WorkShift.id, models.WorkShift.name, models.WorkShift.code
+            ),
         )
 
         if groups is not None:
             stmt = stmt.where(group.id.in_(groups))
 
         if shift:
-            stmt = stmt.where(group.shift == shift)
+            stmt = stmt.where(group.shift_id == shift)
 
         if grade:
-            stmt = stmt.where(group.grade == grade)
+            stmt = stmt.where(group.series_id == grade)
 
         if organizations:
             stmt = stmt.where(group.organization_id.in_(organizations))
@@ -232,6 +257,8 @@ class GetGroup(ports.GetGroup):
             sa.select(models.Group)
             .options(
                 orm.joinedload(models.Group.organization),
+                orm.joinedload(models.Group.series),
+                orm.joinedload(models.Group.work_shift),
             )
             .where(models.Group.id == group_id)
         )
@@ -263,19 +290,31 @@ class ListGroupsWithoutOrg(ports.ListGroupsWithoutOrg):
         Method to list all groups.
         """
 
-        stmt = sa.select(models.Group)
+        stmt = sa.select(models.Group).options(
+            orm.joinedload(models.Group.series),
+            orm.joinedload(models.Group.work_shift),
+            orm.joinedload(models.Group.organization),
+        )
 
         if groups is not None:
             stmt = stmt.where(models.Group.id.in_(groups))
 
         if shift:
-            stmt = stmt.where(models.Group.shift == shift)
+            try:
+                shift_uuid = uuid.UUID(shift)
+                stmt = stmt.where(models.Group.shift_id == shift_uuid)
+            except ValueError:
+                stmt = stmt.join(models.WorkShift).where(models.WorkShift.code == shift)
 
         if name:
             stmt = stmt.where(models.Group.name == name)
 
         if grade:
-            stmt = stmt.where(models.Group.grade == grade)
+            try:
+                grade_uuid = uuid.UUID(grade)
+                stmt = stmt.where(models.Group.series_id == grade_uuid)
+            except ValueError:
+                stmt = stmt.join(models.Series).where(models.Series.name == grade)
 
         async with self._session_factory() as session:
             result = await session.execute(stmt)

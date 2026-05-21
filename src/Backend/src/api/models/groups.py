@@ -44,6 +44,10 @@ class Shifts(enum.StrEnum):
     ALLDAY = "allday"
 
 
+from .series import Series
+from .shifts import WorkShift
+
+
 class Group(db.Base, db.DefaultColumns):
     """
     Group model.
@@ -61,13 +65,24 @@ class Group(db.Base, db.DefaultColumns):
         nullable=False,
     )
 
-    grade: Mapped[Grades] = mapped_column(psql.ENUM(Grades), nullable=False)
-    shift: Mapped[Shifts] = mapped_column(psql.ENUM(Shifts), nullable=False)
+    series_id: Mapped[db.UuidDefault] = mapped_column(
+        sa.ForeignKey("series.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    shift_id: Mapped[db.UuidDefault] = mapped_column(
+        sa.ForeignKey("work_shifts.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
 
     organization: Mapped[organizations.Organization] = orm.relationship(
         organizations.Organization,
         init=False,
     )
+
+    series: Mapped[Series] = orm.relationship("Series", init=False)
+    work_shift: Mapped[WorkShift] = orm.relationship("WorkShift", init=False)
 
     def __repr__(self) -> str:
         return f"Group(id={self.id}, name={self.name})"

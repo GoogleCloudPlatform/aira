@@ -112,14 +112,22 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
             )
         }
 
-        if (['grade', 'shift', 'organization_id'].includes(fieldName)) {
+        if (['series_id', 'shift_id', 'organization_id'].includes(fieldName)) {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`${field.name === 'organization_id' ? 'form.group.create.organization' : 'form.group.create.'+field.name}`)}</FormLabel>
+                            <FormLabel>
+                                {t(
+                                    field.name === 'organization_id'
+                                        ? 'form.group.create.organization'
+                                        : field.name === 'series_id'
+                                            ? 'form.group.create.grade'
+                                            : 'form.group.create.shift'
+                                )}
+                            </FormLabel>
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
@@ -128,22 +136,30 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={`${t(`${field.name === 'organization_id' ? 'form.group.create.organization' : 'form.group.create.'+field.name}`)}`} />
+                                        <SelectValue
+                                            placeholder={t(
+                                                field.name === 'organization_id'
+                                                    ? 'form.group.create.organization'
+                                                    : field.name === 'series_id'
+                                                        ? 'form.group.create.grade'
+                                                        : 'form.group.create.shift'
+                                            )}
+                                        />
                                     </SelectTrigger>
                                 </FormControl>
-                                {fieldName === 'grade' && (
+                                {fieldName === 'series_id' && (
                                     <SelectContent>
                                         {seriesData?.items.map((option: any) => (
-                                            <SelectItem key={option.id} value={option.name}>
+                                            <SelectItem key={option.id} value={option.id}>
                                                 {option.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 )}
-                                {fieldName === 'shift' && (
+                                {fieldName === 'shift_id' && (
                                     <SelectContent>
                                         {shiftsData?.items.map((option: any) => (
-                                            <SelectItem key={option.id} value={option.code.toLowerCase()}>
+                                            <SelectItem key={option.id} value={option.id}>
                                                 {option.name}
                                             </SelectItem>
                                         ))}

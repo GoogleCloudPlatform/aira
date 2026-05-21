@@ -76,8 +76,8 @@ export const ENUM_STATE_OPTIONS = [
 
 export const ENUM_SHIFTS = [
     { id: "morning", name: "morning", value: "morning" },
+    { id: "afternoon", name: "afternoon", value: "afternoon" },
     { id: "evening", name: "evening", value: "evening" },
-    { id: "night", name: "night", value: "night" },
     { id: "allday", name: "allday", value: "allday" }
 ];
 

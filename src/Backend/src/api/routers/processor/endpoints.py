@@ -288,12 +288,12 @@ async def process(
 
         result_data = UserResult(
             school_uuid=user_question.organization_id,
-            class_grade=user_question.group.grade.value,
+            class_grade=user_question.group.series.name,
             class_name=user_question.group.name,
             class_uuid=user_question.group_id,
             exam_end_date=user_question.exam.end_date,
             exam_start_date=user_question.exam.start_date,
-            exam_grade=user_question.group.grade.value,
+            exam_grade=user_question.group.series.name,
             exam_name=user_question.exam.name,
             exam_uuid=user_question.exam_id,
             question_amount_words=len(data.words),
