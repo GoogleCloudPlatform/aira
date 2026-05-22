@@ -1,6 +1,6 @@
 import Alert from "@/classes/Alert";
 import { ALERT_SUCCESS } from "@/constants/alerts";
-import { ENDPOINT_EXAMS, ENDPOINT_PROFILE, ENDPOINT_RESULTS, ENDPOINT_USERS } from "@/constants/endpoints";
+import { ENDPOINT_EXAMS, ENDPOINT_PROFILE, ENDPOINT_RESULTS, ENDPOINT_USERS, ENDPOINT_DASHBOARD } from "@/constants/endpoints";
 import { IUserExportResponse, IUsersImportResponse, IProfileResponse, IUserResponse, IUsersResponse } from "@/interfaces/user";
 import { abortController, api } from "@/api/api";
 import { getURL, simulateRequest } from "@/utils";
@@ -242,6 +242,30 @@ export async function getExamResultByUserId(exam_id: string , user_id: string) :
         } catch (e) {
             if (process.env.NODE_ENV === 'development') console.error('[PROMISE ERROR]: ' + e);
             reject(null);
+        }
+    });
+}
+
+export async function getDashboardResults(filters?: {
+    groups?: string[];
+    organizations?: string[];
+    school_region?: string;
+    school_city?: string;
+    exam_name?: string;
+    school_name?: string;
+    class_name?: string;
+    exam_start_date?: string;
+    exam_end_date?: string;
+}) : Promise<any[]> {
+    return new Promise<any[]>(async (resolve, reject) => {
+        try {
+            const url = getURL(ENDPOINT_DASHBOARD, filters || {});
+            await api.get(url).then(response => {
+                resolve(response.data);
+            });
+        } catch (e) {
+            if (process.env.NODE_ENV === 'development') console.error('[PROMISE ERROR (DASHBOARD)]: ' + e);
+            reject([]);
         }
     });
 }

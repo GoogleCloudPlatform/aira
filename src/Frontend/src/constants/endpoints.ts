@@ -27,5 +27,6 @@ export const ENDPOINT_USERS = 'users';
 export const ENDPOINT_SIGNUP = 'signup';
 export const ENDPOINT_CHECK_EMAIL = 'check_email';
 export const ENDPOINT_PROFILE = `${ENDPOINT_USERS}/me`;
+export const ENDPOINT_DASHBOARD = `${ENDPOINT_USERS}/dashboard`;
 
 export const ENDPOINT_QUESTIONS = 'questions';

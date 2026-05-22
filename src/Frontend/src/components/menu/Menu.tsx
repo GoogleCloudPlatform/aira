@@ -40,7 +40,7 @@ const Menu: React.FC = () => {
             name: 'reports',
             icon: ICON_PRESENTATION_CHART_BAR,
             label: 'reports',
-            render: hasScopePermission([SCOPE_DASHBOARD_VIEWER, SCOPE_ADMIN]),
+            render: hasScopePermission([SCOPE_DASHBOARD_VIEWER, SCOPE_ADMIN, SCOPE_EXAM_LIST]),
             route: '/reports/dashboard',
         },
         {
