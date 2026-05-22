@@ -89,6 +89,14 @@ const Recorder : React.FC<TRecorderProps> = ({ questions }) => {
     }, [getMicrophonePermission]);
 
     useEffect(() => {
+        return () => {
+            if (stream && typeof (stream as any).getTracks === 'function') {
+                (stream as MediaStream).getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [stream]);
+
+    useEffect(() => {
         if (state === RECORD_STATE_RECORDING) {
             hasTimeout.current = setTimeout(() => {
                 if (mediaRecorder && mediaRecorder.current) {

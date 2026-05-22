@@ -173,25 +173,9 @@ class ListGroups(ports.ListGroups):
         group = models.Group
 
         stmt = sa.select(group).options(
-            orm.load_only(
-                group.id,
-                group.name,
-                group.series_id,
-                group.shift_id,
-                group.created_at,
-                group.updated_at,
-                group.customer_id,
-                group.organization_id,
-            ),
-            orm.joinedload(group.organization).load_only(
-                models.Organization.id, models.Organization.name
-            ),
-            orm.joinedload(group.series).load_only(
-                models.Series.id, models.Series.name
-            ),
-            orm.joinedload(group.work_shift).load_only(
-                models.WorkShift.id, models.WorkShift.name, models.WorkShift.code
-            ),
+            orm.joinedload(group.organization),
+            orm.joinedload(group.series),
+            orm.joinedload(group.work_shift),
         )
 
         if groups is not None:

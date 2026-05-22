@@ -79,7 +79,15 @@
             "afternoon": "Afternoon",
             "evening": "Evening",
             "night": "Night",
-            "allday": "Full Day"
+            "allday": "Full Day",
+            "ma": "Morning",
+            "ta": "Afternoon",
+            "no": "Evening",
+            "in": "Full Day",
+            "m": "Morning",
+            "t": "Afternoon",
+            "n": "Evening",
+            "i": "Full Day"
         },
         "messages": {
             "open": "Open menu",

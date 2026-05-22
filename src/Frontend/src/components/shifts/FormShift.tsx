@@ -14,6 +14,8 @@ import { SchemaShift, SchemaShiftDefaultValues } from "@/forms/shift/schema";
 import { MODE_CREATE, MODE_EDIT } from "@/constants";
 import { useEffect } from "react";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface FormShiftProps {
     mode: string;
     formData: {
@@ -81,15 +83,44 @@ const FormShift: React.FC<FormShiftProps> = ({ mode, formData, setOpen }) => {
                 <FormField
                     control={form.control}
                     name="code"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t("table.headers.code")}</FormLabel>
-                            <FormControl>
-                                <Input {...field} placeholder={t("table.headers.code")} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                    render={({ field }) => {
+                        const shiftOptions = [
+                            { value: "morning", label: t("table.shifts.morning") },
+                            { value: "afternoon", label: t("table.shifts.afternoon") },
+                            { value: "evening", label: t("table.shifts.evening") },
+                            { value: "allday", label: t("table.shifts.allday") },
+                        ];
+
+                        return (
+                            <FormItem>
+                                <FormLabel>{t("table.headers.code")}</FormLabel>
+                                <Select
+                                    onValueChange={(val) => {
+                                        field.onChange(val);
+                                        const opt = shiftOptions.find(o => o.value === val);
+                                        if (opt) {
+                                            form.setValue("name", opt.label);
+                                        }
+                                    }}
+                                    value={field.value}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={t("table.headers.code")} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {shiftOptions.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
                 />
                 <div className="flex justify-end space-x-2">
                     <Button type="button" variant="outline" onClick={() => setOpen(false)}>

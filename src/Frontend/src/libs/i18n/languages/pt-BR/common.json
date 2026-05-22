@@ -79,7 +79,15 @@
             "afternoon": "Tarde",
             "evening": "Noite",
             "night": "Noite",
-            "allday": "Integral"
+            "allday": "Integral",
+            "ma": "Manhã",
+            "ta": "Tarde",
+            "no": "Noite",
+            "in": "Integral",
+            "m": "Manhã",
+            "t": "Tarde",
+            "n": "Noite",
+            "i": "Integral"
         },
         "messages": {
             "open": "Abrir menu",

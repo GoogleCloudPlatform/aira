@@ -79,7 +79,15 @@
             "afternoon": "Tarde",
             "evening": "Noche",
             "night": "Noche",
-            "allday": "Todo el día"
+            "allday": "Todo el día",
+            "ma": "Mañana",
+            "ta": "Tarde",
+            "no": "Noche",
+            "in": "Todo el día",
+            "m": "Mañana",
+            "t": "Tarde",
+            "n": "Noche",
+            "i": "Todo el día"
         },
         "messages": {
             "open": "Abrir menú",

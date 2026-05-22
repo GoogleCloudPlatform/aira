@@ -18,6 +18,13 @@ from api import errors, helpers, models, ports, typings
 logger = logging.getLogger(__name__)
 
 
+def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
+    return sa.case(
+        {member.name: member.value for member in models.Grades},
+        value=sa.cast(exam_grade_col, sa.String)
+    )
+
+
 class UserRepository(ports.UserRepository):
     """
     User repository implementation that returns user data.
@@ -406,7 +413,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
                 stmt.join(
                     exam,
                     sa.and_(
-                        models.Series.name == exam.grade,
+                        models.Series.name == _get_grade_mapping_case(exam.grade),
                         exam.start_date <= current_date,
                         exam.end_date > current_date,
                     ),
@@ -426,7 +433,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
             stmt = stmt.outerjoin(
                 exam,
                 sa.and_(
-                    models.Series.name == exam.grade,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                     exam.start_date <= current_date,
                 ),
             ).outerjoin(

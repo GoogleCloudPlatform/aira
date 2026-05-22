@@ -161,6 +161,9 @@ const ExamDisplay : React.FC<TExamDisplayProps> = ({ user_id, exam_id }) => {
 
         if (!microphoneStream) return toast.warn(t('toast.warnings.exam.warning_microphone_permission'));
 
+        // Release the temporary stream tracks immediately!
+        microphoneStream.getTracks().forEach(track => track.stop());
+
         setMicrophoneTester(false);
     }, [t]);
 
@@ -258,7 +261,7 @@ const ExamDisplay : React.FC<TExamDisplayProps> = ({ user_id, exam_id }) => {
                     ) : (
                         <div className="mt-2">
                             <span className="mb-4 sm:mb-6 text-xs sm:text-sm w-full flex justify-center text-center">{t("exam.messages.bottom_message")}</span>
-                            <Recorder questions={questions} />
+                            {!microphoneTester && <Recorder questions={questions} />}
                         </div>
                     )}
                 </article>

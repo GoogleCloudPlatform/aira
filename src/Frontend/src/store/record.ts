@@ -44,6 +44,10 @@ const useRecordStore = create<IRecordStore>()(
             }),
             {
                 name: 'record-storage',
+                partialize: (state) => {
+                    const { stream, audioChunks, ...rest } = state;
+                    return rest;
+                },
             }
         )
     )

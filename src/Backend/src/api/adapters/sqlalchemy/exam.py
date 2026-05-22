@@ -18,6 +18,13 @@ from api import errors, helpers, models, ports, typings
 logger = logging.getLogger(__name__)
 
 
+def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
+    return sa.case(
+        {member.name: member.value for member in models.Grades},
+        value=sa.cast(exam_grade_col, sa.String)
+    )
+
+
 class ExamRepository(ports.ExamRepository):
     """
     Exam repository implementation that returns exam data.
@@ -97,7 +104,7 @@ class GetExam(ports.GetExam):
                 models.Series,
                 sa.and_(
                     models.Series.id == models.Group.series_id,
-                    models.Series.name == models.Exam.grade,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
         async with self._session_factory() as session:
@@ -227,7 +234,7 @@ class ListExams(ports.ListExams):
                 models.Series,
                 sa.and_(
                     models.Series.id == models.Group.series_id,
-                    models.Series.name == models.Exam.grade,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
         if query:
@@ -286,7 +293,7 @@ class ListPendingExams(ports.ListPendingExams):
                 models.Series,
                 sa.and_(
                     models.Series.id == group.series_id,
-                    models.Series.name == exam.grade,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                 ),
             )
             .outerjoin(
@@ -357,7 +364,7 @@ class ListExamsWithResults(ports.ListExamsWithResults):
                 models.Series,
                 sa.and_(
                     models.Series.id == group.series_id,
-                    models.Series.name == exam.grade,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                 ),
             )
             .join(
@@ -404,7 +411,7 @@ class ListPendingQuestions(ports.ListPendingQuestions):
                 models.Series,
                 sa.and_(
                     models.Series.id == models.Group.series_id,
-                    models.Series.name == models.Exam.grade,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
             .outerjoin(
@@ -516,7 +523,7 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
                 models.Series,
                 sa.and_(
                     models.Series.id == models.Group.series_id,
-                    models.Series.name == models.Exam.grade,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
             .outerjoin(
@@ -622,7 +629,7 @@ class GetExamUserStatus(ports.GetExamUserStatus):
                 models.Series,
                 sa.and_(
                     models.Series.id == models.Group.series_id,
-                    models.Series.name == models.Exam.grade,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
             .where(models.ExamUser.exam_id == exam_id)
