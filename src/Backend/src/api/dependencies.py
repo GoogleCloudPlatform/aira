@@ -590,9 +590,12 @@ class GoogleModule(injector.Module):
         """
         Provide the GCP's Secret Manager.
         """
+        creds_path = settings.get("gcp_fb_credentials", "")
+        if settings.get("env", "local") != "prd" and not creds_path:
+            creds_path = settings.get("gcp_storage_credentials", "")
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", "") or settings.get("gcp_storage_credentials", ""),
+            creds_path=creds_path,
         )
 
     @injector.provider
@@ -693,9 +696,12 @@ class InternetlessModule(injector.Module):
         """
         Provide the GCP's Secret Manager.
         """
+        creds_path = settings.get("gcp_fb_credentials", "")
+        if settings.get("env", "local") != "prd" and not creds_path:
+            creds_path = settings.get("gcp_storage_credentials", "")
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", "") or settings.get("gcp_storage_credentials", ""),
+            creds_path=creds_path,
         )
 
     @injector.provider
