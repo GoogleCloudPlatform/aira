@@ -23,6 +23,7 @@ resource "google_storage_bucket" "bucket_audio" {
   project = var.project_id
   public_access_prevention = "enforced"
   storage_class = "STANDARD"
+  uniform_bucket_level_access = true
   depends_on = [
     google_project_service.project
   ]
@@ -71,10 +72,27 @@ resource "google_storage_bucket" "bucket_files" {
   project = var.project_id
   public_access_prevention = "inherited"
   storage_class = "STANDARD"
-  uniform_bucket_level_access = false
+  uniform_bucket_level_access = true
   depends_on = [
     google_project_service.project
   ]
 
+}
+
+## Giving public read permission to all files in bucket_files ##
+resource "google_storage_bucket_iam_member" "public_viewer" {
+  bucket = google_storage_bucket.bucket_files.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
+## Giving permission for backend and GCS SAs in bucket_files ##
+resource "google_storage_bucket_iam_binding" "backend_files_admin" {
+  bucket = google_storage_bucket.bucket_files.name
+  role   = "roles/storage.objectAdmin"
+  members = [
+    "serviceAccount:${google_service_account.service_account_backend.email}",
+    "serviceAccount:${google_service_account.service_account_gcs.email}",
+  ]
 }
 

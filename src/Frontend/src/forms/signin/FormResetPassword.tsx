@@ -48,7 +48,6 @@ const FormResetPassword : React.FC = () => {
         try {
             await resetPassword(token, values.password)
             form.clearErrors()
-            toast.success(tToast('success.auth.success_reset_password'))
             router.push('/')
         } catch (error) {
             console.error(error)

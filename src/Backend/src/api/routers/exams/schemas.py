@@ -21,9 +21,9 @@ class Question(pydantic.BaseModel):
     data: str
     formatted_data: str
     type: models.QuestionType
-    theme: models.QuestionTheme | None
+    theme: models.QuestionTheme | None = None
     order: int
-    answers: list[dict[str, typing.Any]] | None
+    answers: list[dict[str, typing.Any]] | None = None
 
     class Config:
         """
@@ -162,8 +162,8 @@ class QuestionPost(pydantic.BaseModel):
     Schema related to the post of questions.
     """
 
-    url: pydantic.AnyHttpUrl | None
-    answers: list[str] | None
+    url: pydantic.AnyHttpUrl | None = None
+    answers: list[str] | None = None
 
 
 @dataclasses.dataclass
@@ -180,10 +180,16 @@ class QuestionMessage(typings.Message):
     question_theme: str | None
 
 
-class ExamPatch(ExamCreate):
+class ExamPatch(pydantic.BaseModel):
     """
     Schema related to exam patch.
     """
+
+    name: str | None = None
+    questions: list[Question] | None = None
+    grade: models.Grades | None = None
+    start_date: datetime.datetime | None = None
+    end_date: datetime.datetime | None = None
 
     class Config:
         """

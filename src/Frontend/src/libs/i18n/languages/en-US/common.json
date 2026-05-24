@@ -18,12 +18,18 @@
             "exams": "Exams",
             "dashboard": "Dashboard",
             "admin": "Administration",
+            "series": "Grades",
+            "shifts": "Shifts",
             "users": "Users",
             "roles": "Roles",
             "groups": "Groups",
             "organizations": "Schools",
             "apply_exams": "Apply Exam",
-            "results": "Results"
+            "results": "Results",
+            "countries": "Countries",
+            "states": "States",
+            "cities": "Cities",
+            "upload_tutorial": "Upload Tutorial(s)"
         }
     },
     "search": {
@@ -37,6 +43,7 @@
             "actions": "Actions",
             "name": "Name",
             "email": "Email",
+            "role": "Type",
             "grade": "Grade",
             "shift": "Shift",
             "organization": "School",
@@ -46,7 +53,11 @@
             "end_date": "End Date",
             "region": "Region",
             "county": "County",
-            "city": "City"
+            "city": "City",
+            "code": "Code",
+            "is_default": "Default",
+            "country": "Country",
+            "state": "State"
         },
         "buttons": {
             "import": "Import",
@@ -66,9 +77,18 @@
         },
         "shifts": {
             "morning": "Morning",
-            "evening": "Afternoon",
+            "afternoon": "Afternoon",
+            "evening": "Evening",
             "night": "Night",
-            "allday": "Full Day"
+            "allday": "Full Day",
+            "ma": "Morning",
+            "ta": "Afternoon",
+            "no": "Evening",
+            "in": "Full Day",
+            "m": "Morning",
+            "t": "Afternoon",
+            "n": "Evening",
+            "i": "Full Day"
         },
         "messages": {
             "open": "Open menu",
@@ -87,9 +107,19 @@
         "previous": "Previous",
         "next": "Next"
     },
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save"
+    },
     "errors": {
         "cant_delete_resource": "Resource cannot be deleted"
     },
     "group_has_users": "A group with learners cannot be deleted",
-    "organization_has_groups": "A school with groups cannot be deleted"
+    "organization_has_groups": "A school with groups cannot be deleted",
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save"
 }

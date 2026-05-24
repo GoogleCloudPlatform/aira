@@ -6,12 +6,8 @@ import base64
 import datetime
 import logging
 import os
-import smtplib
 import urllib.parse
 import uuid
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from pathlib import Path
 
 import fastapi
 import fastapi_injector
@@ -288,12 +284,12 @@ async def process(
 
         result_data = UserResult(
             school_uuid=user_question.organization_id,
-            class_grade=user_question.group.grade.value,
+            class_grade=user_question.group.series.name,
             class_name=user_question.group.name,
             class_uuid=user_question.group_id,
             exam_end_date=user_question.exam.end_date,
             exam_start_date=user_question.exam.start_date,
-            exam_grade=user_question.group.grade.value,
+            exam_grade=user_question.group.series.name,
             exam_name=user_question.exam.name,
             exam_uuid=user_question.exam_id,
             question_amount_words=len(data.words),
@@ -306,7 +302,6 @@ async def process(
             school_name=user_question.organization.name,
             school_region=user_question.organization.region,
             school_state=user_question.organization.state,
-            school_county=user_question.organization.county,
             student_name=user_question.user.name,
             student_uuid=user_question.user_id,
             student_customer_id=user_question.user.customer_id,
@@ -502,7 +497,6 @@ async def sync_database(  # noqa: PLR0915
                 region=str(organization.get("descNre")),
                 city=str(organization.get("descMun")),
                 state="PR",
-                county=str(organization.get("descMun")),
             )
             updated_org = await uow.organization_repository.create_or_update(
                 sync_org, cached_orgs
@@ -569,7 +563,6 @@ async def sync_database(  # noqa: PLR0915
                     customer_id=student.get("cgm"),
                     type=models.UserType.PASSWORD,
                     role_id=student_role.id,
-                    county=None,
                     region=None,
                     state=None,
                     orgs_customer_id=None,
@@ -607,7 +600,6 @@ async def sync_database(  # noqa: PLR0915
                     customer_id=professor.get("cpfProfessor"),
                     type=models.UserType.PASSWORD,
                     role_id=professor_role.id,
-                    county=None,
                     region=None,
                     state=None,
                     groups_customer_id=[str(professor.get("codTurma"))],

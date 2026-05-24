@@ -1,12 +1,12 @@
 import { studentsMetadata } from "@/app/[locale]/setup";
-import { Users } from "@/components";
+import Exams from "@/components/exams/Exams";
 import Loading from "@/components/loading/Loading";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 export const metadata = studentsMetadata
 
-export default async function Exams() {
+export default async function ExamsPage() {
     return (
         <>
             <article className='flex justify-center items-center w-full h-full overflow-x-hidden overflow-y-auto relative z-10'>
@@ -14,7 +14,7 @@ export default async function Exams() {
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>
-                                <Users />
+                                <Exams />
                             </Suspense>
                         </ErrorBoundary>
                     </div>

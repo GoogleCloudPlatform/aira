@@ -29,6 +29,11 @@ export function Link({
             setPagination("show_finished", false);
         }
 
+        const isExternal = String(href).startsWith('http://') || String(href).startsWith('https://') || String(href).startsWith('//');
+        if (isExternal) {
+            return window.open(`${href}`, '_blank');
+        }
+
         const tutorial_path = process.env.NEXT_PUBLIC_TUTORIAL_BUCKET
         if (tutorial_path && String(href).includes(tutorial_path)) {
             return window.open(`${href}`, '_blank')

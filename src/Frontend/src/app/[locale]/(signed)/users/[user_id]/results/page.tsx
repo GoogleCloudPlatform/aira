@@ -18,8 +18,8 @@ type TResultsPageProps = {
 export default async function ResultsPage({ params } : TResultsPageProps) {
     return (
         <>
-            <article className='flex justify-center items-center w-full h-full overflow-x-hidden overflow-y-auto relative z-10 [&::-webkit-scrollbar]:hidden'>
-                <div className='flex flex-col gap-4 lg:gap-1 w-full h-full relative pt-5'>
+            <article className='flex justify-center w-full h-full overflow-x-hidden overflow-y-auto relative z-10 [&::-webkit-scrollbar]:hidden'>
+                <div className='flex flex-col gap-4 lg:gap-1 w-full h-full relative pt-6 pb-12 px-4 sm:px-6 md:px-8 lg:px-10 max-w-7xl mx-auto'>
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️ Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>

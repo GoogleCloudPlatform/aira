@@ -144,7 +144,7 @@ class ExamUser(db.Base):
     )
 
     ai_exam_feedback: Mapped[str | None] = mapped_column(
-        sa.String(1000), nullable=True, default=None
+        sa.Text, nullable=True, default=None
     )
 
     __table_args__ = (sa.Index("ix_exam_user_exam_user_id", "exam_id", "user_id"),)
@@ -210,7 +210,7 @@ class ExamUserQuestion(db.Base, db.DefaultColumns):
 
     audio_url: Mapped[str] = mapped_column(sa.String(400))
 
-    ai_feedback: Mapped[str | None] = mapped_column(sa.String(1000), nullable=True)
+    ai_feedback: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
     ai_is_correct: Mapped[bool | None] = mapped_column(sa.Boolean, nullable=True)
 
     status: Mapped[ExamStatus] = mapped_column(

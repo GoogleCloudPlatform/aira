@@ -5,26 +5,22 @@ import { z } from "zod";
 
 export const SchemaCreateOrganization = z.object({
     name: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    state: z.string().min(2, { message: "toast.errors.form.required_field" }).refine(value => ENUM_STATE_OPTIONS.some(option => option.value === value), {
-        message: "toast.errors.form.invalid_state",
-    }),
-    region: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    city: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    county: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    country_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    state_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    city_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    region: z.string().optional(),
 });
 
 export const SchemaEditOrganization = z.object({
     id: z.string(),
     name: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    state: z.string().min(2, { message: "toast.errors.form.required_field" }).refine(value => ENUM_STATE_OPTIONS.some(option => option.value === value), {
-        message: "toast.errors.form.invalid_state",
-    }),
-    region: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    city: z.string().min(1, { message: "toast.errors.form.required_field" }),
-    county: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    country_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    state_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    city_id: z.string().min(1, { message: "toast.errors.form.required_field" }),
+    region: z.string().optional(),
     created_at: z.date(),
     updated_at: z.date(),
-}).pick({ name: true, state: true, region: true, city: true, county: true });
+}).pick({ name: true, country_id: true, state_id: true, city_id: true, region: true });
 
 export const SchemaImportOrganization = z.object({
     file: typeof window === 'undefined' ? z.any() : z.instanceof(FileList).optional(),
@@ -62,19 +58,19 @@ export const SchemaImportOrganization = z.object({
 
 export const SchemaCreateOrganizationDefaultValues : z.infer<typeof SchemaCreateOrganization> = {
     name: '',
-    state: 'PR',
-    region: '',
-    city: '',
-    county: ''
+    country_id: '',
+    state_id: '',
+    city_id: '',
+    region: ''
 }
 
 export const SchemaEditOrganizationDefaultValues : z.infer<typeof SchemaEditOrganization> & { id: string, created_at: Date, updated_at: Date } = {
     id: '',
     name: '',
-    state: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
     region: '',
-    city: '',
-    county: '',
     created_at: new Date(),
     updated_at: new Date()
 }

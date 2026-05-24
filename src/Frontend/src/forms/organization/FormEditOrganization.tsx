@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { IOrganizationResponse } from "@/interfaces/organization";
 import { SchemaEditOrganizationDefaultValues } from "./schema";
 import { TFormEditProps } from "@/interfaces/component";
@@ -17,7 +17,7 @@ import { getFormattedDate } from "@/utils";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ENUM_STATE_OPTIONS } from "@/constants/enums";
+import { getCountries, getAllStates, getCities } from "@/services/location";
 import { updateOrganizationById } from "@/services/organization";
 import { CATEGORY_ORGANIZATIONS } from "@/constants";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
@@ -39,6 +39,33 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
         defaultValues: data || SchemaEditOrganizationDefaultValues
     });
 
+    const [selectedCountry, setSelectedCountry] = useState<string>('');
+    const [selectedState, setSelectedState] = useState<string>('');
+
+    const { data: countriesData } = useQuery({
+        queryKey: ['countries', 1],
+        queryFn: getCountries,
+    });
+
+    const { data: statesData } = useQuery({
+        queryKey: ['states', selectedCountry],
+        queryFn: () => getAllStates(selectedCountry),
+        enabled: !!selectedCountry
+    });
+
+    const { data: citiesData } = useQuery({
+        queryKey: ['cities', selectedState],
+        queryFn: () => getCities(selectedState),
+        enabled: !!selectedState
+    });
+
+    useEffect(() => {
+        if (data && !isEmpty(data)) {
+            setSelectedCountry(data.country_id || '');
+            setSelectedState(data.state_id || '');
+        }
+    }, [data]);
+
     useEffect(() => {
         if (data && !isEmpty(data)) {
             const newData = Object.assign({}, data);
@@ -50,7 +77,6 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
         setLoading(true)
         try {
             await updateOrganizationById(data.id, values);
-            toast.success(t('toast.success.form.organization_updated'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.edit_organization'))
@@ -113,7 +139,83 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
             )
         }
 
-        if (fieldName === 'state') {
+        if (fieldName === 'country_id') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.organization.edit.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCountry(value);
+                                    setSelectedState('');
+                                    form.setValue('state_id', '');
+                                    form.setValue('city_id', '');
+                                }}
+                                value={field.value || data.country_id}
+                                disabled={field.disabled}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.organization.edit.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {countriesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
+        }
+
+        if (fieldName === 'state_id') {
+            return (
+                <FormField
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                        <FormItem className="space-y-2">
+                            <FormLabel>{t(`form.organization.edit.${field.name}`)}</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedState(value);
+                                    form.setValue('city_id', '');
+                                }}
+                                value={field.value || data.state_id}
+                                disabled={field.disabled || !selectedCountry}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={`${t(`form.organization.edit.${field.name}`)}`} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {statesData?.map((option: any) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )
+        }
+
+        if (fieldName === 'city_id') {
             return (
                 <FormField
                     control={form.control}
@@ -123,8 +225,8 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
                             <FormLabel>{t(`form.organization.edit.${field.name}`)}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                value={field.value || data.state}
-                                disabled={field.disabled}
+                                value={field.value || data.city_id}
+                                disabled={field.disabled || !selectedState}
                             >
                                 <FormControl>
                                     <SelectTrigger>
@@ -132,9 +234,9 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_STATE_OPTIONS.map((option, index) => (
-                                        <SelectItem key={index} value={option.value}>
-                                            {option.label}
+                                    {citiesData?.items.map((option) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -143,10 +245,10 @@ const FormEditOrganization : React.FC<TFormEditProps> = ({ formData, setOpen }) 
                         </FormItem>
                     )}
                 />
-            )  
+            )
         }
 
-        if (['name', 'region', 'city', 'county'].includes(fieldName)) {
+        if (['name', 'region'].includes(fieldName)) {
             return (
                 <FormField
                     control={form.control}

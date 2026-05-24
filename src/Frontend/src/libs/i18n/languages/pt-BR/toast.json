@@ -32,7 +32,23 @@
 
                 "import_organization":"Escola(s) importada(s) com sucesso.",
                 "import_group":"Turma(s) importada(s) com sucesso.",
-                "import_user":"Usuários(s) importado(s) com sucesso."
+                "import_user":"Usuários(s) importado(s) com sucesso.",
+                "tutorial_created": "Tutorial atualizado com sucesso",
+                "country_created": "País criado com sucesso",
+                "country_updated": "País atualizado com sucesso",
+                "country_deleted": "País excluído com sucesso",
+                "state_created": "Estado criado com sucesso",
+                "state_updated": "Estado atualizado com sucesso",
+                "state_deleted": "Estado excluído com sucesso",
+                "city_created": "Cidade criada com sucesso",
+                "city_updated": "Cidade atualizada com sucesso",
+                "city_deleted": "Cidade excluída com sucesso",
+                "series_created": "Série criada com sucesso",
+                "series_updated": "Série atualizada com sucesso",
+                "series_deleted": "Série excluída com sucesso",
+                "shift_created": "Turno criado com sucesso",
+                "shift_updated": "Turno atualizado com sucesso",
+                "shift_deleted": "Turno excluído com sucesso"
             }
         },
         "errors": {
@@ -87,8 +103,10 @@
                 "create_organization":"Erro ao criar Escola, por favor tente novamente.",
                 "create_exam":"Erro ao criar Avaliação, por favor tente novamente.",
                 "create_user":"Erro ao criar Usuário, por favor tente novamente.",
+                "create_tutorial":"Erro ao criar o tutorial, por favor tente novamente.",
                 "create_group":"Erro ao criar Turma, por favor tente novamente.",
                 "edit_organization":"Erro ao alterar Escola, por favor tente novamente.",
+                "delete_organization":"Erro ao excluir Escola, por favor tente novamente.",
                 "edit_exam":"Erro ao alterar Avaliação, por favor tente novamente.",
                 "edit_user":"Erro ao alterar Usuário, por favor tente novamente.",
                 "edit_group":"Erro ao alterar Turma, por favor tente novamente.",
@@ -110,7 +128,17 @@
                 "password_must_have_special": "A senha deve conter pelo menos um caractere especial.",
                 "passwords_do_not_match": "As senhas não coincidem.",
                 "group_has_users": "Não é possível deletar uma turma com alunos",
-                "organization_has_groups": "Não é possível deletar uma escola com turmas"
+                "organization_has_groups": "Não é possível deletar uma escola com turmas",
+                "create_country": "Erro ao criar País, por favor tente novamente.",
+                "edit_country": "Erro ao editar País, por favor tente novamente.",
+                "delete_country": "Erro ao excluir País, por favor tente novamente.",
+                "create_state": "Erro ao criar Estado, por favor tente novamente.",
+                "edit_state": "Erro ao editar Estado, por favor tente novamente.",
+                "delete_state": "Erro ao excluir Estado, por favor tente novamente.",
+                "create_city": "Erro ao criar Cidade, por favor tente novamente.",
+                "edit_city": "Erro ao editar Cidade, por favor tente novamente.",
+                "delete_city": "Erro ao excluir Cidade, por favor tente novamente.",
+                "action_failed": "Ação falhou, por favor tente novamente."
             },
             "exam": {
                 "error_record": "Não foi possível gravar",

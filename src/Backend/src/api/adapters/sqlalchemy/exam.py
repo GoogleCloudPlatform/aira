@@ -18,6 +18,13 @@ from api import errors, helpers, models, ports, typings
 logger = logging.getLogger(__name__)
 
 
+def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
+    return sa.case(
+        {member.name: member.value for member in models.Grades},
+        value=sa.cast(exam_grade_col, sa.String),
+    )
+
+
 class ExamRepository(ports.ExamRepository):
     """
     Exam repository implementation that returns exam data.
@@ -92,8 +99,12 @@ class GetExam(ports.GetExam):
         if groups is not None:
             stmt = stmt.join(
                 models.Group,
+                models.Group.id.in_(groups),
+            ).join(
+                models.Series,
                 sa.and_(
-                    models.Group.id.in_(groups), models.Group.grade == models.Exam.grade
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
         async with self._session_factory() as session:
@@ -218,9 +229,12 @@ class ListExams(ports.ListExams):
         if groups is not None:
             stmt = stmt.join(
                 models.Group,
+                models.Group.id.in_(groups),
+            ).join(
+                models.Series,
                 sa.and_(
-                    models.Group.id.in_(groups),
-                    models.Group.grade == models.Exam.grade,
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
         if query:
@@ -273,9 +287,13 @@ class ListPendingExams(ports.ListPendingExams):
             )
             .join(
                 group,
+                group.id == group_id,
+            )
+            .join(
+                models.Series,
                 sa.and_(
-                    group.grade == exam.grade,
-                    group.id == group_id,
+                    models.Series.id == group.series_id,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                 ),
             )
             .outerjoin(
@@ -340,9 +358,13 @@ class ListExamsWithResults(ports.ListExamsWithResults):
             sa.select(exam)
             .join(
                 group,
+                group.id == group_id,
+            )
+            .join(
+                models.Series,
                 sa.and_(
-                    group.grade == exam.grade,
-                    group.id == group_id,
+                    models.Series.id == group.series_id,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                 ),
             )
             .join(
@@ -384,7 +406,14 @@ class ListPendingQuestions(ports.ListPendingQuestions):
         stmt = (
             sa.select(Question)
             .join(models.Exam, models.Exam.id == Question.exam_id)
-            .join(models.Group, models.Group.grade == models.Exam.grade)
+            .join(models.Group, models.Group.id == group_id)
+            .join(
+                models.Series,
+                sa.and_(
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
+                ),
+            )
             .outerjoin(
                 Euq,
                 sa.and_(
@@ -489,7 +518,14 @@ class ListQuestionsWithStatus(ports.ListQuestionsWithStatus):
             )
             .select_from(Question)
             .join(models.Exam, models.Exam.id == Question.exam_id)
-            .join(models.Group, models.Group.grade == models.Exam.grade)
+            .join(models.Group, models.Group.id == group_id)
+            .join(
+                models.Series,
+                sa.and_(
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
+                ),
+            )
             .outerjoin(
                 Euq,
                 sa.and_(
@@ -588,15 +624,16 @@ class GetExamUserStatus(ports.GetExamUserStatus):
         stmt = (
             sa.select(models.ExamUser)
             .join(models.Exam, models.Exam.id == models.ExamUser.exam_id)
+            .join(models.Group, models.Group.id == group_id)
             .join(
-                models.Group,
+                models.Series,
                 sa.and_(
-                    models.Group.grade == models.Exam.grade, models.Group.id == group_id
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == _get_grade_mapping_case(models.Exam.grade),
                 ),
             )
             .where(models.ExamUser.exam_id == exam_id)
             .where(models.ExamUser.user_id == user_id)
-            .where()
         )
         async with self._session_factory() as session:
             result = await session.execute(stmt)

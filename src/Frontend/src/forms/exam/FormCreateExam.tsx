@@ -4,9 +4,10 @@ import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { ptBR, enUS, es } from "date-fns/locale";
 import { TFormCreateProps } from "@/interfaces/component";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createExam } from "@/services/exam";
 import { getFormattedDate } from "@/utils";
+import { getSeries } from "@/services/series";
 
 import QuestionPreview from "@/components/question-preview/QuestionsPreview";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,11 @@ const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
     const { locale } = useParams();
     const queryClient = useQueryClient();
 
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
     const { form, resetForm } = useQuestions()
 
     const { errors } = form.formState
@@ -46,7 +52,6 @@ const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
         setLoading(true)
         try {
             await createExam(values);
-            toast.success(t('toast.success.form.exam_created'))
             resetForm()
             setOpen(false)
         } catch (error) {
@@ -148,8 +153,8 @@ const FormCreateExam : React.FC<TFormCreateProps> = ({ setOpen }) => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_GRADE_OPTIONS.map((option, index) => (
-                                        <SelectItem key={index} value={option.value}>
+                                    {seriesData?.items?.map((option: any, index: number) => (
+                                        <SelectItem key={index} value={option.name}>
                                             {option.name}
                                         </SelectItem>
                                     ))}

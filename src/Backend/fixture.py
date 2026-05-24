@@ -364,6 +364,14 @@ async def main() -> None:
     """
     Startup of db fixtures.
     """
+    if os.path.exists(".env"):
+        with open(".env") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ[k] = v
+
     container = create_container()
     uow_builder = container.get(ports.UnitOfWorkBuilder)
     async with uow_builder() as uow:

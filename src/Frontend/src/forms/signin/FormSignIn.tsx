@@ -47,7 +47,6 @@ const FormSignIn : React.FC = () => {
         try {
             await forgotPassword(email)
             form.clearErrors()
-            toast.success(tToast('success.auth.reset_password_email_sent'))
         } catch (error) {
             console.error(error)
             toast.error(tToast('errors.auth.reset_password_email_sent_error'))

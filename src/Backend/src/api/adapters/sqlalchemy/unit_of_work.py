@@ -11,7 +11,19 @@ from sqlalchemy.ext import asyncio as sqlalchemy_aio
 from api import db, ports
 from api.typings import SessionFactory
 
-from . import exam, group, organization, result, role, session_query, user
+from . import (
+    exam,
+    group,
+    location,
+    organization,
+    result,
+    role,
+    series,
+    session_query,
+    shifts,
+    tutorial,
+    user,
+)
 
 
 class UnitOfWorkBuilder(ports.UnitOfWorkBuilder):
@@ -54,6 +66,15 @@ class UnitOfWork(ports.UnitOfWork):
         self.organization_repository = organization.OrganizationRepository(
             session=session,
         )
+        self.country_repository = location.CountryRepository(
+            session=session,
+        )
+        self.state_repository = location.StateRepository(
+            session=session,
+        )
+        self.city_repository = location.CityRepository(
+            session=session,
+        )
         self.role_repository = role.RoleRepository(
             session=session,
         )
@@ -70,6 +91,15 @@ class UnitOfWork(ports.UnitOfWork):
             session=session,
         )
         self.euq_repository = exam.ExamUserQuestionRepository(
+            session=session,
+        )
+        self.series_repository = series.SeriesRepository(
+            session=session,
+        )
+        self.shift_repository = shifts.WorkShiftRepository(
+            session=session,
+        )
+        self.tutorial_repository = tutorial.TutorialRepository(
             session=session,
         )
 

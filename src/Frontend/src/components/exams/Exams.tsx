@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { isEmpty } from "lodash";
-import { RBACWrapper } from "@/context/rbac";
+import { RBACWrapper, useRBAC } from "@/context/rbac";
 import { 
     ColumnDef 
 } from "@tanstack/react-table"; 
@@ -27,12 +27,12 @@ import { ActionTable  } from "@/components";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
 
-import { SCOPE_ADMIN, SCOPE_EXAM_LIST, SCOPE_USER } from "@/constants/rbac";
+import { SCOPE_ADMIN, SCOPE_EXAM_LIST, SCOPE_USER, SCOPE_USER_IMPERSONATE } from "@/constants/rbac";
 import { ICON_EYE, ICON_PENCIL, ICON_PENCIL_SQUARE } from "@/constants/icons";
 import { ACTION_EDIT, ACTION_GET_BY_ID, ACTION_GET_BY_ID_REDIRECT } from "@/constants/actions";
 import { CATEGORY_EXAMS, MODE_CREATE, MODE_EDIT, MODE_VIEW } from "@/constants";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { LucideEdit, LucideEye, MoreHorizontal } from "lucide-react";
+import { LucideEdit, LucideEye, LucideFileText, MoreHorizontal } from "lucide-react";
 import ExamFormHandler from "@/forms/exam/ExamFormHandler";
 
 const Exams : React.FC = () => {
@@ -45,6 +45,7 @@ const Exams : React.FC = () => {
     const { locale } = useParams()
     const router = useRouter();
     const { page, query, page_size, setPagination } : IPaginationStore = usePaginationStore();
+    const { hasScopePermission } = useRBAC();
 
 
     useEffect(() => {
@@ -176,43 +177,48 @@ const Exams : React.FC = () => {
             header: t("table.headers.actions"),
             cell: ({ row }) => {
                 const exam = row.original
+                const isAdmin = hasScopePermission([SCOPE_ADMIN]);
+                const isTeacher = hasScopePermission([SCOPE_USER_IMPERSONATE]) && !isAdmin;
 
                 return (
                     <div className="flex justify-center">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">{t('table.messages.open')}</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                {/* <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
-                                <DropdownMenuItem
-                                    className="cursor-pointer flex justify-between text-xs"
-                                    onClick={() => editById(exam.id)}
-                                    disabled={calculateDisabledEdit(exam)}
-                                >
-                                    {t('table.buttons.edit')}
-                                    <LucideEdit className="w-4 h-4" />
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="cursor-pointer flex justify-between text-xs"
-                                    onClick={() => viewById(exam.id)}
-                                >
-                                    {t('table.buttons.preview')}
-                                    <LucideEye className="w-4 h-4" />
-                                </DropdownMenuItem>
-                                {/* <DropdownMenuSeparator /> */}
-                                {/* <DropdownMenuItem
-                                    className="cursor-pointer flex justify-between text-xs"
-                                    onClick={() => deleteById(exam.id)}
-                                >
-                                    {t('start_exam')}
-                                    <LucideTrash2 className="w-4 h-4" />
-                                </DropdownMenuItem> */}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {isTeacher ? (
+                            <Button
+                                variant={"secondary"}
+                                className="flex text-xs gap-1"
+                                onClick={() => makeExam(exam.id)}
+                            >
+                                <LucideFileText className="w-4 h-4" />
+                                {t('table.buttons.start_exam')}
+                            </Button>
+                        ) : (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <span className="sr-only">{t('table.messages.open')}</span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {/* <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs"
+                                        onClick={() => editById(exam.id)}
+                                        disabled={calculateDisabledEdit(exam)}
+                                    >
+                                        {t('table.buttons.edit')}
+                                        <LucideEdit className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="cursor-pointer flex justify-between text-xs"
+                                        onClick={() => viewById(exam.id)}
+                                    >
+                                        {t('table.buttons.preview')}
+                                        <LucideEye className="w-4 h-4" />
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </div>
                 );
             }
@@ -221,7 +227,11 @@ const Exams : React.FC = () => {
 
     return (
         <>
-            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 2xl:mt-10 sm:container">
+            <div className="sm:container pt-5 2xl:pt-10 mb-10">
+                <h1 className="font-semibold text-2xl md:text-3xl text-primary dark:text-white mb-1">{t('form.exam.list_title')}</h1>
+                <h2 className="text-black/80 dark:text-white/80 text-base md:text-xl">{t('form.exam.list_subtitle')}</h2>
+            </div>
+            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 sm:container">
                 <div className='w-full sm:w-80'>
                     <Search />
                 </div>

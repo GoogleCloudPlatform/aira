@@ -13,7 +13,12 @@ alembic_args = [
     "upgrade",
     "head",
 ]
-alembic.config.main(argv=alembic_args)
+try:
+    alembic.config.main(argv=alembic_args)
+except Exception as e:
+    import logging
+
+    logging.getLogger(__name__).warning(f"Alembic migration skipped in worker: {e}")
 
 
 app = factory.create_app(dependencies.create_container())

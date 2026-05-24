@@ -17,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ENUM_GRADE_OPTIONS, ENUM_SHIFTS } from "@/constants/enums";
 import { CATEGORY_GROUPS, CATEGORY_ORGANIZATIONS } from "@/constants";
 import { updateGroupById } from "@/services/group";
+import { getSeries } from "@/services/series";
+import { getAllShifts } from "@/services/shift";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
@@ -36,6 +38,16 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
 
     const { data, isLoading, isFetching } = useQuery<z.infer<typeof formData.schema>>({ queryKey: ['group'], queryFn: formData.defaultValues });
 
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
+    const { data: shiftsData } = useQuery({
+        queryKey: ['shifts'],
+        queryFn: () => getAllShifts(),
+    });
+
     const form = useForm<z.infer<typeof formData.schema>>({
         resolver: zodResolver(formData.schema),
         defaultValues: data || SchemaEditGroupDefaultValues
@@ -43,7 +55,12 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
 
     useEffect(() => {
         if (data && !isEmpty(data)) {
-            const newData = Object.assign({}, { ...data, organization_id: data.organization.id });
+            const newData = Object.assign({}, {
+                ...data,
+                organization_id: data.organization.id,
+                series_id: data.series_id,
+                shift_id: data.shift_id
+            });
             form.reset(newData);
         }
     }, [data, form]);
@@ -52,7 +69,6 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
         setLoading(true)
         try {
             await updateGroupById(data.id, values);
-            toast.success(t('toast.success.form.group_updated'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.edit_group'))
@@ -116,27 +132,27 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
             )
         }
 
-        if (fieldName === 'grade') {
+        if (fieldName === 'series_id') {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`form.group.edit.${field.name}`)}</FormLabel>
+                            <FormLabel>{t('form.group.edit.grade')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                value={field.value || data.grade}
+                                value={field.value || data.series_id}
                                 disabled={field.disabled}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={`form.group.edit.${field.name}`} />
+                                        <SelectValue placeholder={t('form.group.edit.grade')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_GRADE_OPTIONS.map((option) => (
-                                        <SelectItem key={option.id} value={option.value}>
+                                    {seriesData?.items.map((option: any) => (
+                                        <SelectItem key={option.id} value={option.id}>
                                             {option.name}
                                         </SelectItem>
                                     ))}
@@ -149,28 +165,28 @@ const FormEditGroup : React.FC<TFormEditProps> = ({ formData, setOpen }) => {
             )  
         }
 
-        if (fieldName === 'shift') {
+        if (fieldName === 'shift_id') {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`form.group.edit.${field.name}`)}</FormLabel>
+                            <FormLabel>{t('form.group.edit.shift')}</FormLabel>
                             <Select
                                 onValueChange={field.onChange}
-                                value={field.value || data.shift}
+                                value={field.value || data.shift_id}
                                 disabled={field.disabled}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={t(`form.group.edit.${field.name}`)} />
+                                        <SelectValue placeholder={t('form.group.edit.shift')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_SHIFTS.map((option) => (
-                                        <SelectItem key={option.id} value={option.value}>
-                                            {t(`form.group.edit.${option.name}`)}
+                                    {shiftsData?.items.map((option: any) => (
+                                        <SelectItem key={option.id} value={option.id}>
+                                            {option.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

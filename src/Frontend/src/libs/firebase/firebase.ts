@@ -20,11 +20,11 @@ if (typeof window !== "undefined") {
     firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(firebaseApp);
     // verify if scope has analytics support (jest tests)
-    isSupported().then(hasAnalytics => {
-        if (hasAnalytics) {
-            analytics = getAnalytics(firebaseApp as FirebaseApp);
-        }
-    });
+    // isSupported().then(hasAnalytics => {
+    //     if (hasAnalytics) {
+    //         analytics = getAnalytics(firebaseApp as FirebaseApp);
+    //     }
+    // });
 }
 
 export { auth, analytics };

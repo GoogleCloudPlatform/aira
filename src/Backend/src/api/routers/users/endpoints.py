@@ -83,7 +83,6 @@ async def export_users(
             "name",
             "state",
             "region",
-            "county",
             "role_id",
             "groups",
             "organizations",
@@ -157,7 +156,9 @@ async def list_resources(
 
 @router.get(
     "/exams",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "user.list", "user"])],
+    dependencies=[
+        fastapi.Security(auth.get_token, scopes=["admin", "user.list", "user"])
+    ],
 )
 async def list_resources_with_exams(
     groups: list[uuid.UUID] | None = fastapi.Query(default=None),
@@ -324,6 +325,10 @@ async def create(
                 else 1
             ),
         )
+        # Merge groups and organizations into the active UoW session
+        groups = [await uow.merge(g) for g in groups]
+        orgs = [await uow.merge(o) for o in orgs]
+
         body_dict = body.dict()
         role = await uow.role_repository.get(role_id=body.role_id)
         user_model = await crud.create_user(
@@ -372,6 +377,11 @@ async def signup(
             name="Senai 3EM",
         )
         orgs, _ = await list_organizations(name="Escola Senai")
+
+        # Merge groups and organizations into the active UoW session
+        groups = [await uow.merge(g) for g in groups]
+        orgs = [await uow.merge(o) for o in orgs]
+
         role = await uow.role_repository.get(name="user")
         user_dict = {
             "external_id": None,
@@ -379,7 +389,6 @@ async def signup(
             "role_id": role.id,
             "state": None,
             "region": None,
-            "county": None,
             "groups": [group.id for group in groups],
             "organizations": [org.id for org in orgs],
             **body.dict(),

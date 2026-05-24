@@ -12,7 +12,8 @@ export type TTableHeader = {
 export interface ActionTableProps {
     columns: ColumnDef<TTableHeader>[],
     data: IUsersResponse | any,
-    pagination: boolean
+    pagination: boolean,
+    category?: string
   }
 
 export interface IActionTableInfoData {

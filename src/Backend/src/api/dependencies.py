@@ -16,9 +16,12 @@ from .adapters import google, memory, sendgrid, sere
 from .adapters.sqlalchemy import (
     exam,
     group,
+    location,
     organization,
     role,
+    series,
     session_query,
+    shifts,
     unit_of_work,
     user,
 )
@@ -39,9 +42,19 @@ class SettingsModule(injector.Module):
         """
         Provide settings from environment.
         """
-        settings = {
-            k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")
-        }
+        settings = {}
+        if os.path.exists(".env"):
+            with open(".env") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        if k.startswith("_"):
+                            settings[k[1:].lower()] = v
+
+        settings.update(
+            {k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")}
+        )
 
         return Settings(settings)
 
@@ -160,6 +173,46 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
         Provides sqlalchemy list groups.
         """
         return organization.GetOrganization(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_series(self, session_factory: SessionFactory) -> ports.ListSeries:
+        """
+        Provides sqlalchemy list series.
+        """
+        return series.ListSeries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_series(self, session_factory: SessionFactory) -> ports.GetSeries:
+        """
+        Provides sqlalchemy get series.
+        """
+        return series.GetSeries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_shifts(self, session_factory: SessionFactory) -> ports.ListShifts:
+        """
+        Provides sqlalchemy list shifts.
+        """
+        return shifts.ListShifts(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_shift(self, session_factory: SessionFactory) -> ports.GetShift:
+        """
+        Provides sqlalchemy get shift.
+        """
+        return shifts.GetShift(
             session_factory=session_factory,
         )
 
@@ -399,6 +452,50 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
             session_factory=session_factory,
         )
 
+    @injector.provider
+    @injector.singleton
+    def provide_list_countries(
+        self, session_factory: SessionFactory
+    ) -> ports.ListCountries:
+        return location.ListCountries(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_country(self, session_factory: SessionFactory) -> ports.GetCountry:
+        return location.GetCountry(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_states(self, session_factory: SessionFactory) -> ports.ListStates:
+        return location.ListStates(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_state(self, session_factory: SessionFactory) -> ports.GetState:
+        return location.GetState(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_list_cities(self, session_factory: SessionFactory) -> ports.ListCities:
+        return location.ListCities(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_get_city(self, session_factory: SessionFactory) -> ports.GetCity:
+        return location.GetCity(
+            session_factory=session_factory,
+        )
+
 
 class SyncModule(injector.Module):
     """
@@ -449,6 +546,9 @@ class GoogleModule(injector.Module):
         """
         return google.GenerativeAI(
             project_id=settings.get("project_id", ""),
+            model_version=settings.get("model_version", "gemini-1.5-flash"),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+            location=settings.get("gcp_location", "us-central1"),
         )
 
     @injector.provider
@@ -480,9 +580,12 @@ class GoogleModule(injector.Module):
         """
         Provide the GCP's Secret Manager.
         """
+        creds_path = settings.get("gcp_fb_credentials", "")
+        if settings.get("env", "local") != "prd" and not creds_path:
+            creds_path = settings.get("gcp_storage_credentials", "")
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", ""),
+            creds_path=creds_path,
         )
 
     @injector.provider
@@ -546,12 +649,27 @@ class InternetlessModule(injector.Module):
 
     @injector.provider
     @injector.singleton
+    def provide_storage(self, settings: Settings) -> ports.Storage:
+        """
+        Provide the Storage.
+        """
+        return google.CloudStorage(
+            project_id=settings.get("project_id", ""),
+            storage_path=settings.get("bucket_path", ""),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+        )
+
+    @injector.provider
+    @injector.singleton
     def provide_generative_ai(self, settings: Settings) -> ports.GenAI:
         """
         Provide the Generative AI.
         """
         return google.GenerativeAI(
             project_id=settings.get("project_id", ""),
+            model_version=settings.get("model_version", "gemini-1.5-flash"),
+            creds_path=settings.get("gcp_storage_credentials", ""),
+            location=settings.get("gcp_location", "us-central1"),
         )
 
     @injector.provider
@@ -568,9 +686,12 @@ class InternetlessModule(injector.Module):
         """
         Provide the GCP's Secret Manager.
         """
+        creds_path = settings.get("gcp_fb_credentials", "")
+        if settings.get("env", "local") != "prd" and not creds_path:
+            creds_path = settings.get("gcp_storage_credentials", "")
         return google.FirebaseAuth(
             project_id=settings.get("project_id", ""),
-            creds_path=settings.get("gcp_fb_credentials", ""),
+            creds_path=creds_path,
         )
 
     @injector.provider
@@ -655,12 +776,35 @@ def create_container(mods: tuple[injector.Module] | None = None) -> injector.Inj
 
     :return: configured dependency injection container.
     """
-    modules = mods or (
+    if mods:
+        return injector.Injector(mods)
+
+    # Read _ENV from environment or .env file
+    env = os.environ.get("_ENV")
+    if not env and os.path.exists(".env"):
+        try:
+            with open(".env") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        if k == "_ENV":
+                            env = v
+                            break
+        except Exception:
+            pass
+
+    google_module = GoogleModule()
+    if env == "local":
+        logger.info("Using InternetlessModule for local environment")
+        google_module = InternetlessModule()
+
+    modules = (
         SettingsModule(),
         EngineSQLAlchemy(),
         SQLAlchemyModule(),
         SyncModule(),
-        GoogleModule(),
+        google_module,
         UtilModule(),
         TracingModule(),
     )
@@ -688,17 +832,20 @@ def get_speech_to_text(
     """
     Get the speech to text.
     """
+    creds_path = settings.get("gcp_stt_credentials", "") or settings.get(
+        "gcp_storage_credentials", ""
+    )
     match version:
         case "v2":
             return google.SpeechToTextV2(
                 project_id=settings.get("project_id", ""),
-                creds_path=settings.get("gcp_stt_credentials", ""),
+                creds_path=creds_path,
                 storage=storage,
             )
         case "v1":
             return google.SpeechToText(
                 project_id=settings.get("project_id", ""),
-                creds_path=settings.get("gcp_stt_credentials", ""),
+                creds_path=creds_path,
                 storage=storage,
             )
         case "v2chirp":

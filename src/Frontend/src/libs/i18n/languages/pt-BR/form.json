@@ -24,10 +24,15 @@
             "already_have_account": "Já possui uma conta? Entre"
         },
         "organization": {
+            "list_title": "Escolas",
+            "list_subtitle": "Gerencie as escolas no sistema.",
             "create": {
                 "create_organization": "Criar Escolas",
                 "create_subtitle_organization": "Preencha os campos abaixo para realizar a criação de uma nova escola. Todas as informações abaixo são obrigatórias para que a escola seja registrada corretamente no sistema.",
                 "name": "Nome",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Cidade",
                 "state": "Estado",
                 "region": "Região",
                 "city": "Cidade",
@@ -40,6 +45,9 @@
                 "edit_subtitle_organization": "Atualize os campos abaixo para editar as informações da escola. Modifique apenas os campos necessários e verifique se todas as informações estão corretas antes de salvar as alterações.",
                 "id": "ID",
                 "name": "Nome",
+                "country_id": "País",
+                "state_id": "Estado",
+                "city_id": "Cidade",
                 "state": "Estado",
                 "region": "Região",
                 "city": "Cidade",
@@ -73,7 +81,148 @@
                 "loading": "Carregando ..."
             }
         },
+        "series": {
+            "list_title": "Séries",
+            "list_subtitle": "Gerencie as séries no sistema.",
+            "create": {
+                "create_series": "Criar Série",
+                "create_subtitle_series": "Preencha os campos abaixo para criar uma nova série.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Criar",
+                "cancel": "Cancelar"
+            },
+            "edit": {
+                "edit_series": "Editar Série",
+                "edit_subtitle_series": "Atualize os campos abaixo para editar a série.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Salvar",
+                "cancel": "Cancelar"
+            },
+            "delete": {
+                "title": "Excluir Série",
+                "message": "Tem certeza de que deseja excluir esta série?",
+                "close": "Cancelar",
+                "confirm": "Excluir"
+            }
+        },
+        "shift": {
+            "list_title": "Turnos",
+            "list_subtitle": "Gerencie os turnos no sistema.",
+            "create": {
+                "create_shift": "Criar Turno",
+                "create_subtitle_shift": "Preencha os campos abaixo para criar um novo turno.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Criar",
+                "cancel": "Cancelar"
+            },
+            "edit": {
+                "edit_shift": "Editar Turno",
+                "edit_subtitle_shift": "Atualize os campos abaixo para editar o turno.",
+                "name": "Nome",
+                "code": "Código",
+                "confirm": "Salvar",
+                "cancel": "Cancelar"
+            },
+            "delete": {
+                "title": "Excluir Turno",
+                "message": "Tem certeza de que deseja excluir este turno?",
+                "close": "Cancelar",
+                "confirm": "Excluir"
+            }
+        },
+        "country": {
+            "list_title": "Países",
+            "list_subtitle": "Gerencie os países no sistema.",
+            "create": {
+                "create_country": "Criar País",
+                "create_subtitle_country": "Preencha os campos abaixo para criar um novo país.",
+                "name": "Nome",
+                "code": "Código",
+                "is_default": "País Padrão",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_country": "Editar País",
+                "edit_subtitle_country": "Atualize os campos abaixo para editar o país.",
+                "name": "Nome",
+                "code": "Código",
+                "is_default": "País Padrão",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Excluir País",
+                "subtitle": "Excluir País",
+                "message": "Tem certeza que deseja excluir este país?",
+                "close": "Fechar",
+                "confirm": "Confirmar"
+            }
+        },
+        "state": {
+            "list_title": "Estados",
+            "list_subtitle": "Gerencie os estados no sistema.",
+            "create": {
+                "create_state": "Criar Estado",
+                "create_subtitle_state": "Preencha os campos abaixo para criar um novo estado.",
+                "name": "Nome",
+                "code": "Código",
+                "country": "País",
+                "select_country": "Selecione um país",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_state": "Editar Estado",
+                "edit_subtitle_state": "Atualize os campos abaixo para editar o estado.",
+                "name": "Nome",
+                "code": "Código",
+                "country": "País",
+                "select_country": "Selecione um país",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Excluir Estado",
+                "subtitle": "Excluir Estado",
+                "message": "Tem certeza que deseja excluir este estado?",
+                "close": "Fechar",
+                "confirm": "Confirmar"
+            }
+        },
+        "city": {
+            "list_title": "Cidades",
+            "list_subtitle": "Gerencie as cidades no sistema.",
+            "create": {
+                "create_city": "Criar Cidade",
+                "create_subtitle_city": "Preencha os campos abaixo para criar uma nova cidade.",
+                "name": "Nome",
+                "state": "Estado",
+                "country": "País",
+                "select_state": "Selecione um estado",
+                "select_country": "Selecione um país",
+                "confirm": "Confirmar"
+            },
+            "edit": {
+                "edit_city": "Editar Cidade",
+                "edit_subtitle_city": "Atualize os campos abaixo para editar a cidade.",
+                "name": "Nome",
+                "state": "Estado",
+                "country": "País",
+                "select_state": "Selecione um estado",
+                "select_country": "Selecione um país",
+                "confirm": "Confirmar"
+            },
+            "delete": {
+                "title": "Excluir Cidade",
+                "subtitle": "Excluir Cidade",
+                "message": "Tem certeza que deseja excluir esta cidade?",
+                "close": "Fechar",
+                "confirm": "Confirmar"
+            }
+        },
         "group": {
+            "list_title": "Turmas",
+            "list_subtitle": "Gerencie as turmas no sistema.",
             "create": {
                 "create_group": "Criar Turma",
                 "create_subtitle_group": "Preencha os campos abaixo para criar uma nova turma. Todas as informações abaixo são obrigatórias para que a turma seja registrada corretamente no sistema.",
@@ -82,7 +231,8 @@
                 "shift": "Turno",
                 "organization": "Escola",
                 "morning": "Manhã",
-                "evening": "Tarde",
+                "afternoon": "Tarde",
+                "evening": "Noite",
                 "night": "Noite",
                 "allday": "Integral",
                 "confirm": "Confirmar",
@@ -97,7 +247,8 @@
                 "shift": "Turno",
                 "organization": "Escola",
                 "morning": "Manhã",
-                "evening": "Tarde",
+                "afternoon": "Tarde",
+                "evening": "Noite",
                 "night": "Noite",
                 "confirm": "Confirmar",
                 "allday": "Integral",
@@ -127,6 +278,8 @@
             }
         },
         "exam": {
+            "list_title": "Avaliações",
+            "list_subtitle": "Gerencie as avaliações no sistema.",
             "questions": "Questões",
             "words": "Palavras",
             "complex_words": "Palavras Complexas",
@@ -217,6 +370,8 @@
             }
         },
         "user": {
+            "list_title": "Usuários",
+            "list_subtitle": "Gerencie os usuários no sistema.",
             "create": {
                 "create_user": "Criar Usuário",
                 "create_subtitle_user": "Preencha os campos abaixo para criar um novo usuário. Todas as informações abaixo são obrigatórias para cadastrar o usuário no sistema corretamente.",

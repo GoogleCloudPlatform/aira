@@ -99,7 +99,11 @@ export async function deleteOrganizationById(id : string) : Promise<void> {
                 AlertInstance.alert(ALERT_SUCCESS, 'toast.success.form.organization_deleted');
                 resolve(response.data);
             }).catch((error: any) => {
-                //AlertInstance.alert(ALERT_ERROR, 'error_api');
+                let errorKey = 'toast.errors.form.delete_organization';
+                if (error.response?.data?.code === 'cant_delete_resource') {
+                    errorKey = 'toast.errors.form.organization_has_groups';
+                }
+                AlertInstance.alert(ALERT_ERROR, errorKey);
                 if (process.env.NODE_ENV === 'development') console.error('API ERROR: ' + error);
                 reject(null);
             });  

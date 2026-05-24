@@ -20,7 +20,9 @@ export const getURL = (url: string, params: Record<string, any>): string => {
     if (params) {
         Object.keys(params).forEach((param: string) => {
             const value = params[param];
-            searchParams.append(param, value.toString());
+            if (value !== undefined && value !== null) {
+                searchParams.append(param, value.toString());
+            }
         });
     }
     

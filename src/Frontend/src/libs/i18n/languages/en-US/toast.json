@@ -32,7 +32,23 @@
   
           "import_organization": "School(s) successfully imported.",
           "import_group": "Class(es) successfully imported.",
-          "import_user": "User(s) successfully imported."
+          "import_user": "User(s) successfully imported.",
+          "tutorial_created": "Tutorial successfully updated",
+          "country_created": "Country successfully created",
+          "country_updated": "Country successfully updated",
+          "country_deleted": "Country successfully deleted",
+          "state_created": "State successfully created",
+          "state_updated": "State successfully updated",
+          "state_deleted": "State successfully deleted",
+          "city_created": "City successfully created",
+          "city_updated": "City successfully updated",
+          "city_deleted": "City successfully deleted",
+          "series_created": "Series successfully created",
+          "series_updated": "Series successfully updated",
+          "series_deleted": "Series successfully deleted",
+          "shift_created": "Shift successfully created",
+          "shift_updated": "Shift successfully updated",
+          "shift_deleted": "Shift successfully deleted"
         }
       },
       "errors": {
@@ -87,8 +103,10 @@
           "create_organization": "Error creating School, please try again.",
           "create_exam": "Error creating Exam, please try again.",
           "create_user": "Error creating User, please try again.",
+          "create_tutorial": "Error updating tutorial, please try again.",
           "create_group": "Error creating Class, please try again.",
           "edit_organization": "Error editing School, please try again.",
+          "delete_organization": "Error deleting School, please try again.",
           "edit_exam": "Error editing Exam, please try again.",
           "edit_user": "Error editing User, please try again.",
           "edit_group": "Error editing Class, please try again.",
@@ -110,7 +128,17 @@
           "password_must_have_special": "Password must contain at least one special character.",
           "passwords_do_not_match": "Passwords do not match.",
           "group_has_users": "Cannot delete a class with students",
-          "organization_has_groups": "Cannot delete a school with classes"
+          "organization_has_groups": "Cannot delete a school with classes",
+          "create_country": "Error creating Country, please try again.",
+          "edit_country": "Error editing Country, please try again.",
+          "delete_country": "Error deleting Country, please try again.",
+          "create_state": "Error creating State, please try again.",
+          "edit_state": "Error editing State, please try again.",
+          "delete_state": "Error deleting State, please try again.",
+          "create_city": "Error creating City, please try again.",
+          "edit_city": "Error editing City, please try again.",
+          "delete_city": "Error deleting City, please try again.",
+          "action_failed": "Action failed, please try again."
         },
         "exam": {
           "error_record": "Could not record",

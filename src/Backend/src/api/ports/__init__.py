@@ -29,6 +29,17 @@ from .group import (
     ListGroups,
     ListGroupsWithoutOrg,
 )
+from .location import (
+    CityRepository,
+    CountryRepository,
+    GetCity,
+    GetCountry,
+    GetState,
+    ListCities,
+    ListCountries,
+    ListStates,
+    StateRepository,
+)
 from .message_publisher import MessagePublisher
 from .notification import Notification
 from .organization import (
@@ -40,9 +51,12 @@ from .organization import (
 from .result import ResultRepository
 from .role import GetRole, GetRoleByName, ListRoles, RoleRepository
 from .secret_manager import SecretManager, Secrets
+from .series import GetSeries, ListSeries, SeriesRepository
 from .session_query import GetSession, SessionRepository
+from .shifts import GetShift, ListShifts, WorkShiftRepository
 from .speech import SpeechToText
 from .storage import Storage
+from .tutorial import TutorialRepository
 from .unit_of_work import UnitOfWork, UnitOfWorkBuilder
 from .user import (
     CheckUserOnGroup,
@@ -57,11 +71,15 @@ __all__ = (
     "AnalyticalResult",
     "CheckGroupOnOrg",
     "CheckUserOnGroup",
+    "CityRepository",
+    "CountryRepository",
     "Dashboard",
     "DataSyncApi",
     "ExamRepository",
     "ExternalAuth",
     "GenAI",
+    "GetCity",
+    "GetCountry",
     "GetExam",
     "GetUsersExamDetails",
     "GetExamUserStatus",
@@ -71,8 +89,11 @@ __all__ = (
     "GetRoleByName",
     "GetRole",
     "GetSession",
+    "GetState",
     "GetUser",
     "GroupRepository",
+    "ListCities",
+    "ListCountries",
     "ListExams",
     "ListGroups",
     "ListGroupsWithoutOrg",
@@ -84,6 +105,7 @@ __all__ = (
     "ListPersonifiableUsers",
     "ListQuestionsWithStatus",
     "ListRoles",
+    "ListStates",
     "ListUsers",
     "ListUsersWithExams",
     "MessagePublisher",
@@ -91,15 +113,23 @@ __all__ = (
     "OrganizationRepository",
     "ResultRepository",
     "RoleRepository",
+    "SessionRepository",
     "SpeechToText",
+    "StateRepository",
     "Storage",
     "SecretManager",
     "Secrets",
     "UnitOfWork",
     "UnitOfWorkBuilder",
     "QuestionRepository",
-    "SessionRepository",
     "UserRepository",
     "ExamUserQuestionRepository",
     "ExamUserRepository",
+    "GetSeries",
+    "ListSeries",
+    "SeriesRepository",
+    "ListShifts",
+    "GetShift",
+    "WorkShiftRepository",
+    "TutorialRepository",
 )

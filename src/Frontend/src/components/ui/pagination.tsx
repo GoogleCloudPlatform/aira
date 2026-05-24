@@ -76,13 +76,8 @@ const PaginationButton = ({
 }: PaginationButtonProps) => (
     <Button
         aria-current={isActive ? "page" : undefined}
-        className={cn(
-            className,
-            buttonVariants({
-                variant: isActive ? "outline" : "ghost",
-            }),
-        )}
-        variant={variant}
+        className={className}
+        variant={isActive ? "outline" : variant}
         {...props}
     /> 
 )

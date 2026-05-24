@@ -18,12 +18,18 @@
             "exams": "Exámenes",
             "dashboard": "Panel",
             "admin": "Administración",
+            "series": "Series",
+            "shifts": "Turnos",
             "users": "Usuarios",
             "roles": "Roles",
             "groups": "Grupos",
             "organizations": "Escuelas",
             "apply_exams": "Aplicar Examen",
-            "results": "Resultados"
+            "results": "Resultados",
+            "countries": "Países",
+            "states": "Estados",
+            "cities": "Ciudades",
+            "upload_tutorial": "Subir Tutorial(es)"
         }
     },
     "search": {
@@ -37,6 +43,7 @@
             "actions": "Acciones",
             "name": "Nombre",
             "email": "Correo electrónico",
+            "role": "Tipo",
             "grade": "Grado",
             "shift": "Turno",
             "organization": "Escuela",
@@ -46,7 +53,11 @@
             "end_date": "Fecha de Finalización",
             "region": "Región",
             "county": "Municipio",
-            "city": "Ciudad"
+            "city": "Ciudad",
+            "code": "Código",
+            "is_default": "Predeterminado",
+            "country": "País",
+            "state": "Estado"
         },
         "buttons": {
             "import": "Importar",
@@ -66,9 +77,18 @@
         },
         "shifts": {
             "morning": "Mañana",
-            "evening": "Tarde",
+            "afternoon": "Tarde",
+            "evening": "Noche",
             "night": "Noche",
-            "allday": "Todo el día"
+            "allday": "Todo el día",
+            "ma": "Mañana",
+            "ta": "Tarde",
+            "no": "Noche",
+            "in": "Todo el día",
+            "m": "Mañana",
+            "t": "Tarde",
+            "n": "Noche",
+            "i": "Todo el día"
         },
         "messages": {
             "open": "Abrir menú",
@@ -87,9 +107,19 @@
         "previous": "Anterior",
         "next": "Siguiente"
     },
+    "common": {
+        "yes": "Sí",
+        "no": "No",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "save": "Guardar"
+    },
     "errors": {
         "cant_delete_resource": "No se puede eliminar el recurso"
     },
     "group_has_users": "No se puede eliminar un grupo con alumnos",
-    "organization_has_groups": "No se puede eliminar una escuela con grupos"
+    "organization_has_groups": "No se puede eliminar una escuela con grupos",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "save": "Guardar"
 }

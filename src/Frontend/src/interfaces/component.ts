@@ -10,19 +10,20 @@ import { SchemaCreateGroupDefaultValues, SchemaImportGroup, SchemaImportGroupDef
 import { IGroupResponse } from "./group";
 
 export type TCreateFormData = {
-    schema: typeof SchemaCreateUserForm | any;
-    defaultValues: typeof SchemaCreateUserDefaultValues | typeof SchemaCreateOrganizationDefaultValues | typeof SchemaCreateExamDefaultValues | typeof SchemaCreateGroupDefaultValues;  
-    category: typeof CATEGORY_USERS | typeof CATEGORY_ORGANIZATIONS | typeof CATEGORY_EXAMS | typeof CATEGORY_GROUPS;
+    schema: any;
+    defaultValues: any;  
+    category: string;
 }
 
 export type TEditFormData = {
-    schema: typeof SchemaCreateUserForm | any;
-    defaultValues: () => Promise<IUserResponse | IOrganizationResponse | IExamResponse | IGroupResponse>;
-    category: typeof CATEGORY_USERS | typeof CATEGORY_ORGANIZATIONS | typeof CATEGORY_EXAMS | typeof CATEGORY_GROUPS;
+    schema: any;
+    defaultValues: () => Promise<any>;
+    category: string;
+    id?: string;
 }
 
 export type TDeleteFormData = {
-    category: typeof CATEGORY_USERS | typeof CATEGORY_ORGANIZATIONS | typeof CATEGORY_EXAMS | typeof CATEGORY_GROUPS;
+    category: string;
     confirm: () => Promise<void>;
 }
 

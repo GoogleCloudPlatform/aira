@@ -27,7 +27,10 @@ const MicrophonePermission : React.FC = () => {
     useEffect(() => {
         const getMicrophonePermission = async () => {
             const hasPermission = await checkMicrophonePermissions();
-            if (!hasPermission) {
+            if (hasPermission) {
+                // Release verification stream tracks immediately
+                hasPermission.getTracks().forEach(track => track.stop());
+            } else {
                 setRecord("microphonePermission", false);
             }
         }
@@ -41,6 +44,9 @@ const MicrophonePermission : React.FC = () => {
         if (!microphoneStream) {
             return toast.warn(t('toast.warnings.exam.warning_microphone_permission'));
         }
+
+        // Release verification stream tracks immediately
+        microphoneStream.getTracks().forEach(track => track.stop());
 
         setRecord("microphonePermission", true);
     }, [t, setRecord]);

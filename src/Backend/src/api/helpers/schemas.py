@@ -68,7 +68,6 @@ class AnalyticalResult:  # pylint: disable=too-many-instance-attributes
     school_city: str
     school_state: str
     school_region: str | None
-    school_county: str
     class_uuid: uuid.UUID
     class_name: str
     class_grade: str

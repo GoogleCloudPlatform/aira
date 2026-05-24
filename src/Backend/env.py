@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext import asyncio as sqlalchemy_aio
 
 from api import db, dependencies, typings
+import api.models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -44,6 +44,11 @@ import {
     ICON_CHEVRON_UP,
     ICON_NOTEPAD_TEXT,
     ICON_CLIPBOARD_CHECK,
+    ICON_GLOBE,
+    ICON_MAP,
+    ICON_BUILDING,
+    ICON_LIST_ORDERED,
+    ICON_CLOCK,
 } from '@/constants/icons';
 import {
     MicrophoneIcon,
@@ -91,7 +96,7 @@ import {
     ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/solid';
 import { IIcon } from '@/interfaces/icon';
-import { NotepadTextIcon } from 'lucide-react';
+import { NotepadTextIcon, Globe, Map, Building, ListOrdered, Clock } from 'lucide-react';
 
 const useIcon = () => {
     const getSize = () => 'w-full h-full';
@@ -143,6 +148,11 @@ const useIcon = () => {
         if (icon === ICON_QUESTION_MARK_CIRCLE) newIcon = <QuestionMarkCircleIcon />;
         if (icon === ICON_NOTEPAD_TEXT) newIcon = <NotepadTextIcon />;
         if (icon === ICON_CLIPBOARD_CHECK) newIcon = <ClipboardDocumentCheckIcon />;
+        if (icon === ICON_GLOBE) newIcon = <Globe />;
+        if (icon === ICON_MAP) newIcon = <Map />;
+        if (icon === ICON_BUILDING) newIcon = <Building />;
+        if (icon === ICON_LIST_ORDERED) newIcon = <ListOrdered />;
+        if (icon === ICON_CLOCK) newIcon = <Clock />;
 
         const CustomIcon = ({ action, children }: PropsWithChildren<{ action: () => void }>) => (
             <div

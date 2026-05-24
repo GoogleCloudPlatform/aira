@@ -21,6 +21,8 @@ async def create_user(
     """
     _id = body_dict.pop("id", None)
     password = body_dict.pop("password", None)
+    body_dict.pop("groups", None)
+    body_dict.pop("organizations", None)
     user = models.User(**body_dict)
     user.id = _id if _id else user.id
 

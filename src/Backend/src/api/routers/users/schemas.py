@@ -12,6 +12,7 @@ from api.helpers import util
 from api.routers.exams import schemas as exam_schemas
 from api.routers.groups import schemas as group_schemas
 from api.routers.organizations import schemas as org_schemas
+from api.routers.roles import schemas as role_schemas
 
 
 class User(pydantic.BaseModel):
@@ -25,6 +26,7 @@ class User(pydantic.BaseModel):
     groups: list[group_schemas.Group]
     organizations: list[org_schemas.Organization]
     role_id: uuid.UUID
+    role: role_schemas.Role | None = None
 
     class Config:
         """
@@ -112,7 +114,6 @@ class UserGet(User):
     """
 
     state: str | None
-    county: str | None
     region: str | None
     external_id: str | None
     last_login: datetime.datetime | None
@@ -135,7 +136,6 @@ class UserCreate(pydantic.BaseModel):
     password: pydantic.StrictStr | None = None
     external_id: str | None = None
     state: str | None = None
-    county: str | None = None
     region: str | None = None
 
     class Config:
@@ -179,9 +179,8 @@ class UserPatch(pydantic.BaseModel, orm_mode=True):
     Schema related to the User patch.
     """
 
-    name: str | None
-    groups: list[uuid.UUID] | None
-    organizations: list[uuid.UUID] | None
-    state: str | None
-    county: str | None
-    region: str | None
+    name: str | None = None
+    groups: list[uuid.UUID] | None = None
+    organizations: list[uuid.UUID] | None = None
+    state: str | None = None
+    region: str | None = None

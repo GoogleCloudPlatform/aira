@@ -247,7 +247,11 @@ const Groups : React.FC = () => {
 
     return (
         <>
-            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 2xl:mt-10 sm:container">
+            <div className="sm:container pt-5 2xl:pt-10 mb-10">
+                <h1 className="font-semibold text-2xl md:text-3xl text-primary dark:text-white mb-1">{t('form.group.list_title')}</h1>
+                <h2 className="text-black/80 dark:text-white/80 text-base md:text-xl">{t('form.group.list_subtitle')}</h2>
+            </div>
+            <div className="flex sm:flex-row flex-col gap-5 justify-between p-1 sm:container">
                 <div className='w-full sm:w-80'>
                     <Search />
                 </div>

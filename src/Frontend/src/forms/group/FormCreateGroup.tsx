@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ENUM_GRADE_OPTIONS, ENUM_SHIFTS } from "@/constants/enums";
 import { CATEGORY_GROUPS } from "@/constants";
 import { createGroup } from "@/services/group";
+import { getSeries } from "@/services/series";
+import { getAllShifts } from "@/services/shift";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 import { useLoading } from "@/context/loading";
@@ -35,6 +37,16 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
         retryOnMount: false, retry: false,
     });
 
+    const { data: seriesData } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
+    const { data: shiftsData } = useQuery({
+        queryKey: ['shifts'],
+        queryFn: () => getAllShifts(),
+    });
+
     if (isLoading) return <>Loading...</>;
     if (!organizations || isEmpty(organizations)) return null;
 
@@ -42,7 +54,6 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
         setLoading(true)
         try {
             await createGroup(values);
-            toast.success(t('toast.success.form.group_created'))
             setOpen(false)
         } catch (error) {
             toast.error(t('toast.errors.form.create_group'))
@@ -101,14 +112,22 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
             )
         }
 
-        if (['grade', 'shift', 'organization_id'].includes(fieldName)) {
+        if (['series_id', 'shift_id', 'organization_id'].includes(fieldName)) {
             return (
                 <FormField
                     control={form.control}
                     name={fieldName as any}
                     render={({ field }) => (
                         <FormItem className="space-y-2">
-                            <FormLabel>{t(`${field.name === 'organization_id' ? 'form.group.create.organization' : 'form.group.create.'+field.name}`)}</FormLabel>
+                            <FormLabel>
+                                {t(
+                                    field.name === 'organization_id'
+                                        ? 'form.group.create.organization'
+                                        : field.name === 'series_id'
+                                            ? 'form.group.create.grade'
+                                            : 'form.group.create.shift'
+                                )}
+                            </FormLabel>
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
@@ -117,23 +136,31 @@ const FormCreateGroup : React.FC<TFormCreateProps> = ({ formData, setOpen }) => 
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={`${t(`${field.name === 'organization_id' ? 'form.group.create.organization' : 'form.group.create.'+field.name}`)}`} />
+                                        <SelectValue
+                                            placeholder={t(
+                                                field.name === 'organization_id'
+                                                    ? 'form.group.create.organization'
+                                                    : field.name === 'series_id'
+                                                        ? 'form.group.create.grade'
+                                                        : 'form.group.create.shift'
+                                            )}
+                                        />
                                     </SelectTrigger>
                                 </FormControl>
-                                {fieldName === 'grade' && (
+                                {fieldName === 'series_id' && (
                                     <SelectContent>
-                                        {ENUM_GRADE_OPTIONS.map((option) => (
-                                            <SelectItem key={option.id} value={option.value}>
+                                        {seriesData?.items.map((option: any) => (
+                                            <SelectItem key={option.id} value={option.id}>
                                                 {option.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 )}
-                                {fieldName === 'shift' && (
+                                {fieldName === 'shift_id' && (
                                     <SelectContent>
-                                        {ENUM_SHIFTS.map((option) => (
-                                            <SelectItem key={option.id} value={option.value}>
-                                                {t(`form.group.create.${option.name}`)}
+                                        {shiftsData?.items.map((option: any) => (
+                                            <SelectItem key={option.id} value={option.id}>
+                                                {option.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

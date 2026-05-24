@@ -18,6 +18,13 @@ from api import errors, helpers, models, ports, typings
 logger = logging.getLogger(__name__)
 
 
+def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
+    return sa.case(
+        {member.name: member.value for member in models.Grades},
+        value=sa.cast(exam_grade_col, sa.String),
+    )
+
+
 class UserRepository(ports.UserRepository):
     """
     User repository implementation that returns user data.
@@ -46,8 +53,11 @@ class UserRepository(ports.UserRepository):
         )
         if joined_load:
             stmt = stmt.options(
-                orm.joinedload(models.User.groups),
-            ).options(
+                orm.joinedload(models.User.groups).joinedload(models.Group.series),
+                orm.joinedload(models.User.groups).joinedload(models.Group.work_shift),
+                orm.joinedload(models.User.groups).joinedload(
+                    models.Group.organization
+                ),
                 orm.joinedload(models.User.organizations),
             )
         if user_id:
@@ -279,7 +289,12 @@ class ListUsers(ports.ListUsers):
         group = models.Group
         stmt = (
             sa.select(user)
-            .options(orm.joinedload(user.groups), orm.joinedload(user.organizations))
+            .options(
+                orm.joinedload(user.groups).joinedload(models.Group.series),
+                orm.joinedload(user.groups).joinedload(models.Group.work_shift),
+                orm.joinedload(user.groups).joinedload(models.Group.organization),
+                orm.joinedload(user.organizations),
+            )
             .order_by(user.updated_at.desc())
         )
         if organizations or query:
@@ -383,6 +398,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
                 group,
                 sa.and_(group.id.in_(groups), group.id == models.UserGroup.group_id),
             )
+            .join(models.Series, models.Series.id == group.series_id)
             .join(models.UserOrganization, models.UserOrganization.user_id == user.id)
             .join(
                 org,
@@ -399,7 +415,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
                 stmt.join(
                     exam,
                     sa.and_(
-                        group.grade == exam.grade,
+                        models.Series.name == _get_grade_mapping_case(exam.grade),
                         exam.start_date <= current_date,
                         exam.end_date > current_date,
                     ),
@@ -419,7 +435,7 @@ class ListUsersWithExams(ports.ListUsersWithExams):
             stmt = stmt.outerjoin(
                 exam,
                 sa.and_(
-                    group.grade == exam.grade,
+                    models.Series.name == _get_grade_mapping_case(exam.grade),
                     exam.start_date <= current_date,
                 ),
             ).outerjoin(
@@ -499,11 +515,11 @@ class GetUser(ports.GetUser):
             sa.select(models.User)
             .options(
                 orm.joinedload(models.User.role),
-            )
-            .options(
-                orm.joinedload(models.User.groups),
-            )
-            .options(
+                orm.joinedload(models.User.groups).joinedload(models.Group.series),
+                orm.joinedload(models.User.groups).joinedload(models.Group.work_shift),
+                orm.joinedload(models.User.groups).joinedload(
+                    models.Group.organization
+                ),
                 orm.joinedload(models.User.organizations),
             )
             .where(models.User.id == user_id)

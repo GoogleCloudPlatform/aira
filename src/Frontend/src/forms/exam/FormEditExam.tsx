@@ -22,6 +22,7 @@ import { SchemaEditExamDefaultValues } from "./schema";
 import { isEmpty } from "lodash";
 import { updateExamById } from "@/services/exam";
 import { IQuestion } from "@/interfaces/question";
+import { getSeries } from "@/services/series";
 import { TimePicker } from "@/components/ui/time-picker";
 import SkeletonSheet from "@/components/skeletons/SkeletonSheet";
 import Loading from "@/components/loading/Loading";
@@ -47,13 +48,18 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
     const queryClient = useQueryClient();
     const { data, isLoading, isFetching} = useQuery<IExamResponse | z.infer<typeof formData.schema>>({ queryKey: ['exam'], queryFn: formData.defaultValues });
 
+    const { data: seriesData, isLoading: isLoadingSeries } = useQuery({
+        queryKey: ['series'],
+        queryFn: () => getSeries(),
+    });
+
     const { form, resetForm } = useQuestions()
 
     console.log(form.watch());
     console.log(form.formState.errors);
     
     useEffect(() => {
-        if (data && !isEmpty(data)) {
+        if (data && !isEmpty(data) && seriesData) {
             const transformDateStringInDate = { 
                 ...data, 
                 start_date: new Date(data.start_date), 
@@ -69,9 +75,12 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
             const newData = Object.assign({}, transformDateStringInDate);
 
             form.reset(newData)
+            if (data.grade) {
+                form.setValue('grade', data.grade || "5º Ano", { shouldValidate: true })
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [data, seriesData]);
 
     const watchQuestions = form.watch('questions')
     const { errors } = form.formState
@@ -80,8 +89,6 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
         setLoading(true)
         try {
             await updateExamById(data.id, values);
-            toast.success(t('toast.success.form.exam_updated'))
-
             resetForm()
             setOpen(false)
         } catch (error) {
@@ -99,7 +106,7 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
         onChange(day)
     }
 
-    if ( !data || isEmpty(data) || isLoading || isFetching ) { return <SkeletonSheet/> }
+    if ( !data || isEmpty(data) || isLoading || isFetching || isLoadingSeries ) { return <SkeletonSheet/> }
 
     const today = new Date();
     const start_date = new Date(data.start_date);
@@ -174,10 +181,11 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
                         <FormItem className="space-y-2">
                             <FormLabel>{t(`form.exam.create.${field.name}`)}</FormLabel>
                             <Select
+                                key={field.value}
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
                                 value={field.value}
-                                disabled={field.disabled}
+                                disabled={field.disabled || preview}
                             >
                                 <FormControl>
                                     <SelectTrigger>
@@ -185,8 +193,8 @@ const FormEditExam : React.FC<FormEditExamProps> = ({ formData, setOpen, preview
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {ENUM_GRADE_OPTIONS.map((option, index) => (
-                                        <SelectItem key={index} value={option.value}>
+                                    {seriesData?.items?.map((option: any, index: number) => (
+                                        <SelectItem key={index} value={option.name}>
                                             {option.name}
                                         </SelectItem>
                                     ))}
