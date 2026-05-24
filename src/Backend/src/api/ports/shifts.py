@@ -1,6 +1,8 @@
 import abc
 import uuid
+
 from api import models, typings
+
 
 class ListShifts(abc.ABC):
     @abc.abstractmethod
@@ -12,10 +14,12 @@ class ListShifts(abc.ABC):
     ) -> tuple[list[models.WorkShift], typings.PaginationMetadata]:
         raise NotImplementedError
 
+
 class GetShift(abc.ABC):
     @abc.abstractmethod
     async def __call__(self, shift_id: uuid.UUID) -> models.WorkShift:
         raise NotImplementedError
+
 
 class WorkShiftRepository(abc.ABC):
     @abc.abstractmethod
@@ -31,5 +35,7 @@ class WorkShiftRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def list(self, shift_ids: list[uuid.UUID] | None = None) -> list[models.WorkShift]:
+    async def list(
+        self, shift_ids: list[uuid.UUID] | None = None
+    ) -> list[models.WorkShift]:
         raise NotImplementedError

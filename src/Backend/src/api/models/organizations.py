@@ -3,6 +3,7 @@ Module for the organizations model, aka schools.
 """
 
 import uuid
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -31,7 +32,11 @@ class Organization(db.Base, db.DefaultColumns):
 
     @property
     def country_id(self) -> uuid.UUID | None:
-        return self.city_rel.state.country_id if self.city_rel and self.city_rel.state else None
+        return (
+            self.city_rel.state.country_id
+            if self.city_rel and self.city_rel.state
+            else None
+        )
 
     @property
     def state_id(self) -> uuid.UUID | None:

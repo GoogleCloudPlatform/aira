@@ -20,8 +20,8 @@ from .adapters.sqlalchemy import (
     organization,
     role,
     series,
-    shifts,
     session_query,
+    shifts,
     unit_of_work,
     user,
 )
@@ -51,10 +51,10 @@ class SettingsModule(injector.Module):
                         k, v = line.split("=", 1)
                         if k.startswith("_"):
                             settings[k[1:].lower()] = v
-        
-        settings.update({
-            k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")
-        })
+
+        settings.update(
+            {k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")}
+        )
 
         return Settings(settings)
 
@@ -463,45 +463,35 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
 
     @injector.provider
     @injector.singleton
-    def provide_get_country(
-        self, session_factory: SessionFactory
-    ) -> ports.GetCountry:
+    def provide_get_country(self, session_factory: SessionFactory) -> ports.GetCountry:
         return location.GetCountry(
             session_factory=session_factory,
         )
 
     @injector.provider
     @injector.singleton
-    def provide_list_states(
-        self, session_factory: SessionFactory
-    ) -> ports.ListStates:
+    def provide_list_states(self, session_factory: SessionFactory) -> ports.ListStates:
         return location.ListStates(
             session_factory=session_factory,
         )
 
     @injector.provider
     @injector.singleton
-    def provide_get_state(
-        self, session_factory: SessionFactory
-    ) -> ports.GetState:
+    def provide_get_state(self, session_factory: SessionFactory) -> ports.GetState:
         return location.GetState(
             session_factory=session_factory,
         )
 
     @injector.provider
     @injector.singleton
-    def provide_list_cities(
-        self, session_factory: SessionFactory
-    ) -> ports.ListCities:
+    def provide_list_cities(self, session_factory: SessionFactory) -> ports.ListCities:
         return location.ListCities(
             session_factory=session_factory,
         )
 
     @injector.provider
     @injector.singleton
-    def provide_get_city(
-        self, session_factory: SessionFactory
-    ) -> ports.GetCity:
+    def provide_get_city(self, session_factory: SessionFactory) -> ports.GetCity:
         return location.GetCity(
             session_factory=session_factory,
         )
@@ -842,7 +832,9 @@ def get_speech_to_text(
     """
     Get the speech to text.
     """
-    creds_path = settings.get("gcp_stt_credentials", "") or settings.get("gcp_storage_credentials", "")
+    creds_path = settings.get("gcp_stt_credentials", "") or settings.get(
+        "gcp_storage_credentials", ""
+    )
     match version:
         case "v2":
             return google.SpeechToTextV2(

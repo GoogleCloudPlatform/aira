@@ -28,7 +28,8 @@
             "results": "Results",
             "countries": "Countries",
             "states": "States",
-            "cities": "Cities"
+            "cities": "Cities",
+            "upload_tutorial": "Upload Tutorial(s)"
         }
     },
     "search": {
@@ -109,7 +110,9 @@
     "common": {
         "yes": "Yes",
         "no": "No",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save"
     },
     "errors": {
         "cant_delete_resource": "Resource cannot be deleted"

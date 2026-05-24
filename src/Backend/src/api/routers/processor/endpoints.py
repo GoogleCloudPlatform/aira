@@ -6,12 +6,8 @@ import base64
 import datetime
 import logging
 import os
-import smtplib
 import urllib.parse
 import uuid
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from pathlib import Path
 
 import fastapi
 import fastapi_injector

@@ -62,7 +62,9 @@ class GroupRepository(ports.GroupRepository):
         except exc.IntegrityError as exception:
             raise errors.AlreadyExists() from exception
 
-        await self._session.refresh(group_model, ["organization", "series", "work_shift"])
+        await self._session.refresh(
+            group_model, ["organization", "series", "work_shift"]
+        )
         return group_model
 
     async def delete(self, group_model: models.Group) -> None:
@@ -92,14 +94,18 @@ class GroupRepository(ports.GroupRepository):
                 return None
         org_id = organization.id
 
-        series_stmt = sa.select(models.Series).where(models.Series.name == sync_group.grade)
+        series_stmt = sa.select(models.Series).where(
+            models.Series.name == sync_group.grade
+        )
         series_result = await self._session.execute(series_stmt)
         series = series_result.unique().scalar_one_or_none()
         if not series:
             logger.warning(f"Series not found for grade: {sync_group.grade}")
             return None
 
-        shift_stmt = sa.select(models.WorkShift).where(models.WorkShift.code == sync_group.shift)
+        shift_stmt = sa.select(models.WorkShift).where(
+            models.WorkShift.code == sync_group.shift
+        )
         shift_result = await self._session.execute(shift_stmt)
         shift = shift_result.unique().scalar_one_or_none()
         if not shift:

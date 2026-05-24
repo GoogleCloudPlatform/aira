@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
     return sa.case(
         {member.name: member.value for member in models.Grades},
-        value=sa.cast(exam_grade_col, sa.String)
+        value=sa.cast(exam_grade_col, sa.String),
     )
 
 

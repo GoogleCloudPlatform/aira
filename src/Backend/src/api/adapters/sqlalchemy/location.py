@@ -100,7 +100,11 @@ class CityRepository(ports.CityRepository):
         await self._session.delete(city_model)
 
     async def list(self, state_id: uuid.UUID | None = None) -> list[models.City]:
-        stmt = sa.select(models.City).options(joinedload(models.City.state)).order_by(models.City.name.asc())
+        stmt = (
+            sa.select(models.City)
+            .options(joinedload(models.City.state))
+            .order_by(models.City.name.asc())
+        )
         if state_id:
             stmt = stmt.where(models.City.state_id == state_id)
         result = await self._session.execute(stmt)
@@ -143,7 +147,11 @@ class ListStates(ports.ListStates):
         page: int = 1,
         query: str | None = None,
     ) -> tuple[list[models.State], typings.PaginationMetadata]:
-        stmt = sa.select(models.State).options(joinedload(models.State.country)).order_by(models.State.name.asc())
+        stmt = (
+            sa.select(models.State)
+            .options(joinedload(models.State.country))
+            .order_by(models.State.name.asc())
+        )
         if country_id:
             stmt = stmt.where(models.State.country_id == country_id)
         if query:
@@ -174,7 +182,11 @@ class ListCities(ports.ListCities):
         page: int = 1,
         query: str | None = None,
     ) -> tuple[list[models.City], typings.PaginationMetadata]:
-        stmt = sa.select(models.City).options(joinedload(models.City.state)).order_by(models.City.name.asc())
+        stmt = (
+            sa.select(models.City)
+            .options(joinedload(models.City.state))
+            .order_by(models.City.name.asc())
+        )
         if state_id:
             stmt = stmt.where(models.City.state_id == state_id)
         if query:
@@ -212,7 +224,11 @@ class GetState(ports.GetState):
         self._session_factory = session_factory
 
     async def __call__(self, state_id: uuid.UUID) -> models.State:
-        stmt = sa.select(models.State).options(joinedload(models.State.country)).where(models.State.id == state_id)
+        stmt = (
+            sa.select(models.State)
+            .options(joinedload(models.State.country))
+            .where(models.State.id == state_id)
+        )
         async with self._session_factory() as session:
             result = await session.execute(stmt)
             if not (state := result.scalars().one_or_none()):
@@ -225,7 +241,11 @@ class GetCity(ports.GetCity):
         self._session_factory = session_factory
 
     async def __call__(self, city_id: uuid.UUID) -> models.City:
-        stmt = sa.select(models.City).options(joinedload(models.City.state)).where(models.City.id == city_id)
+        stmt = (
+            sa.select(models.City)
+            .options(joinedload(models.City.state))
+            .where(models.City.id == city_id)
+        )
         async with self._session_factory() as session:
             result = await session.execute(stmt)
             if not (city := result.scalars().one_or_none()):

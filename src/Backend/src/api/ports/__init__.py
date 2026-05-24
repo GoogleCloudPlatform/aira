@@ -50,12 +50,13 @@ from .organization import (
 )
 from .result import ResultRepository
 from .role import GetRole, GetRoleByName, ListRoles, RoleRepository
-from .series import GetSeries, ListSeries, SeriesRepository
-from .shifts import ListShifts, GetShift, WorkShiftRepository
 from .secret_manager import SecretManager, Secrets
+from .series import GetSeries, ListSeries, SeriesRepository
 from .session_query import GetSession, SessionRepository
+from .shifts import GetShift, ListShifts, WorkShiftRepository
 from .speech import SpeechToText
 from .storage import Storage
+from .tutorial import TutorialRepository
 from .unit_of_work import UnitOfWork, UnitOfWorkBuilder
 from .user import (
     CheckUserOnGroup,
@@ -130,4 +131,5 @@ __all__ = (
     "ListShifts",
     "GetShift",
     "WorkShiftRepository",
+    "TutorialRepository",
 )

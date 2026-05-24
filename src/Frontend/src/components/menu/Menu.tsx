@@ -1,6 +1,6 @@
 'use client'
 
-import { ICON_ACADEMIC_CAP, ICON_BOOK_OPEN, ICON_BUILDING_LIBRARY, ICON_CHART_PIE, ICON_CHEVRON_DOWN, ICON_CHEVRON_UP, ICON_CLIPBOARD_CHECK, ICON_COG, ICON_DOCUMENT_TEXT, ICON_HOME, ICON_NOTEPAD_TEXT, ICON_PRESENTATION_CHART_BAR, ICON_TABLE_CELLS, ICON_USER, ICON_USER_GROUP, ICON_GLOBE, ICON_MAP, ICON_BUILDING, ICON_LIST_ORDERED, ICON_CLOCK } from '@/constants/icons';
+import { ICON_ACADEMIC_CAP, ICON_BOOK_OPEN, ICON_BUILDING_LIBRARY, ICON_CHART_PIE, ICON_CHEVRON_DOWN, ICON_CHEVRON_UP, ICON_CLIPBOARD_CHECK, ICON_COG, ICON_DOCUMENT_TEXT, ICON_HOME, ICON_NOTEPAD_TEXT, ICON_PRESENTATION_CHART_BAR, ICON_TABLE_CELLS, ICON_USER, ICON_USER_GROUP, ICON_GLOBE, ICON_MAP, ICON_BUILDING, ICON_LIST_ORDERED, ICON_CLOCK, ICON_CLOUD_ARROW_UP } from '@/constants/icons';
 import { SCOPE_ADMIN, SCOPE_DASHBOARD_VIEWER, SCOPE_EXAM_LIST, SCOPE_GROUP_LIST, SCOPE_ORGANIZATION_LIST, SCOPE_USER, SCOPE_USER_IMPERSONATE, SCOPE_USER_LIST } from '@/constants/rbac';
 import { useRBAC } from '@/context/rbac';
 import useIcon from '@/hooks/useIcon';
@@ -14,6 +14,8 @@ import Profile from '../profile/Profile';
 import { cn } from '@/libs/shadcn/utils';
 import { Link } from '@/router/link/Link';
 import { usePaginationStore } from '@/store/pagination';
+import { api } from '@/api/api';
+import UploadTutorialModal from '../tutorials/UploadTutorialModal';
 
 const Menu: React.FC = () => {
     const t = useTranslations("sidebar");
@@ -26,7 +28,7 @@ const Menu: React.FC = () => {
     const { getIcon } = useIcon();
     const { show_finished }: IPaginationStore = usePaginationStore();
 
-
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
     const [mounted, setMounted] = useState<boolean>(false);
     const [menuItems, setMenusItems] = useState<Array<IMenuItem>>([
         {
@@ -203,12 +205,52 @@ const Menu: React.FC = () => {
                     order: 3,
                     shouldRedirect: true,
                 },
+                {
+                    name: 'upload',
+                    icon: ICON_CLOUD_ARROW_UP,
+                    label: 'upload_tutorial',
+                    render: hasScopePermission([SCOPE_ADMIN]),
+                    route: '#upload-tutorial-modal',
+                    order: 4,
+                },
             ],
         },
     ]);
 
+    const fetchTutorialUrls = async () => {
+        try {
+            const [educatorRes, adminRes] = await Promise.all([
+                api.get(`/tutorials/latest/educator?locale=${locale}`),
+                api.get(`/tutorials/latest/admin?locale=${locale}`),
+            ]);
+            
+            setMenusItems(prevItems => {
+                return prevItems.map(item => {
+                    if (item.name === 'tutorials') {
+                        return {
+                            ...item,
+                            items: item.items?.map(subItem => {
+                                if (subItem.name === 'educator' && educatorRes.data?.url) {
+                                    return { ...subItem, route: educatorRes.data.url };
+                                }
+                                if (subItem.name === 'admin' && adminRes.data?.url) {
+                                    return { ...subItem, route: adminRes.data.url };
+                                }
+                                return subItem;
+                            })
+                        };
+                    }
+                    return item;
+                });
+            });
+        } catch (error) {
+            console.error("Failed to fetch dynamic tutorial links", error);
+        }
+    };
+
     useEffect(() => {
         setMounted(true);
+        fetchTutorialUrls();
         return () => {
             setMounted(false);
         };
@@ -245,6 +287,11 @@ const Menu: React.FC = () => {
             setMenusItems(newMenuItems);
         }
 
+        if (menu.name === 'upload') {
+            setIsUploadModalOpen(true);
+            return;
+        }
+
         if (menu.shouldRedirect) window.open(menu.route, '_blank');
         else {
             router.push(menu.route);
@@ -278,7 +325,7 @@ const Menu: React.FC = () => {
         };
 
         const Tag: React.FC<any> = ({ children, ...props }: PropsWithChildren) => {
-            if (menuItem.items) {
+            if (menuItem.items || menuItem.route.startsWith('#')) {
                 return (
                     <button {...props} onClick={() => handleMenuClick(menuItem)}>
                         {children}
@@ -382,6 +429,12 @@ const Menu: React.FC = () => {
             <div className='w-full'>
                 <Profile />
             </div>
+            <UploadTutorialModal 
+                isOpen={isUploadModalOpen} 
+                onClose={() => setIsUploadModalOpen(false)} 
+                locale={locale as string} 
+                onSuccess={fetchTutorialUrls} 
+            />
         </nav>
     );
 };

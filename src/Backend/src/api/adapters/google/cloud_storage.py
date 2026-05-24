@@ -46,12 +46,18 @@ class CloudStorage(ports.Storage):
         with open(audio_temp, "wb") as file:
             self.client.download_blob_to_file(gcs_path, file)
 
-    async def upload_by_text(self, path: str, text: bytes) -> str:
+    async def upload_by_text(
+        self, path: str, text: bytes, content_type: str | None = None
+    ) -> str:
         """
         Upload audio to GCS by text.
         """
         blob = self.client.bucket(self.storage_path).blob(path)
-        await asyncio.to_thread(functools.partial(blob.upload_from_string, text))
+        if content_type:
+            blob.content_type = content_type
+        await asyncio.to_thread(
+            functools.partial(blob.upload_from_string, text, content_type=content_type)
+        )
         return str(blob.id.rsplit("/", 1)[0])
 
     async def upload_by_file(self, path: str, audio_path: str) -> str:

@@ -6,7 +6,6 @@ import enum
 
 import sqlalchemy as sa
 from sqlalchemy import orm
-from sqlalchemy.dialects import postgresql as psql
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api import db

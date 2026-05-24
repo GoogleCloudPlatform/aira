@@ -28,7 +28,8 @@
             "results": "Resultados",
             "countries": "Países",
             "states": "Estados",
-            "cities": "Ciudades"
+            "cities": "Ciudades",
+            "upload_tutorial": "Subir Tutorial(es)"
         }
     },
     "search": {
@@ -109,7 +110,9 @@
     "common": {
         "yes": "Sí",
         "no": "No",
-        "confirm": "Confirmar"
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "save": "Guardar"
     },
     "errors": {
         "cant_delete_resource": "No se puede eliminar el recurso"

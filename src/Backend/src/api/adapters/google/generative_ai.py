@@ -1,11 +1,8 @@
 import json
 import random
-import sys
 import textwrap
 import typing
 from pathlib import Path
-
-import sqlite3
 
 import chromadb
 import vertexai
@@ -27,31 +24,38 @@ class GenerativeAI(ports.GenAI):
     Implementation of google's cloud storage.
     """
 
-    def __init__(self, project_id: str, model_version: str, creds_path: str | None = None, location: str = "us-central1", embedding_model="text-embedding-004"):
+    def __init__(
+        self,
+        project_id: str,
+        model_version: str,
+        creds_path: str | None = None,
+        location: str = "us-central1",
+        embedding_model="text-embedding-004",
+    ):
         from google.oauth2 import service_account
+
         credentials = None
         if creds_path:
-            credentials = service_account.Credentials.from_service_account_file(creds_path)
-            
+            credentials = service_account.Credentials.from_service_account_file(
+                creds_path
+            )
+
         vertexai.init(project=project_id, location=location, credentials=credentials)
         self.model = GenerativeModel(model_version)
         self.embedding_model = embedding_model
         self.project_id = project_id
         self.location = location
-        self.chroma_client = chromadb.PersistentClient(
-            path="./chroma_data"
-        )
+        self.chroma_client = chromadb.PersistentClient(path="./chroma_data")
         # GoogleVertexEmbeddingFunction requires api_key but uses it as a placeholder
         # when running in GCP with service account, it will use default credentials
         import google.auth
+
         credentials, _ = google.auth.default()
-        self.embedding_function = (
-            embedding_functions.GoogleVertexEmbeddingFunction(
-                api_key="",  # Empty string - will use default credentials
-                project_id=project_id,
-                region=location,
-                model_name=self.embedding_model,
-            )
+        self.embedding_function = embedding_functions.GoogleVertexEmbeddingFunction(
+            api_key="",  # Empty string - will use default credentials
+            project_id=project_id,
+            region=location,
+            model_name=self.embedding_model,
         )
         self.collections = {}
 
@@ -76,8 +80,9 @@ class GenerativeAI(ports.GenAI):
             case models.QuestionType.WORDS:
                 query += f"Me gere EXATAMENTE {qty} palavras ÚNICAS e DIFERENTES, aleatórias, todas em minúsculas, separadas por espaço. IMPORTANTE: Não repita palavras, cada palavra deve ser única. Critérios: - Diferentes extensões (número de letras e sílabas), com estruturas silábicas canônicas (CV) e não canônicas (CVC, VC, CCV); - Familiaridade acessível para alunos em fase inicial de leitura, evitando palavras muito complexas ou técnicas; - Inclua palavras com regularidades e irregularidades ortográficas, considerando grafemas e fonemas com relação direta e indireta; - Evite palavras correlacionadas entre si. Retorne APENAS as palavras separadas por espaço, sem numeração ou formatação."
         import time
+
         from google.api_core import exceptions as google_exceptions
-        
+
         try:
             response = self.model.generate_content(query)
         except google_exceptions.ResourceExhausted:
@@ -87,15 +92,15 @@ class GenerativeAI(ports.GenAI):
         if question_type == models.QuestionType.PHRASES:
             return response.text
         words_list = list(set(response.text.split()))
-        
+
         # Se não tivermos palavras suficientes, gerar mais com backoff exponencial
         retry_count = 0
         while len(words_list) < qty_words and retry_count < 3:
             try:
                 # Aguardar antes de fazer nova requisição (exponential backoff)
-                wait_time = 2 ** retry_count  # 1s, 2s, 4s
+                wait_time = 2**retry_count  # 1s, 2s, 4s
                 time.sleep(wait_time)
-                
+
                 additional_qty = qty_words - len(words_list) + 20
                 additional_query = query.replace(f"{qty}", f"{additional_qty}")
                 additional_response = self.model.generate_content(additional_query)
@@ -107,7 +112,7 @@ class GenerativeAI(ports.GenAI):
             except Exception:
                 # Para qualquer outro erro, parar e retornar o que temos
                 break
-        
+
         # Garantir que não excedemos o tamanho disponível
         sample_size = min(qty_words, len(words_list))
         sub_list = random.sample(words_list, sample_size)

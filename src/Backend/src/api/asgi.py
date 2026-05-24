@@ -17,6 +17,7 @@ try:
     alembic.config.main(argv=alembic_args)
 except Exception as e:
     import logging
+
     logging.getLogger(__name__).warning(f"Alembic migration skipped in worker: {e}")
 
 

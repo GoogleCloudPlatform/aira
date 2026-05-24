@@ -156,7 +156,9 @@ async def list_resources(
 
 @router.get(
     "/exams",
-    dependencies=[fastapi.Security(auth.get_token, scopes=["admin", "user.list", "user"])],
+    dependencies=[
+        fastapi.Security(auth.get_token, scopes=["admin", "user.list", "user"])
+    ],
 )
 async def list_resources_with_exams(
     groups: list[uuid.UUID] | None = fastapi.Query(default=None),
@@ -375,7 +377,7 @@ async def signup(
             name="Senai 3EM",
         )
         orgs, _ = await list_organizations(name="Escola Senai")
-        
+
         # Merge groups and organizations into the active UoW session
         groups = [await uow.merge(g) for g in groups]
         orgs = [await uow.merge(o) for o in orgs]

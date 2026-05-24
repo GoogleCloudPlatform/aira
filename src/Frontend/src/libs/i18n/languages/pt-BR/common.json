@@ -28,7 +28,8 @@
             "results": "Resultados",
             "countries": "Países",
             "states": "Estados",
-            "cities": "Cidades"
+            "cities": "Cidades",
+            "upload_tutorial": "Upload de Tutorial(s)"
         }
     },
     "search": {
@@ -110,7 +111,9 @@
     "common": {
         "yes": "Sim",
         "no": "Não",
-        "confirm": "Confirmar"
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "save": "Salvar"
     },
     "errors": {
         "cant_delete_resource": "Não é possível deletar o recurso"

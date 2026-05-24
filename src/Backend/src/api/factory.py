@@ -65,6 +65,7 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     app.include_router(routers.locations_router, prefix="/api/v1/locations")
     app.include_router(routers.series_router, prefix="/api/v1/series")
     app.include_router(routers.shifts_router, prefix="/api/v1/shifts")
+    app.include_router(routers.tutorials_router, prefix="/api/v1/tutorials")
 
     app.add_exception_handler(
         errors.BaseError,
@@ -82,5 +83,5 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
 
     return app
 
-# Trigger reload after .env change (5)
 
+# Trigger reload after .env change (5)

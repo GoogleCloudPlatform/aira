@@ -155,13 +155,17 @@ async def create(
     async with uow_builder() as uow:
         if not body.city_id:
             raise errors.InvalidField("city_id")
-            
-        stmt = sa.select(models.City).options(joinedload(models.City.state)).where(models.City.id == body.city_id)
+
+        stmt = (
+            sa.select(models.City)
+            .options(joinedload(models.City.state))
+            .where(models.City.id == body.city_id)
+        )
         result = await uow._session.execute(stmt)
         city = result.scalars().one_or_none()
         if not city:
             raise errors.NotFound("city")
-            
+
         organization = models.Organization(
             name=body.name,
             customer_id=body.customer_id,
@@ -230,26 +234,32 @@ async def update(
     :param body: parsed data for organization patch.
     """
     async with uow_builder() as uow:
-        stmt = sa.select(models.Organization).options(
-            joinedload(models.Organization.city_rel).joinedload(models.City.state)
-        ).where(
-            models.Organization.id == organization_id
+        stmt = (
+            sa.select(models.Organization)
+            .options(
+                joinedload(models.Organization.city_rel).joinedload(models.City.state)
+            )
+            .where(models.Organization.id == organization_id)
         )
         result = await uow._session.execute(stmt)
         organization = result.scalars().one_or_none()
         if not organization:
             raise errors.NotFound()
-            
+
         if body.city_id and body.city_id != organization.city_id:
-            stmt = sa.select(models.City).options(joinedload(models.City.state)).where(models.City.id == body.city_id)
+            stmt = (
+                sa.select(models.City)
+                .options(joinedload(models.City.state))
+                .where(models.City.id == body.city_id)
+            )
             result = await uow._session.execute(stmt)
             city = result.scalars().one_or_none()
             if not city:
                 raise errors.NotFound("city")
-            
+
             organization.city = city.name
             organization.state = city.state.code[:2]
-            
+
         organization = crud.update_org(organization, body)
         await uow.commit()
 

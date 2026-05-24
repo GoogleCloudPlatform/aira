@@ -8,7 +8,7 @@ import uuid
 
 import pydantic
 
-from api import errors, models
+from api import errors
 from api.routers.organizations import schemas
 
 
@@ -36,10 +36,10 @@ class Group(pydantic.BaseModel):
             # ORM instance mapping (wrapped in a Pydantic GetterDict)
             series_obj = values.get("series")
             work_shift_obj = values.get("work_shift")
-            
+
             grade_val = series_obj.name if series_obj else ""
             shift_val = work_shift_obj.code.lower() if work_shift_obj else ""
-            
+
             res = {
                 "id": values.get("id"),
                 "name": values.get("name"),
@@ -50,13 +50,13 @@ class Group(pydantic.BaseModel):
                 "created_at": values.get("created_at"),
                 "updated_at": values.get("updated_at"),
             }
-            
+
             # Dynamically copy subclass fields if present in GetterDict
             if values.get("organization") is not None:
                 res["organization"] = values.get("organization")
             if values.get("customer_id") is not None:
                 res["customer_id"] = values.get("customer_id")
-                
+
             return res
         return values
 

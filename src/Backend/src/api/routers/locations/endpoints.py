@@ -10,8 +10,7 @@ import uuid
 import fastapi
 import fastapi_injector
 import sqlalchemy as sa
-
-from api import dependencies, errors, models, ports
+from api import models, ports
 from api.helpers import auth
 from api.helpers import schemas as util_schemas
 
@@ -48,9 +47,7 @@ async def list_countries(
     response_model=schemas.CountryGet,
 )
 async def get_country(
-    get_country_query: ports.GetCountry = fastapi_injector.Injected(
-        ports.GetCountry
-    ),
+    get_country_query: ports.GetCountry = fastapi_injector.Injected(ports.GetCountry),
     country_id: uuid.UUID = fastapi.Path(...),
 ) -> schemas.CountryGet:
     country = await get_country_query(country_id=country_id)
@@ -120,9 +117,7 @@ async def delete_country(
 async def list_states(
     country_id: uuid.UUID | None = fastapi.Query(default=None),
     list_data: util_schemas.ListSchema = fastapi.Depends(),
-    list_states_query: ports.ListStates = fastapi_injector.Injected(
-        ports.ListStates
-    ),
+    list_states_query: ports.ListStates = fastapi_injector.Injected(ports.ListStates),
 ) -> schemas.StateList:
     result, pagination_metadata = await list_states_query(
         country_id=country_id,
@@ -137,6 +132,7 @@ async def list_states(
         pages=pagination_metadata.total_pages,
     )
 
+
 @router.get("/states/all", response_model=list[schemas.StateGet])
 async def list_all_states(
     country_id: uuid.UUID | None = fastapi.Query(default=None),
@@ -145,12 +141,17 @@ async def list_all_states(
     ),
 ) -> list[schemas.StateGet]:
     async with uow_builder() as uow:
-        stmt = sa.select(models.State).options(sa.orm.joinedload(models.State.country)).order_by(models.State.name.asc())
+        stmt = (
+            sa.select(models.State)
+            .options(sa.orm.joinedload(models.State.country))
+            .order_by(models.State.name.asc())
+        )
         if country_id:
             stmt = stmt.where(models.State.country_id == country_id)
         result = await uow._session.execute(stmt)
         states = result.scalars().unique().all()
         return [schemas.StateGet.from_orm(s) for s in states]
+
 
 @router.get(
     "/states/{state_id}",
@@ -234,9 +235,7 @@ async def delete_state(
 async def list_cities(
     state_id: uuid.UUID | None = fastapi.Query(default=None),
     list_data: util_schemas.ListSchema = fastapi.Depends(),
-    list_cities_query: ports.ListCities = fastapi_injector.Injected(
-        ports.ListCities
-    ),
+    list_cities_query: ports.ListCities = fastapi_injector.Injected(ports.ListCities),
 ) -> schemas.CityList:
     result, pagination_metadata = await list_cities_query(
         state_id=state_id,

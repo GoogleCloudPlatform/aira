@@ -79,3 +79,20 @@ resource "google_storage_bucket" "bucket_files" {
 
 }
 
+## Giving public read permission to all files in bucket_files ##
+resource "google_storage_bucket_iam_member" "public_viewer" {
+  bucket = google_storage_bucket.bucket_files.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
+## Giving permission for backend and GCS SAs in bucket_files ##
+resource "google_storage_bucket_iam_binding" "backend_files_admin" {
+  bucket = google_storage_bucket.bucket_files.name
+  role   = "roles/storage.objectAdmin"
+  members = [
+    "serviceAccount:${google_service_account.service_account_backend.email}",
+    "serviceAccount:${google_service_account.service_account_gcs.email}",
+  ]
+}
+

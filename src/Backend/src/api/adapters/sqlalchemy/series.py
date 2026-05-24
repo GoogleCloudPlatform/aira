@@ -1,13 +1,16 @@
 import logging
 import uuid
+
 import sqlalchemy as sa
-from sqlalchemy import exc
-from sqlalchemy.ext import asyncio as sqlalchemy_aio
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import exc
+from sqlalchemy.ext import asyncio as sqlalchemy_aio
+
 from api import errors, models, ports, typings
 
 logger = logging.getLogger(__name__)
+
 
 class SeriesRepository(ports.SeriesRepository):
     def __init__(self, session: sqlalchemy_aio.AsyncSession) -> None:
@@ -36,6 +39,7 @@ class SeriesRepository(ports.SeriesRepository):
         result = await self._session.execute(stmt)
         return list(result.scalars().unique())
 
+
 class ListSeries(ports.ListSeries):
     def __init__(self, session_factory: typings.SessionFactory):
         self._session_factory = session_factory
@@ -59,6 +63,7 @@ class ListSeries(ports.ListSeries):
             total_items=result.total,
             page_size=result.size,
         )
+
 
 class GetSeries(ports.GetSeries):
     def __init__(self, session_factory: typings.SessionFactory):

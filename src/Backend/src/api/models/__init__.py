@@ -14,11 +14,12 @@ from .exams import (
 )
 from .groups import Grades, Group, Shifts
 from .locations import City, Country, State
-from .series import Series
-from .shifts import WorkShift
 from .organizations import Organization
 from .roles import Role
+from .series import Series
 from .sessions import Session
+from .shifts import WorkShift
+from .tutorials import Tutorial
 from .users import User, UserGroup, UserOrganization, UserType
 
 __all__ = (
@@ -45,4 +46,5 @@ __all__ = (
     "UserOrganization",
     "UserRating",
     "UserType",
+    "Tutorial",
 )

@@ -19,7 +19,9 @@ class Country(db.Base, db.DefaultColumns):
     code: Mapped[str] = mapped_column(sa.String(5), unique=True)
     is_default: Mapped[bool] = mapped_column(default=False)
 
-    states: Mapped[list["State"]] = relationship("State", back_populates="country", init=False)
+    states: Mapped[list["State"]] = relationship(
+        "State", back_populates="country", init=False
+    )
 
 
 class State(db.Base, db.DefaultColumns):
@@ -36,8 +38,12 @@ class State(db.Base, db.DefaultColumns):
         nullable=False,
     )
 
-    country: Mapped["Country"] = relationship("Country", back_populates="states", init=False)
-    cities: Mapped[list["City"]] = relationship("City", back_populates="state", init=False)
+    country: Mapped["Country"] = relationship(
+        "Country", back_populates="states", init=False
+    )
+    cities: Mapped[list["City"]] = relationship(
+        "City", back_populates="state", init=False
+    )
 
     __table_args__ = (
         sa.UniqueConstraint("name", "country_id", name="uix_state_name_country"),

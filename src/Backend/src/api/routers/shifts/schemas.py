@@ -1,13 +1,17 @@
 import datetime
 import uuid
+
 import pydantic
+
 
 class ShiftBase(pydantic.BaseModel):
     name: str
     code: str
 
+
 class ShiftCreate(ShiftBase):
     pass
+
 
 class ShiftGet(ShiftBase):
     id: uuid.UUID
@@ -16,6 +20,7 @@ class ShiftGet(ShiftBase):
 
     class Config:
         orm_mode = True
+
 
 class ShiftList(pydantic.BaseModel):
     items: list[ShiftGet]

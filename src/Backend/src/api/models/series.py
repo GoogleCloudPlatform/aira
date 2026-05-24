@@ -1,11 +1,14 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
+
 from api import db
+
 
 class Series(db.Base, db.DefaultColumns):
     """
     Series model.
     """
+
     __tablename__ = "series"
 
     name: Mapped[str] = mapped_column(sa.String(50), unique=True, nullable=False)

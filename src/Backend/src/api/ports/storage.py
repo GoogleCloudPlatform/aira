@@ -17,7 +17,9 @@ class Storage(abc.ABC):
         """
 
     @abc.abstractmethod
-    async def upload_by_text(self, path: str, text: bytes) -> str:
+    async def upload_by_text(
+        self, path: str, text: bytes, content_type: str | None = None
+    ) -> str:
         """
         Method that uploads a file by bytes.
         """

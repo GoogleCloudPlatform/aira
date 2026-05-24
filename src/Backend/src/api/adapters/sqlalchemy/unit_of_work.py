@@ -11,7 +11,19 @@ from sqlalchemy.ext import asyncio as sqlalchemy_aio
 from api import db, ports
 from api.typings import SessionFactory
 
-from . import exam, group, location, organization, result, role, series, session_query, user, shifts
+from . import (
+    exam,
+    group,
+    location,
+    organization,
+    result,
+    role,
+    series,
+    session_query,
+    shifts,
+    tutorial,
+    user,
+)
 
 
 class UnitOfWorkBuilder(ports.UnitOfWorkBuilder):
@@ -85,6 +97,9 @@ class UnitOfWork(ports.UnitOfWork):
             session=session,
         )
         self.shift_repository = shifts.WorkShiftRepository(
+            session=session,
+        )
+        self.tutorial_repository = tutorial.TutorialRepository(
             session=session,
         )
 

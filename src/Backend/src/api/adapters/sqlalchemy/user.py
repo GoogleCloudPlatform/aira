@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def _get_grade_mapping_case(exam_grade_col) -> sa.ColumnElement:
     return sa.case(
         {member.name: member.value for member in models.Grades},
-        value=sa.cast(exam_grade_col, sa.String)
+        value=sa.cast(exam_grade_col, sa.String),
     )
 
 
@@ -55,7 +55,9 @@ class UserRepository(ports.UserRepository):
             stmt = stmt.options(
                 orm.joinedload(models.User.groups).joinedload(models.Group.series),
                 orm.joinedload(models.User.groups).joinedload(models.Group.work_shift),
-                orm.joinedload(models.User.groups).joinedload(models.Group.organization),
+                orm.joinedload(models.User.groups).joinedload(
+                    models.Group.organization
+                ),
                 orm.joinedload(models.User.organizations),
             )
         if user_id:
@@ -291,7 +293,7 @@ class ListUsers(ports.ListUsers):
                 orm.joinedload(user.groups).joinedload(models.Group.series),
                 orm.joinedload(user.groups).joinedload(models.Group.work_shift),
                 orm.joinedload(user.groups).joinedload(models.Group.organization),
-                orm.joinedload(user.organizations)
+                orm.joinedload(user.organizations),
             )
             .order_by(user.updated_at.desc())
         )
@@ -515,7 +517,9 @@ class GetUser(ports.GetUser):
                 orm.joinedload(models.User.role),
                 orm.joinedload(models.User.groups).joinedload(models.Group.series),
                 orm.joinedload(models.User.groups).joinedload(models.Group.work_shift),
-                orm.joinedload(models.User.groups).joinedload(models.Group.organization),
+                orm.joinedload(models.User.groups).joinedload(
+                    models.Group.organization
+                ),
                 orm.joinedload(models.User.organizations),
             )
             .where(models.User.id == user_id)
