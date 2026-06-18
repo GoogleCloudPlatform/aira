@@ -58,7 +58,7 @@ fastapi-profiler = "^1.4.1"
 gunicorn = "^23.0.0"
 ddtrace = "^2.20.0"
 chromadb = "^0.6.3"
-pypdf = "^5.4.0"
+pypdf = ">=5.4,<7.0"
 python-multipart = "^0.0.29"
 
 [tool.poetry.group.dev.dependencies]
