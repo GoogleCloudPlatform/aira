@@ -10,12 +10,21 @@ const fallbackLocale = defaultLocale;
  
 // Get the preferred locale
 function getLocale(request : NextRequest) { 
-    const acceptLanguage = request.headers.get('accept-language')?.substring(0,5);
-    let headers = { 'accept-language': acceptLanguage };
-    let languages = new Negotiator({ headers }).languages();
-    let defaultLocale = fallbackLocale;
-    
-    return match(languages, locales, defaultLocale);
+    const acceptLanguage = request.headers.get('accept-language');
+    if (!acceptLanguage) {
+        return fallbackLocale;
+    }
+    try {
+        let headers = { 'accept-language': acceptLanguage.substring(0,5) };
+        let languages = new Negotiator({ headers }).languages();
+        let validLanguages = languages.filter(lang => lang && lang !== '*');
+        if (validLanguages.length === 0) {
+            return fallbackLocale;
+        }
+        return match(validLanguages, locales, fallbackLocale);
+    } catch (error) {
+        return fallbackLocale;
+    }
 }
 
 export default async function middleware(request: NextRequest) {
