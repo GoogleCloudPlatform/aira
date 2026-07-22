@@ -73,7 +73,8 @@
             "go_to_users": "View Users",
             "start_exam": "Start Exam",
             "delete": "Delete",
-            "preview": "Preview"
+            "preview": "Preview",
+            "processing": "Processing..."
         },
         "shifts": {
             "morning": "Morning",

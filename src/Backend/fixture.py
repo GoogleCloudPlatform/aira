@@ -370,7 +370,7 @@ async def main() -> None:
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
-                    os.environ[k] = v
+                    os.environ[k] = v.strip().strip('"').strip("'")
 
     container = create_container()
     uow_builder = container.get(ports.UnitOfWorkBuilder)

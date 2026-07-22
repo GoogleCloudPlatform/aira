@@ -11,6 +11,7 @@ import uuid
 
 import fastapi
 import fastapi_injector
+import sqlalchemy as sa
 from opentelemetry import trace
 
 from api import dependencies, errors, helpers, models, ports, typings
@@ -250,37 +251,76 @@ async def process(
         user_question.total_accuracy = (
             user_question.right_count / len(data.words) if data.words else 0.0
         )
-        question_list = await list_pending(
-            user_question.user_id, user_question.group_id, user_question.exam_id
+        # Acquire row lock on ExamUser to serialize processing for this student's exam
+        stmt_lock = (
+            sa.select(models.ExamUser)
+            .where(models.ExamUser.exam_id == user_question.exam_id)
+            .where(models.ExamUser.user_id == user_question.user_id)
+            .with_for_update()
         )
+        lock_result = await uow._session.execute(stmt_lock)
+        exam_user = lock_result.unique().scalars().one_or_none()
 
-        user_rating = models.UserRating.NO_RATING
+        if not exam_user:
+            logger.warning(
+                "Exam user not found", extra={"result_id": str(data.result_id)}
+            )
+            return fastapi.Response(status_code=200)
 
-        exam_user = await get_exam_user(
-            user_id=user_question.user_id,
-            exam_id=user_question.exam_id,
-            group_id=user_question.group_id,
+        # Query pending questions using UOW's transaction session to see status updates
+        Question = models.Question
+        Euq = models.ExamUserQuestion
+        current_date = helpers.time_now()
+        grade_mapping_case = sa.case(
+            {member.name: member.value for member in models.Grades},
+            value=sa.cast(models.Exam.grade, sa.String),
         )
-        exam_user_merged: models.ExamUser = await uow.merge(exam_user)
-        if len(question_list) == 1:
-            if not exam_user:
-                logger.warning(
-                    "Exam user not found", extra={"result_id": str(data.result_id)}
-                )
-                return fastapi.Response(status_code=200)
+        stmt_pending = (
+            sa.select(Question)
+            .join(models.Exam, models.Exam.id == Question.exam_id)
+            .join(models.Group, models.Group.id == user_question.group_id)
+            .join(
+                models.Series,
+                sa.and_(
+                    models.Series.id == models.Group.series_id,
+                    models.Series.name == grade_mapping_case,
+                ),
+            )
+            .outerjoin(
+                Euq,
+                sa.and_(
+                    Euq.question_id == Question.id,
+                    Euq.user_id == user_question.user_id,
+                    Euq.exam_id == user_question.exam_id,
+                ),
+            )
+            .where(
+                sa.or_(Euq.user_id.is_(None), Euq.status != models.ExamStatus.FINISHED)
+            )
+            .where(Question.exam_id == user_question.exam_id)
+            .where(models.Group.id == user_question.group_id)
+            .where(
+                models.Exam.start_date <= current_date,
+            )
+            .where(models.Exam.end_date > current_date)
+        )
+        pending_result = await uow._session.execute(stmt_pending)
+        question_list = list(pending_result.scalars().unique())
+
+        if len(question_list) == 0:
             if exam_user.status == models.ExamStatus.FINISHED:
                 logger.warning(
                     "Exam is already done and it's running again.",
                     extra={"result_id": str(data.result_id)},
                 )
                 return fastapi.Response(status_code=200)
-            exam_user_merged.status = models.ExamStatus.FINISHED
+            exam_user.status = models.ExamStatus.FINISHED
 
         question = await uow.question_repository.get(user_question.question_id)
         user_rating = calculate_user_rating(
-            user_question, question.type, exam_user_merged.user_rating, data.words
+            user_question, question.type, exam_user.user_rating, data.words
         )
-        exam_user_merged.user_rating = user_rating
+        exam_user.user_rating = user_rating
 
         result_data = UserResult(
             school_uuid=user_question.organization_id,

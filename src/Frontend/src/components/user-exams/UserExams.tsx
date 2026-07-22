@@ -31,6 +31,7 @@ import { SCOPE_ADMIN, SCOPE_USER } from "@/constants/rbac";
 import { CATEGORY_EXAMS, MODE_CREATE, MODE_EDIT, MODE_VIEW } from "@/constants";
 import { getExamsByUserId } from "@/services/user";
 import { LucideFileText } from "lucide-react";
+import { ENUM_EXAM_STATUS_IN_PROGRESS } from "@/constants/enums";
 
 type TUserExams = {
     user_id: string;
@@ -156,16 +157,18 @@ const UserExams : React.FC<TUserExams> = ({ user_id }) => {
             accessorKey: "actions",
             header: t("table.headers.actions"),
             cell: ({ row }) => {
-                const exam = row.original;
+                const exam = row.original as any;
+                const isProcessing = exam.status === ENUM_EXAM_STATUS_IN_PROGRESS;
                 
                 return (
                     <Button
                         variant={"secondary"}
                         className="flex text-xs gap-1"
                         onClick={() => makeExam(exam.id)}
+                        disabled={isProcessing}
                     >
                         <LucideFileText className="w-4 h-4" />
-                        {t('table.buttons.start_exam')}
+                        {isProcessing ? t('table.buttons.processing') : t('table.buttons.start_exam')}
                     </Button>
                 )
             }
