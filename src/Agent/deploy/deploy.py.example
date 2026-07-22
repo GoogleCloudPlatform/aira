@@ -1,0 +1,76 @@
+import os
+import sys
+from google.adk.cli.cli_deploy import to_agent_engine
+
+# Hardcoded production values
+AGENT_DISPLAY_NAME = "<YOUR_AGENT_DISPLAY_NAME>"
+AGENT_IDENTIFIER = "<YOUR_AGENT_IDENTIFIER>"
+PROJECT_ID = "<YOUR_GCP_PROJECT_ID>"
+REGION = "<YOUR_GCP_REGION>"
+GEMINI_API_KEY = "<YOUR_GEMINI_API_KEY>"
+MODEL_VERSION = "<YOUR_MODEL_VERSION>"
+DATABASE_URI = "<YOUR_DATABASE_URI>"
+INSTANCE_CONNECTION_NAME = "<YOUR_INSTANCE_CONNECTION_NAME>"
+BQ_DATASET = "<YOUR_BQ_DATASET>"
+BQ_TABLE_NAME = "<YOUR_BQ_TABLE_NAME>"
+
+def deploy():
+    # Resolve directory paths
+    deploy_dir = os.path.dirname(os.path.abspath(__file__))
+    agent_dir = os.path.dirname(deploy_dir)
+    
+    # Path for temporary production .env file
+    temp_env_path = os.path.join(deploy_dir, ".env.production")
+    
+    # Path for temporary requirements.txt file
+    temp_req_path = os.path.join(agent_dir, "requirements.txt")
+    
+    # Write hardcoded production variables to temporary file
+    env_content = f"""GEMINI_API_KEY="{GEMINI_API_KEY}"
+MODEL_VERSION="{MODEL_VERSION}"
+AGENT_DISPLAY_NAME="{AGENT_DISPLAY_NAME}"
+AGENT_IDENTIFIER="{AGENT_IDENTIFIER}"
+DATABASE_URI="{DATABASE_URI}"
+INSTANCE_CONNECTION_NAME="{INSTANCE_CONNECTION_NAME}"
+GCP_PROJECT_ID="{PROJECT_ID}"
+BQ_DATASET="{BQ_DATASET}"
+BQ_TABLE_NAME="{BQ_TABLE_NAME}"
+GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY="true"
+"""
+    
+    req_content = """google-adk[a2a]>=2.5.0,<3.0.0
+asyncpg>=0.31.0,<0.32.0
+sqlalchemy>=2.0.51,<3.0.0
+google-cloud-bigquery>=3.42.2,<4.0.0
+google-cloud-aiplatform>=1.162.0,<2.0.0
+opentelemetry-exporter-otlp-proto-http<=1.42.1
+cloud-sql-python-connector>=1.20.4
+"""
+    
+    with open(temp_env_path, "w") as f:
+        f.write(env_content)
+        
+    with open(temp_req_path, "w") as f:
+        f.write(req_content)
+        
+    try:
+        print("Starting deployment of agent to Google Cloud Agent Engine...")
+        to_agent_engine(
+            agent_folder=agent_dir,
+            project=PROJECT_ID,
+            region=REGION,
+            display_name=AGENT_DISPLAY_NAME,
+            description="Educational agent for analyzing reading proficiency results in schools and regions.",
+            env_file=temp_env_path,
+            otel_to_cloud=True,
+        )
+        print("Deployment completed successfully!")
+    finally:
+        # Clean up the temporary files
+        if os.path.exists(temp_env_path):
+            os.remove(temp_env_path)
+        if os.path.exists(temp_req_path):
+            os.remove(temp_req_path)
+
+if __name__ == "__main__":
+    deploy()

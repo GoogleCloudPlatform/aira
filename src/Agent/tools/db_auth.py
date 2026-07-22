@@ -1,5 +1,7 @@
 import os
+import asyncio
 import asyncpg
+from google.cloud.sql.connector import Connector
 from dotenv import load_dotenv
 
 # Load .env file from the Agent directory if present
@@ -20,10 +22,45 @@ async def get_user_context(email: str) -> dict | None:
     if not db_uri:
         raise ValueError("DATABASE_URI environment variable is not set")
     
-    # asyncpg requires postgresql:// instead of postgresql+asyncpg://
-    db_uri = db_uri.replace("postgresql+asyncpg://", "postgresql://")
+    instance_connection_name = os.getenv("INSTANCE_CONNECTION_NAME")
+    print(f"[db_auth] Lookup email: '{email}'")
+    print(f"[db_auth] Using instance_connection_name: {instance_connection_name}")
     
-    conn = await asyncpg.connect(db_uri)
+    conn = None
+    connector = None
+    
+    try:
+        if instance_connection_name:
+            from sqlalchemy.engine import make_url
+            
+            # Parse db connection params from db_uri
+            url = make_url(db_uri)
+            db_user = url.username
+            db_pass = url.password
+            db_name = url.database
+            
+            print(f"[db_auth] Connecting to Cloud SQL instance: {instance_connection_name} as user {db_user}...")
+            loop = asyncio.get_running_loop()
+            connector = Connector(loop=loop)
+            conn = await connector.connect_async(
+                instance_connection_name,
+                "asyncpg",
+                user=db_user,
+                password=db_pass,
+                db=db_name
+            )
+        else:
+            # asyncpg requires postgresql:// instead of postgresql+asyncpg://
+            db_uri = db_uri.replace("postgresql+asyncpg://", "postgresql://")
+            print(f"[db_auth] Connecting to direct DB URI...")
+            conn = await asyncpg.connect(db_uri)
+        print("[db_auth] Connection established successfully.")
+    except Exception as connect_err:
+        import traceback
+        print(f"[db_auth] DATABASE CONNECTION FAILED: {connect_err}")
+        traceback.print_exc()
+        raise connect_err
+
     try:
         query = """
         SELECT 
@@ -58,4 +95,7 @@ async def get_user_context(email: str) -> dict | None:
             "allowed_groups": list(row["allowed_groups"]) if row["allowed_groups"] else []
         }
     finally:
-        await conn.close()
+        if conn:
+            await conn.close()
+        if connector:
+            await connector.close_async()

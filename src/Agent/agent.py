@@ -97,7 +97,7 @@ tools = [
 
 # Instantiate LlmAgent
 root_agent = LlmAgent(
-    name="reading_proficiency_agent",
+    name=os.getenv("AGENT_IDENTIFIER", "reading_proficiency_agent"),
     description="Educational agent for analyzing reading proficiency results in schools and regions.",
     instruction=INSTRUCTIONS.strip(),
     model=os.getenv("MODEL_VERSION", "gemini-3.5-flash"),
