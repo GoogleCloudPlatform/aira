@@ -11,3 +11,4 @@ _ORIGIN=*
 src/IAC/backend.tf
 src/IAC/terraform.tfvars
 src/IAC/variables.tf
+.env
