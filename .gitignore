@@ -6,7 +6,7 @@ src/IAC/.terraform/providers/registry.terraform.io/hashicorp/google/7.5.0/darwin
 src/IAC/terraform.tfstate
 src/IAC/terraform.tfstate.backup
 src/Backend/chroma_data/chroma.sqlite3
-src/Backend/aira-demo-eaed8-8f3bfad5df4a.json
+src/Backend/aira-sa-local-access-key.json
 _ORIGIN=*
 src/IAC/backend.tf
 src/IAC/terraform.tfvars

@@ -49,11 +49,16 @@ class SettingsModule(injector.Module):
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
                         k, v = line.split("=", 1)
+                        v = v.strip().strip('"').strip("'")
                         if k.startswith("_"):
                             settings[k[1:].lower()] = v
 
         settings.update(
-            {k[1:].lower(): v for k, v in os.environ.items() if k.startswith("_")}
+            {
+                k[1:].lower(): v.strip().strip('"').strip("'") if isinstance(v, str) else v
+                for k, v in os.environ.items()
+                if k.startswith("_")
+            }
         )
 
         return Settings(settings)
@@ -789,7 +794,7 @@ def create_container(mods: tuple[injector.Module] | None = None) -> injector.Inj
                     if line and not line.startswith("#") and "=" in line:
                         k, v = line.split("=", 1)
                         if k == "_ENV":
-                            env = v
+                            env = v.strip().strip('"').strip("'")
                             break
         except Exception:
             pass

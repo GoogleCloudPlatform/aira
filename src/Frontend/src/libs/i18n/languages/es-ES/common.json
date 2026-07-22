@@ -73,7 +73,8 @@
             "go_to_users": "Ver Usuarios",
             "start_exam": "Iniciar Examen",
             "delete": "Eliminar",
-            "preview": "Vista previa"
+            "preview": "Vista previa",
+            "processing": "Procesando..."
         },
         "shifts": {
             "morning": "Mañana",
