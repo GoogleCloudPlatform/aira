@@ -72,3 +72,32 @@ class GenAI(abc.ABC):
         """
         Method that generates a feedback for the entire exam
         """
+
+    @abc.abstractmethod
+    async def index_document(
+        self, doc_id: str, text: str, metadata: dict[str, typing.Any] | None = None
+    ) -> None:
+        """
+        Index a document (generate embeddings and store vectors in the vector store).
+        """
+
+    @abc.abstractmethod
+    async def delete_document(self, doc_id: str) -> None:
+        """
+        Delete a document and all its chunks from the vector store.
+        """
+
+    @abc.abstractmethod
+    async def query_kb(
+        self, query_text: str, limit: int = 5
+    ) -> list[dict[str, typing.Any]]:
+        """
+        Query the pedagogical knowledge base for recommendations.
+        """
+
+    @abc.abstractmethod
+    async def generate_description(self, text: str) -> str:
+        """
+        Generate a brief description/summary of the given document text.
+        """
+

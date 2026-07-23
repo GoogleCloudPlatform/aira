@@ -1,2 +1,3 @@
 from .db_auth import get_user_context
 from .bq_query import query_reading_proficiency
+from .pedagogical_recommendations import query_pedagogical_recommendations

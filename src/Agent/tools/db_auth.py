@@ -73,6 +73,11 @@ async def get_user_context(email: str) -> dict | None:
                 (SELECT array_agg(uo.organization_id::text) FROM users_organizations uo WHERE uo.user_id = u.id),
                 ARRAY[]::text[]
             ) AS allowed_organizations,
+            -- Subquery to get organization Names
+            COALESCE(
+                (SELECT array_agg(o.name) FROM users_organizations uo JOIN organizations o ON uo.organization_id = o.id WHERE uo.user_id = u.id),
+                ARRAY[]::text[]
+            ) AS allowed_organization_names,
             -- Subquery to get group IDs
             COALESCE(
                 (SELECT array_agg(ug.group_id::text) FROM users_groups ug WHERE ug.user_id = u.id),
@@ -92,6 +97,7 @@ async def get_user_context(email: str) -> dict | None:
             "email_address": row["email_address"],
             "role_name": row["role_name"],
             "allowed_organizations": list(row["allowed_organizations"]) if row["allowed_organizations"] else [],
+            "allowed_organization_names": list(row["allowed_organization_names"]) if row["allowed_organization_names"] else [],
             "allowed_groups": list(row["allowed_groups"]) if row["allowed_groups"] else []
         }
     finally:

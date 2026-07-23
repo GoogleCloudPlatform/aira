@@ -19,6 +19,25 @@ THEMES_DICT = {
 }
 
 
+
+class VertexAIEmbeddingFunction(chromadb.EmbeddingFunction[chromadb.Documents]):
+    def __init__(self, model_name: str = "text-embedding-004"):
+        self.model_name = model_name
+
+    def __call__(self, input: chromadb.Documents) -> chromadb.Embeddings:
+        from vertexai.language_models import TextEmbeddingModel
+        model = TextEmbeddingModel.from_pretrained(self.model_name)
+        
+        # Batch requests to prevent hitting the 20,000 total tokens per request limit.
+        batch_size = 20
+        all_embeddings = []
+        for i in range(0, len(input), batch_size):
+            batch = input[i : i + batch_size]
+            embeddings = model.get_embeddings(batch)
+            all_embeddings.extend([emb.values for emb in embeddings])
+        return all_embeddings
+
+
 class GenerativeAI(ports.GenAI):
     """
     Implementation of google's cloud storage.
@@ -46,18 +65,11 @@ class GenerativeAI(ports.GenAI):
         self.project_id = project_id
         self.location = location
         self.chroma_client = chromadb.PersistentClient(path="./chroma_data")
-        # GoogleVertexEmbeddingFunction requires api_key but uses it as a placeholder
-        # when running in GCP with service account, it will use default credentials
-        import google.auth
-
-        credentials, _ = google.auth.default()
-        self.embedding_function = embedding_functions.GoogleVertexEmbeddingFunction(
-            api_key="",  # Empty string - will use default credentials
-            project_id=project_id,
-            region=location,
-            model_name=self.embedding_model,
+        self.embedding_function = VertexAIEmbeddingFunction(
+            model_name=self.embedding_model
         )
         self.collections = {}
+
 
     def generate_words(
         self,
@@ -539,3 +551,108 @@ O feedback deve ser **claro, objetivo e motivador**, sem formatações HTML ou m
         else:
             results = self.collections[collection_name].get(include=["documents"])
             return results["documents"]
+
+    async def index_document(
+        self, doc_id: str, text: str, metadata: dict[str, typing.Any] | None = None
+    ) -> None:
+        try:
+            collection = self.chroma_client.get_collection(
+                name="pedagogical_kb",
+                embedding_function=self.embedding_function
+            )
+        except Exception:
+            collection = self.chroma_client.create_collection(
+                name="pedagogical_kb",
+                embedding_function=self.embedding_function
+            )
+
+        def chunk_text(t: str, chunk_size: int = 1000, overlap: int = 100) -> list[str]:
+            chunks = []
+            start = 0
+            while start < len(t):
+                end = min(start + chunk_size, len(t))
+                chunks.append(t[start:end])
+                if end == len(t):
+                    break
+                start += chunk_size - overlap
+            return chunks
+
+        chunks = chunk_text(text)
+        if not chunks:
+            return
+
+        documents = chunks
+        ids = [f"{doc_id}_chunk_{i}" for i in range(len(chunks))]
+        base_metadata = metadata or {}
+        metadatas = [
+            {**base_metadata, "doc_id": doc_id, "chunk_index": i}
+            for i in range(len(chunks))
+        ]
+
+        import asyncio
+        await asyncio.to_thread(
+            collection.add,
+            documents=documents,
+            ids=ids,
+            metadatas=metadatas
+        )
+
+    async def delete_document(self, doc_id: str) -> None:
+        try:
+            collection = self.chroma_client.get_collection(
+                name="pedagogical_kb",
+                embedding_function=self.embedding_function
+            )
+            import asyncio
+            await asyncio.to_thread(
+                collection.delete,
+                where={"doc_id": doc_id}
+            )
+        except Exception as e:
+            logger.warning(
+                f"Failed to delete document {doc_id} from Chroma: {str(e)}"
+            )
+
+    async def query_kb(
+        self, query_text: str, limit: int = 5
+    ) -> list[dict[str, typing.Any]]:
+        try:
+            collection = self.chroma_client.get_collection(
+                name="pedagogical_kb",
+                embedding_function=self.embedding_function
+            )
+        except Exception:
+            return []
+
+        import asyncio
+        results = await asyncio.to_thread(
+            collection.query,
+            query_texts=[query_text],
+            n_results=limit
+        )
+
+        output = []
+        if results and "documents" in results and results["documents"]:
+            docs = results["documents"][0]
+            metas = results["metadatas"][0] if "metadatas" in results else [{}] * len(docs)
+            ids = results["ids"][0] if "ids" in results else [""] * len(docs)
+            for doc_uuid, text_chunk, meta in zip(ids, docs, metas):
+                output.append({"id": doc_uuid, "text": text_chunk, "metadata": meta})
+        return output
+
+    async def generate_description(self, text: str) -> str:
+        # If text is empty or very short, return a generic description
+        if not text or len(text.strip()) < 10:
+            return "No content description available."
+
+        query = (
+            "Analyze the following text from a pedagogical material and write a brief, "
+            "concise summary/description (max 3 sentences) in the same language as the text. "
+            "Focus on the main topic and who it is intended for. "
+            "Do not output markdown format or bullet points, just return the plain paragraph.\n\n"
+            f"Text:\n{text[:15000]}"
+        )
+        import asyncio
+        response = await asyncio.to_thread(self.model.generate_content, query)
+        return response.text.strip()
+

@@ -1,6 +1,9 @@
-"""
-Module to startup the server
-"""
+# Apply monkeypatch to bcrypt for passlib compatibility in Python 3.13
+import bcrypt
+if not hasattr(bcrypt, "__about__"):
+    class BcryptAbout:
+        __version__ = bcrypt.__version__
+    bcrypt.__about__ = BcryptAbout()
 
 import alembic.config
 

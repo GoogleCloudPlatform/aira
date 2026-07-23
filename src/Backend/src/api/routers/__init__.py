@@ -15,6 +15,7 @@ from .series.endpoints import router as series_router
 from .shifts.endpoints import router as shifts_router
 from .tutorials.endpoints import router as tutorials_router
 from .users.endpoints import router as users_router
+from .knowledge_base.endpoints import router as knowledge_base_router
 
 __all__ = (
     "auth_router",
@@ -29,6 +30,8 @@ __all__ = (
     "shifts_router",
     "users_router",
     "tutorials_router",
+    "knowledge_base_router",
     "PubsubRequest",
     "PubsubMessage",
 )
+

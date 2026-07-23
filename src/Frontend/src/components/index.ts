@@ -9,6 +9,7 @@ import Countries from "./locations/Countries";
 import States from "./locations/States";
 import Cities from "./locations/Cities";
 import Series from "./series/Series";
+import KnowledgeBase from "./knowledge-base/KnowledgeBase";
 
 export {
     ActionTable,
@@ -21,5 +22,6 @@ export {
     Countries,
     States,
     Cities,
-    Series
+    Series,
+    KnowledgeBase
 }

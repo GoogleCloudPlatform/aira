@@ -10,6 +10,7 @@ import textwrap
 import chromadb
 from chromadb.utils import embedding_functions
 
+import sqlalchemy as sa
 from api import create_container, errors, models, ports
 from api.helpers import time_now
 
@@ -21,6 +22,32 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
     role = await uow.role_repository.get(name="admin")
     role_user = await uow.role_repository.get(name="user")
     role_semi = await uow.role_repository.get(name="professor")
+
+    # Fetch series dynamically
+    res_series = await uow._session.execute(sa.text("SELECT id, name FROM series"))
+    series_map = {row.name: row.id for row in res_series.all()}
+
+    # Fetch shifts dynamically
+    res_shifts = await uow._session.execute(sa.text("SELECT id, name FROM work_shifts"))
+    shifts_map = {row.name: row.id for row in res_shifts.all()}
+
+    def get_series_id(grade_enum):
+        val = grade_enum.value
+        if val in series_map:
+            return series_map[val]
+        if "3ª Série" in val or "3ª" in val:
+            return series_map.get("3º Ano") or list(series_map.values())[0]
+        return list(series_map.values())[0]
+
+    def get_shift_id(shift_str):
+        mapping = {
+            "morning": "Manhã",
+            "evening": "Noite",
+            "afternoon": "Tarde",
+            "allday": "Integral"
+        }
+        name = mapping.get(shift_str, "Manhã")
+        return shifts_map.get(name) or list(shifts_map.values())[0]
     
     senai = models.Organization(
         customer_id=None,
@@ -28,14 +55,13 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="Escola Senai",
         city="DF",
         state="DF",
-        county="Distrito Federal"
     )
     senai_group = models.Group(
         customer_id=None,
         name="Senai 3EM",
         organization_id=senai.id,
-        grade=models.Grades.THIRD_HS,
-        shift="morning",
+        series_id=get_series_id(models.Grades.THIRD_HS),
+        shift_id=get_shift_id("morning"),
     )
 
     org1 = models.Organization(
@@ -44,7 +70,6 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="teste",
         city="teste",
         state="RJ",
-        county="Rio de Janeiro"
     )
     org2 = models.Organization(
         customer_id=None,
@@ -52,21 +77,20 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="teste2",
         city="teste",
         state="RJ",
-        county="Rio de Janeiro"
     )
     group = models.Group(
         customer_id=None,
         name="teste",
         organization_id=org1.id,
-        grade=models.Grades.FIRST_FUND,
-        shift="morning",
+        series_id=get_series_id(models.Grades.FIRST_FUND),
+        shift_id=get_shift_id("morning"),
     )
     group2 = models.Group(
         customer_id=None,
         name="teste2",
         organization_id=org2.id,
-        grade=models.Grades.SECOND_FUND,
-        shift="evening",
+        series_id=get_series_id(models.Grades.SECOND_FUND),
+        shift_id=get_shift_id("evening"),
     )
     test_user1 = models.User(
         external_id=None,
@@ -75,13 +99,10 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="Teste Admin",
         email_address="gustavo@radhark.tech",
         role_id=role.id,
-        groups=[],
-        organizations=[],
-        county=None,
         region=None,
         state=None,
     )
-    test_user1._password = "$2b$12$Vz6ThPIN30KSOl6Q6fOFIeh58fbx1D4YF6Pt9YJQLt3n6JRJv0NNO"
+    test_user1._password = "$2b$12$Kp735KKvJawJxkpAcmb2xO/3dTWi8LLUt1IOR3SWl2x6eThukKmvy"
     test_user2 = models.User(
         external_id=None,
         customer_id=None,
@@ -89,9 +110,6 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="Rodrigo Werneck",
         email_address="werneck@radhark.tech",
         role_id=role.id,
-        groups=[],
-        organizations=[],
-        county=None,
         region=None,
         state=None,
     )
@@ -102,13 +120,12 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="Teste Aluno",
         email_address="aluno@radhark.tech",
         role_id=role_user.id,
-        groups=[senai_group],
-        organizations=[senai],
-        county=None,
         region=None,
         state=None,
     )
-    test_user3._password = "$2b$12$Vz6ThPIN30KSOl6Q6fOFIeh58fbx1D4YF6Pt9YJQLt3n6JRJv0NNO"
+    test_user3.groups.append(senai_group)
+    test_user3.organizations.append(senai)
+    test_user3._password = "$2b$12$Kp735KKvJawJxkpAcmb2xO/3dTWi8LLUt1IOR3SWl2x6eThukKmvy"
     test_user4 = models.User(
         external_id=None,
         customer_id=None,
@@ -116,13 +133,12 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         name="Teste Professor",
         email_address="professor@radhark.tech",
         role_id=role_semi.id,
-        groups=[senai_group],
-        organizations=[senai],
-        county=None,
         region=None,
         state=None,
     )
-    test_user4._password = "$2b$12$Vz6ThPIN30KSOl6Q6fOFIeh58fbx1D4YF6Pt9YJQLt3n6JRJv0NNO"
+    test_user4.groups.append(senai_group)
+    test_user4.organizations.append(senai)
+    test_user4._password = "$2b$12$Kp735KKvJawJxkpAcmb2xO/3dTWi8LLUt1IOR3SWl2x6eThukKmvy"
     exam = models.Exam(
         name="Test Exam",
         questions=[
@@ -169,7 +185,7 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         ],
         start_date=time_now(),
         end_date=time_now() + datetime.timedelta(days=30),
-        grade=group.grade,
+        grade=models.Grades.FIRST_FUND,
     )
     exam_two = models.Exam(
         name="Test Exam 2",
@@ -217,7 +233,7 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         ],
         start_date=time_now(),
         end_date=time_now() + datetime.timedelta(days=4),
-        grade=group.grade,
+        grade=models.Grades.FIRST_FUND,
     )
     exam_three = models.Exam(
         name="Prova completa",
@@ -319,7 +335,7 @@ async def insert_models(uow: ports.UnitOfWork) -> None:
         ],
         start_date=time_now(),
         end_date=time_now() + datetime.timedelta(days=30),
-        grade=senai_group.grade,
+        grade=models.Grades.THIRD_HS,
     )
 
     await uow.organization_repository.create(senai)

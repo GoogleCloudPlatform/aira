@@ -1,0 +1,91 @@
+import base64
+import json
+import time
+import requests
+import sys
+
+# Configuration placeholders - replace with your local setup details
+BASE_URL = "http://localhost:8080/api/v1"
+EMAIL = "YOUR_EMAIL_HERE"
+PASSWORD = "YOUR_PASSWORD_HERE"
+
+def get_token():
+    try:
+        r = requests.post(f"{BASE_URL}/auth/token", json={"email_address": EMAIL, "password": PASSWORD})
+        r.raise_for_status()
+        return r.json()["access_token"]
+    except Exception as e:
+        print(f"Failed to authenticate: {e}")
+        if 'r' in locals():
+            print(f"Response: {r.text}")
+        return None
+
+def poll_and_forward():
+    token = get_token()
+    if not token:
+        print("Could not start due to authentication failure.")
+        sys.exit(1)
+        
+    print(f"Authenticated as {EMAIL}. Starting local Pub/Sub forwarder daemon...")
+    print("Watching for files with status 'uploaded' to trigger processing...")
+    
+    processed_files = set()
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    while True:
+        try:
+            # Poll files
+            r = requests.get(f"{BASE_URL}/admin/knowledge-base/files?page=1&size=100", headers=headers)
+            if r.status_code == 401:
+                # Token expired, refresh token
+                print("Token expired. Re-authenticating...")
+                token = get_token()
+                if token:
+                    headers["Authorization"] = f"Bearer {token}"
+                else:
+                    print("Failed to re-authenticate. Waiting before retry...")
+                    time.sleep(5)
+                continue
+                
+            r.raise_for_status()
+            files = r.json().get("items", [])
+            
+            for file in files:
+                file_id = file.get("id")
+                status = file.get("status")
+                filename = file.get("filename")
+                
+                if status == "uploaded" and file_id not in processed_files:
+                    print(f"\n[Detected Upload] ID: {file_id} | Filename: {filename}")
+                    print(f"Forwarding local Pub/Sub trigger for file_id: {file_id}...")
+                    
+                    # Construct message
+                    data_str = json.dumps({"file_id": file_id})
+                    base64_data = base64.b64encode(data_str.encode("utf-8")).decode("utf-8")
+                    pubsub_payload = {
+                        "message": {
+                            "data": base64_data,
+                            "messageId": "local-daemon-trigger"
+                        },
+                        "subscription": "kb_processing_subs"
+                    }
+                    
+                    # POST webhook
+                    resp = requests.post(f"{BASE_URL}/admin/knowledge-base/process-message", json=pubsub_payload)
+                    if resp.status_code == 200:
+                        print("Processing triggered successfully!")
+                        processed_files.add(file_id)
+                    else:
+                        print(f"Failed to trigger processing: {resp.status_code} - {resp.text}")
+                        
+        except Exception as e:
+            print(f"Error during polling: {e}")
+            
+        time.sleep(2)
+
+if __name__ == "__main__":
+    try:
+        poll_and_forward()
+    except KeyboardInterrupt:
+        print("\nExiting local Pub/Sub forwarder.")

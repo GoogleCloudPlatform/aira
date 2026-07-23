@@ -96,3 +96,48 @@ resource "google_storage_bucket_iam_binding" "backend_files_admin" {
   ]
 }
 
+## Creating GCS Bucket to store knowledge base files ##
+resource "google_storage_bucket" "bucket_kb_files" {
+  name          = "${var.project_id}-aira-kb-files"
+  location      = var.region
+  force_destroy = true
+  project       = var.project_id
+  public_access_prevention = "enforced"
+  storage_class = "STANDARD"
+  uniform_bucket_level_access = true
+  depends_on = [
+    google_project_service.project
+  ]
+
+  cors {
+    origin          = [var.frontend_url]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+
+  cors {
+    origin          = [var.dev_local_url]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+
+  cors {
+    origin          = [var.localhost_url]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+}
+
+## Giving permission for backend SA in bucket_kb_files ##
+resource "google_storage_bucket_iam_binding" "backend_kb_objectAdmin" {
+  bucket = google_storage_bucket.bucket_kb_files.name
+  role   = "roles/storage.objectAdmin"
+  members = [
+    "serviceAccount:${google_service_account.service_account_backend.email}",
+  ]
+}
+
+

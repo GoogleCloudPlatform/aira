@@ -24,9 +24,12 @@ from .adapters.sqlalchemy import (
     shifts,
     unit_of_work,
     user,
+    knowledge_base,
 )
 from .helpers import auth, schemas, session_manager
 from .typings import SessionFactory, Settings
+from .domain.service.knowledge_base_processor import KBProcessorService
+
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +176,40 @@ class SQLAlchemyModule(injector.Module):  # pylint: disable=too-many-public-meth
 
     @injector.provider
     @injector.singleton
+    def provide_list_knowledge_base_files(
+        self, session_factory: SessionFactory
+    ) -> ports.ListKnowledgeBaseFiles:
+        """
+        Provides sqlalchemy list knowledge base files.
+        """
+        return knowledge_base.ListKnowledgeBaseFiles(
+            session_factory=session_factory,
+        )
+
+    @injector.provider
+    @injector.singleton
+    def provide_kb_processor_service(
+        self,
+        uow_builder: ports.UnitOfWorkBuilder,
+        settings: Settings,
+        storage_factory: ports.StorageFactory,
+        gen_ai: ports.GenAI,
+    ) -> KBProcessorService:
+        """
+        Provides the Knowledge Base processor service.
+        """
+        return KBProcessorService(
+            uow_builder=uow_builder,
+            settings=settings,
+            storage_factory=storage_factory,
+            gen_ai=gen_ai,
+        )
+
+
+    @injector.provider
+    @injector.singleton
     def provide_get_org(self, session_factory: SessionFactory) -> ports.GetOrganization:
+
         """
         Provides sqlalchemy list groups.
         """
@@ -570,6 +606,21 @@ class GoogleModule(injector.Module):
 
     @injector.provider
     @injector.singleton
+    def provide_storage_factory(self, settings: Settings) -> ports.StorageFactory:
+        """
+        Provide the Storage Factory.
+        """
+        def _factory(bucket_name: str) -> ports.Storage:
+            return google.CloudStorage(
+                project_id=settings.get("project_id", ""),
+                storage_path=bucket_name,
+                creds_path=settings.get("gcp_storage_credentials", ""),
+            )
+        return _factory
+
+
+    @injector.provider
+    @injector.singleton
     def provide_secret_manager(self, settings: Settings) -> ports.SecretManager:
         """
         Provide the GCP's Secret Manager.
@@ -663,6 +714,21 @@ class InternetlessModule(injector.Module):
             storage_path=settings.get("bucket_path", ""),
             creds_path=settings.get("gcp_storage_credentials", ""),
         )
+
+    @injector.provider
+    @injector.singleton
+    def provide_storage_factory(self, settings: Settings) -> ports.StorageFactory:
+        """
+        Provide the Storage Factory.
+        """
+        def _factory(bucket_name: str) -> ports.Storage:
+            return google.CloudStorage(
+                project_id=settings.get("project_id", ""),
+                storage_path=bucket_name,
+                creds_path=settings.get("gcp_storage_credentials", ""),
+            )
+        return _factory
+
 
     @injector.provider
     @injector.singleton

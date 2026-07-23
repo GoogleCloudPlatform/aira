@@ -55,9 +55,11 @@ from .series import GetSeries, ListSeries, SeriesRepository
 from .session_query import GetSession, SessionRepository
 from .shifts import GetShift, ListShifts, WorkShiftRepository
 from .speech import SpeechToText
-from .storage import Storage
+from .storage import Storage, StorageFactory
 from .tutorial import TutorialRepository
+from .knowledge_base import KnowledgeBaseRepository, ListKnowledgeBaseFiles
 from .unit_of_work import UnitOfWork, UnitOfWorkBuilder
+
 from .user import (
     CheckUserOnGroup,
     GetUser,
@@ -117,6 +119,8 @@ __all__ = (
     "SpeechToText",
     "StateRepository",
     "Storage",
+    "StorageFactory",
+
     "SecretManager",
     "Secrets",
     "UnitOfWork",
@@ -132,4 +136,7 @@ __all__ = (
     "GetShift",
     "WorkShiftRepository",
     "TutorialRepository",
+    "KnowledgeBaseRepository",
+    "ListKnowledgeBaseFiles",
 )
+
