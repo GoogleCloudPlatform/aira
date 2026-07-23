@@ -56,8 +56,9 @@ const ExamResult : React.FC<TExamResult> = ({ exam_id, user_id }) => {
         return percentage;
     }
     
-    if (!mounted || !data || !exam_id || !user_id) return null;
+    if (!mounted) return null;
     if (isLoading) return <Loading style="vertical" text={true}/>;
+    if (!data || !exam_id || !user_id) return null;
 
     const proficiency = data.questions.find(question => question.type === QuestionType.Words);
 
