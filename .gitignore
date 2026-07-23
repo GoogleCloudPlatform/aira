@@ -28,3 +28,11 @@ src/Backend/test.pdf
 
 # Local pubsub helper daemon
 local_pubsub_forwarder.py
+
+# OS metadata
+.DS_Store
+**/.DS_Store
+
+# Local Agent Development Kit Databases
+src/Agent/.adk/
+*.db
