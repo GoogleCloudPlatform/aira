@@ -68,6 +68,8 @@ async def query_reading_proficiency(
     if not tool_context:
         return {"success": False, "error": "System execution error: tool_context is missing"}
     
+    print(f"[bq_query] query_reading_proficiency called with school_name='{school_name}', class_name='{class_name}', exam_name='{exam_name}', role='{tool_context.state.get('role_name')}'")
+    
     # Retrieve security scopes from session state
     session_state = tool_context.state
     email = session_state.get("user_email")
@@ -107,25 +109,25 @@ async def query_reading_proficiency(
 
     # Add dynamic user filters
     if school_name:
-        conditions.append("school_name = @school_name_param")
+        conditions.append("TRIM(LOWER(school_name)) = TRIM(LOWER(@school_name_param))")
         query_params.append(bigquery.ScalarQueryParameter("school_name_param", "STRING", school_name))
     if school_city:
-        conditions.append("school_city = @school_city_param")
+        conditions.append("TRIM(LOWER(school_city)) = TRIM(LOWER(@school_city_param))")
         query_params.append(bigquery.ScalarQueryParameter("school_city_param", "STRING", school_city))
     if school_state:
-        conditions.append("school_state = @school_state_param")
+        conditions.append("TRIM(LOWER(school_state)) = TRIM(LOWER(@school_state_param))")
         query_params.append(bigquery.ScalarQueryParameter("school_state_param", "STRING", school_state))
     if school_region:
-        conditions.append("school_region = @school_region_param")
+        conditions.append("TRIM(LOWER(school_region)) = TRIM(LOWER(@school_region_param))")
         query_params.append(bigquery.ScalarQueryParameter("school_region_param", "STRING", school_region))
     if class_name:
-        conditions.append("class_name = @class_name_param")
+        conditions.append("TRIM(LOWER(class_name)) = TRIM(LOWER(@class_name_param))")
         query_params.append(bigquery.ScalarQueryParameter("class_name_param", "STRING", class_name))
     if class_grade:
-        conditions.append("class_grade = @class_grade_param")
+        conditions.append("TRIM(LOWER(class_grade)) = TRIM(LOWER(@class_grade_param))")
         query_params.append(bigquery.ScalarQueryParameter("class_grade_param", "STRING", class_grade))
     if exam_name:
-        conditions.append("exam_name = @exam_name_param")
+        conditions.append("TRIM(LOWER(exam_name)) = TRIM(LOWER(@exam_name_param))")
         query_params.append(bigquery.ScalarQueryParameter("exam_name_param", "STRING", exam_name))
         
     if exam_start_date:
@@ -165,6 +167,7 @@ async def query_reading_proficiency(
     LIMIT 200;
     """
 
+    print(f"[bq_query] Running query:\n{query}")
     try:
         client = get_bq_client()
         job_config = bigquery.QueryJobConfig(query_parameters=query_params)
@@ -182,10 +185,12 @@ async def query_reading_proficiency(
                 record["exam_end_date"] = record["exam_end_date"].isoformat()
             records.append(record)
 
+        print(f"[bq_query] Query succeeded. Returned {len(records)} records.")
         return {
             "success": True,
             "records": records,
             "count": len(records)
         }
     except Exception as e:
+        print(f"[bq_query] FAILED: {str(e)}")
         return {"success": False, "error": f"Failed to execute BigQuery query: {str(e)}"}
