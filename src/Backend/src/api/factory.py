@@ -66,6 +66,8 @@ def create_app(container: injector.Injector) -> fastapi.FastAPI:
     app.include_router(routers.series_router, prefix="/api/v1/series")
     app.include_router(routers.shifts_router, prefix="/api/v1/shifts")
     app.include_router(routers.tutorials_router, prefix="/api/v1/tutorials")
+    app.include_router(routers.knowledge_base_router, prefix="/api/v1/admin/knowledge-base")
+
 
     app.add_exception_handler(
         errors.BaseError,

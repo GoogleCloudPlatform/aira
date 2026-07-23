@@ -139,6 +139,14 @@ const Menu: React.FC = () => {
                     route: '/admin/exams',
                     order: 10,
                 },
+                {
+                    name: 'knowledge_base',
+                    icon: ICON_BOOK_OPEN,
+                    label: 'knowledge_base',
+                    render: hasScopePermission([SCOPE_ADMIN]),
+                    route: '/admin/knowledge-base',
+                    order: 11,
+                },
             ],
             open: pathname.includes('admin'),
         },
@@ -230,10 +238,10 @@ const Menu: React.FC = () => {
                         return {
                             ...item,
                             items: item.items?.map(subItem => {
-                                if (subItem.name === 'educator' && educatorRes.data?.url) {
+                                if (subItem.name === 'educator' && educatorRes?.data?.url) {
                                     return { ...subItem, route: educatorRes.data.url };
                                 }
-                                if (subItem.name === 'admin' && adminRes.data?.url) {
+                                if (subItem.name === 'admin' && adminRes?.data?.url) {
                                     return { ...subItem, route: adminRes.data.url };
                                 }
                                 return subItem;

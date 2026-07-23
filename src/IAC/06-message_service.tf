@@ -62,3 +62,34 @@ resource "google_pubsub_subscription" "conversion_queue" {
     }
   }
 }
+
+// Create a Pub/Sub topic for kb_processing.
+
+resource "google_pubsub_topic" "kb_processing" {
+  project = var.project_id
+  name     = "kb_processing_topic"
+  provider = google-beta
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+resource "google_pubsub_subscription" "kb_processing" {
+  name  = "kb_processing_subs"
+  project = var.project_id
+  topic = google_pubsub_topic.kb_processing.name
+
+  ack_deadline_seconds = 600
+
+  expiration_policy {
+    ttl = ""
+  }
+
+  push_config {
+    push_endpoint = "${var.backend_url}/api/v1/admin/knowledge-base/process-message" 
+
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
+}

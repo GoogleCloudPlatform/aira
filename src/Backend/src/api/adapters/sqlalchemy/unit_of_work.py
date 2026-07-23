@@ -23,6 +23,7 @@ from . import (
     shifts,
     tutorial,
     user,
+    knowledge_base,
 )
 
 
@@ -102,6 +103,10 @@ class UnitOfWork(ports.UnitOfWork):
         self.tutorial_repository = tutorial.TutorialRepository(
             session=session,
         )
+        self.knowledge_base_repository = knowledge_base.KnowledgeBaseRepository(
+            session=session,
+        )
+
 
     async def close(self) -> None:
         if not self.closed:

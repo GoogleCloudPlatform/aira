@@ -111,7 +111,7 @@ resource "google_project_iam_member" "service_account_frontend_role" {
 resource "google_project_iam_member" "service_account_gcs" {
   project = var.project_id
   provider = google-beta
-  for_each = toset(["roles/iam.serviceAccountTokenCreator"])
+  for_each = toset(["roles/iam.serviceAccountTokenCreator", "roles/aiplatform.user"])
   role    = each.key
   member  = "serviceAccount:${google_service_account.service_account_gcs.email}"
   depends_on = [

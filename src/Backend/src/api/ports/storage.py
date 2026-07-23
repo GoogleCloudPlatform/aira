@@ -49,3 +49,16 @@ class Storage(abc.ABC):
         """
         Method to get blob size.
         """
+
+
+class StorageFactory(abc.ABC):
+    """
+    Factory port to construct Storage adapters with dynamic paths/buckets.
+    """
+
+    @abc.abstractmethod
+    def __call__(self, bucket_name: str) -> Storage:
+        """
+        Create a Storage port instance for the specified bucket.
+        """
+

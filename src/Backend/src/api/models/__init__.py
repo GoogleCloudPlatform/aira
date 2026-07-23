@@ -21,6 +21,7 @@ from .sessions import Session
 from .shifts import WorkShift
 from .tutorials import Tutorial
 from .users import User, UserGroup, UserOrganization, UserType
+from .knowledge_base import KnowledgeBaseFile
 
 __all__ = (
     "City",
@@ -47,4 +48,6 @@ __all__ = (
     "UserRating",
     "UserType",
     "Tutorial",
+    "KnowledgeBaseFile",
 )
+

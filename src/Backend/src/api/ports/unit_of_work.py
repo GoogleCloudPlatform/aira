@@ -25,6 +25,7 @@ from . import (
     shifts,
     tutorial,
     user,
+    knowledge_base,
 )
 
 
@@ -69,6 +70,8 @@ class UnitOfWork(abc.ABC):
     series_repository: series.SeriesRepository
     shift_repository: shifts.WorkShiftRepository
     tutorial_repository: tutorial.TutorialRepository
+    knowledge_base_repository: knowledge_base.KnowledgeBaseRepository
+
     closed: bool
     _session: sqlalchemy_aio.AsyncSession
     committed: bool
