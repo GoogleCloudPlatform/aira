@@ -4,7 +4,9 @@ import uuid
 
 import pytest
 import sqlalchemy as sa
-from api import models
+from api import errors, models
+from api.helpers import util
+from api.routers.users import schemas as user_schemas
 from api.typings import SessionFactory
 from httpx import AsyncClient
 
@@ -188,3 +190,10 @@ async def test_admin_create_user_preserves_validation_and_uniqueness(
     )
     assert duplicate_resp.status_code == 409
     assert duplicate_resp.json()["code"] == "already_exists"
+
+
+def test_dead_signup_symbols_removed_from_backend() -> None:
+    assert not hasattr(user_schemas, "SignupUserCreate")
+    assert not hasattr(errors, "UserAlreadyExists")
+    assert not hasattr(errors, "InvalidEmail")
+    assert not hasattr(util, "validate_email")
