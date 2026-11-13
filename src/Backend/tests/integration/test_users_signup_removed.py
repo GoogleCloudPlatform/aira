@@ -1,4 +1,4 @@
-"""Characterization and regression tests for user signup and check_email endpoints."""
+"""Regression tests verifying removal of public signup and check_email endpoints."""
 
 import uuid
 
@@ -7,80 +7,6 @@ import sqlalchemy as sa
 from api import models
 from api.typings import SessionFactory
 from httpx import AsyncClient
-
-
-async def _ensure_signup_seed_data(session_factory: SessionFactory) -> None:
-    """Ensure default role, organization, and group required by legacy /signup exist."""
-    async with session_factory() as session:
-        series = (
-            await session.execute(
-                sa.select(models.Series).where(models.Series.name == "3º Ano")
-            )
-        ).scalar_one_or_none()
-        if series is None:
-            series = models.Series(name="3º Ano", code="3EM")
-            session.add(series)
-            await session.flush()
-
-        shift = (
-            await session.execute(
-                sa.select(models.WorkShift).where(models.WorkShift.code == "morning")
-            )
-        ).scalar_one_or_none()
-        if shift is None:
-            shift = models.WorkShift(name="Manhã", code="morning")
-            session.add(shift)
-            await session.flush()
-
-        org = (
-            await session.execute(
-                sa.select(models.Organization).where(
-                    models.Organization.name == "Escola Senai"
-                )
-            )
-        ).scalar_one_or_none()
-        if org is None:
-            org = models.Organization(
-                name="Escola Senai",
-                city="DF",
-                state="DF",
-                customer_id=None,
-                region="DF",
-            )
-            session.add(org)
-            await session.flush()
-
-        group = (
-            await session.execute(
-                sa.select(models.Group).where(models.Group.name == "Senai 3EM")
-            )
-        ).scalar_one_or_none()
-        if group is None:
-            group = models.Group(
-                name="Senai 3EM",
-                customer_id=None,
-                organization_id=org.id,
-                series_id=series.id,
-                shift_id=shift.id,
-            )
-            session.add(group)
-            await session.flush()
-
-        role = (
-            await session.execute(
-                sa.select(models.Role).where(models.Role.name == "user")
-            )
-        ).scalar_one_or_none()
-        if role is None:
-            role = models.Role(
-                name="user",
-                display_name={"en-US": "Student"},
-                description={"en-US": "Student"},
-                scopes=["user"],
-            )
-            session.add(role)
-
-        await session.commit()
 
 
 async def _create_admin_role(session_factory: SessionFactory) -> models.Role:
@@ -98,56 +24,36 @@ async def _create_admin_role(session_factory: SessionFactory) -> models.Role:
 
 
 @pytest.mark.asyncio
-async def test_characterize_signup_endpoint_current_behavior(
+async def test_signup_endpoint_removed(
     unauthenticated_client: AsyncClient,
     session_factory: SessionFactory,
 ) -> None:
-    await _ensure_signup_seed_data(session_factory)
-    target_email = f"signup-{uuid.uuid4()}@example.com"
+    target_email = f"attacker-{uuid.uuid4()}@example.com"
 
-    create_resp = await unauthenticated_client.post(
+    response = await unauthenticated_client.post(
         "/api/v1/users/signup",
         json={
-            "name": "Self Signup User",
+            "name": "Attacker",
             "email_address": target_email,
             "password": "Password123!",
             "type": "password",
         },
     )
-    assert create_resp.status_code == 200
-    payload = create_resp.json()
-    assert payload["email_address"] == target_email
-    assert payload["role"]["display_name"] == {"en-US": "Student"}
-    assert [org["name"] for org in payload["organizations"]] == ["Escola Senai"]
-    assert [grp["name"] for grp in payload["groups"]] == ["Senai 3EM"]
+    assert response.status_code == 405
+    assert response.headers["allow"] == "GET"
+    assert response.json() == {"detail": "Method Not Allowed"}
 
-    duplicate_resp = await unauthenticated_client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": "Duplicate Signup User",
-            "email_address": target_email,
-            "password": "Password123!",
-            "type": "password",
-        },
-    )
-    assert duplicate_resp.status_code == 409
-    assert duplicate_resp.json()["code"] == "user_already_exists"
-
-    invalid_resp = await unauthenticated_client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": "Invalid Email User",
-            "email_address": "not-an-email",
-            "password": "Password123!",
-            "type": "password",
-        },
-    )
-    assert invalid_resp.status_code == 400
-    assert invalid_resp.json()["code"] == "invalid_email"
+    async with session_factory() as session:
+        persisted = (
+            await session.execute(
+                sa.select(models.User).where(models.User.email_address == target_email)
+            )
+        ).scalar_one_or_none()
+    assert persisted is None
 
 
 @pytest.mark.asyncio
-async def test_characterize_check_email_endpoint_current_behavior(
+async def test_check_email_endpoint_removed_no_enumeration(
     unauthenticated_client: AsyncClient,
     session_factory: SessionFactory,
 ) -> None:
@@ -170,28 +76,34 @@ async def test_characterize_check_email_endpoint_current_behavior(
         )
         await session.commit()
 
-    unknown_resp = await unauthenticated_client.get(
-        f"/api/v1/users/check_email/{unknown_email}"
-    )
-    assert unknown_resp.status_code == 200
-
     existing_resp = await unauthenticated_client.get(
         f"/api/v1/users/check_email/{existing_email}"
     )
-    assert existing_resp.status_code == 409
-    assert existing_resp.json()["code"] == "user_already_exists"
+    unknown_resp = await unauthenticated_client.get(
+        f"/api/v1/users/check_email/{unknown_email}"
+    )
+    assert existing_resp.status_code == 404
+    assert unknown_resp.status_code == 404
+    assert existing_resp.json() == {"detail": "Not Found"}
+    assert unknown_resp.json() == {"detail": "Not Found"}
+
+    exams_collision_resp = await unauthenticated_client.get(
+        "/api/v1/users/check_email/exams"
+    )
+    assert exams_collision_resp.status_code == 403
+    assert exams_collision_resp.json() == {"detail": "Not authenticated"}
 
 
 @pytest.mark.asyncio
-async def test_characterize_openapi_currently_exposes_signup_routes(
+async def test_openapi_excludes_removed_signup_routes_and_schema(
     unauthenticated_client: AsyncClient,
 ) -> None:
     resp = await unauthenticated_client.get("/openapi.json")
     assert resp.status_code == 200
     spec = resp.json()
-    assert "/api/v1/users/signup" in spec["paths"]
-    assert "/api/v1/users/check_email/{user_email}" in spec["paths"]
-    assert "SignupUserCreate" in spec["components"]["schemas"]
+    assert "/api/v1/users/signup" not in spec["paths"]
+    assert "/api/v1/users/check_email/{user_email}" not in spec["paths"]
+    assert "SignupUserCreate" not in spec.get("components", {}).get("schemas", {})
 
 
 @pytest.mark.asyncio

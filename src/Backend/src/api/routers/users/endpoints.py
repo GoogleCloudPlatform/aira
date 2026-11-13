@@ -15,7 +15,7 @@ import fastapi_injector
 from passlib import context
 
 from api import dependencies, errors, models, ports, typings
-from api.helpers import auth, data, util
+from api.helpers import auth, data
 from api.helpers import session_manager as sess_mg
 from api.helpers.schemas import AnalyticalResult as UserResult
 from api.helpers.schemas import ImportData, ListSchema
@@ -342,85 +342,6 @@ async def create(
         await uow.commit()
 
     return schemas.UserGet.from_orm(user_model)
-
-
-@router.post("/signup")
-async def signup(
-    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
-        ports.UnitOfWorkBuilder
-    ),
-    body: schemas.SignupUserCreate = fastapi.Body(...),
-    list_groups: ports.ListGroupsWithoutOrg = fastapi_injector.Injected(
-        ports.ListGroupsWithoutOrg
-    ),
-    list_organizations: ports.ListOrganizations = fastapi_injector.Injected(
-        ports.ListOrganizations
-    ),
-    hash_ctx: context.CryptContext = fastapi_injector.Injected(context.CryptContext),
-) -> schemas.UserGet:
-    """
-    Create user.
-
-    Handles requests related to creating a specific user.
-
-    :param uow_builder: implementation user get query.
-    :param body: parsed data for user creation.
-    """
-    async with uow_builder() as uow:
-        try:
-            await uow.user_repository.get(email=body.email_address)
-            raise errors.UserAlreadyExists()
-        except errors.NotFound as err:
-            if not util.validate_email(body.email_address):
-                raise errors.InvalidEmail() from err
-        groups = await list_groups(
-            name="Senai 3EM",
-        )
-        orgs, _ = await list_organizations(name="Escola Senai")
-
-        # Merge groups and organizations into the active UoW session
-        groups = [await uow.merge(g) for g in groups]
-        orgs = [await uow.merge(o) for o in orgs]
-
-        role = await uow.role_repository.get(name="user")
-        user_dict = {
-            "external_id": None,
-            "customer_id": None,
-            "role_id": role.id,
-            "state": None,
-            "region": None,
-            "groups": [group.id for group in groups],
-            "organizations": [org.id for org in orgs],
-            **body.dict(),
-        }
-        logger.info(f"\n\n{user_dict}\n\n")
-        user_model = await crud.create_user(
-            body_dict=user_dict,
-            role=role,
-            hash_ctx=hash_ctx,
-            groups=groups,
-            organizations=orgs,
-        )
-        await uow.user_repository.create(user_model)
-        await uow.commit()
-
-    return schemas.UserGet.from_orm(user_model)
-
-
-@router.get("/check_email/{user_email}")
-async def delete(
-    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
-        ports.UnitOfWorkBuilder
-    ),
-    user_email: str = fastapi.Path(...),
-) -> fastapi.Response:
-    async with uow_builder() as uow:
-        try:
-            await uow.user_repository.get(email=user_email)
-            raise errors.UserAlreadyExists()
-        except errors.NotFound:
-            pass
-    return fastapi.Response(status_code=fastapi.status.HTTP_200_OK)
 
 
 @router.delete(
