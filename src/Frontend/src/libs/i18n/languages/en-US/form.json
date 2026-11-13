@@ -9,19 +9,7 @@
             "button_sign_in": "Sign In",
             "forgot_password": "Forgot Password",
             "reset_password": "Password Recovery",
-            "button_reset_password": "Recover Password",
-            "create_account": "Don't have an account? Sign up for free"
-        },
-        "signup": {
-            "register": "Sign Up",
-            "name": "Name",
-            "email_address": "Email",
-            "password": "Password",
-            "confirm_password": "Confirm Password",
-            "button_google_sign_up": "Sign up with Google",
-            "button_cni_sign_up": "Sign up with my CNI account",
-            "button_sign_up": "Sign Up",
-            "already_have_account": "Already have an account? Sign In"
+            "button_reset_password": "Recover Password"
         },
         "organization": {
             "list_title": "Schools",

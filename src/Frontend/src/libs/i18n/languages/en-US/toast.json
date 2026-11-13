@@ -6,8 +6,7 @@
         },
         "auth": {
           "reset_password_email_sent": "Password recovery email successfully sent",
-          "success_reset_password": "Password successfully reset",
-          "success_signup": "Signup completed successfully"
+          "success_reset_password": "Password successfully reset"
         },
         "form": {
           "exam_created": "Exam successfully created",
@@ -65,7 +64,6 @@
           "reset_password_email_sent_error": "An error occurred while sending the password recovery email. Please try again",
           "failed_reset_password": "An error occurred while resetting the password. Please try again",
           "error_missing_reset_token": "Password reset token not found",
-          "signup_user_error": "An error occurred while creating your account. Please try again",
           "email_already_registered": "User already registered.",
           "user_not_registered": "User not found."
         },
