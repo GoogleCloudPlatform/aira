@@ -9,19 +9,7 @@
             "button_sign_in": "Iniciar sesión",
             "forgot_password": "Olvidé mi contraseña",
             "reset_password": "Recuperación de contraseña",
-            "button_reset_password": "Recuperar contraseña",
-            "create_account": "¿No tienes una cuenta? Regístrate gratis"
-        },
-        "signup": {
-            "register": "Registrarse",
-            "name": "Nombre",
-            "email_address": "Correo electrónico",
-            "password": "Contraseña",
-            "confirm_password": "Confirmar contraseña",
-            "button_google_sign_up": "Registrarse con Google",
-            "button_cni_sign_up": "Registrarse con mi cuenta CNI",
-            "button_sign_up": "Registrarse",
-            "already_have_account": "¿Ya tienes una cuenta? Inicia sesión"
+            "button_reset_password": "Recuperar contraseña"
         },
         "organization": {
             "list_title": "Escuelas",

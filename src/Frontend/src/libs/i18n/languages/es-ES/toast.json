@@ -6,8 +6,7 @@
         },
         "auth": {
           "reset_password_email_sent": "Correo de recuperación de contraseña enviado con éxito",
-          "success_reset_password": "Contraseña restablecida con éxito",
-          "success_signup": "Registro completado con éxito"
+          "success_reset_password": "Contraseña restablecida con éxito"
         },
         "form": {
           "exam_created": "Evaluación creada con éxito",
@@ -65,7 +64,6 @@
           "reset_password_email_sent_error": "Ocurrió un error al enviar el correo de recuperación de contraseña. Por favor, inténtelo de nuevo",
           "failed_reset_password": "Ocurrió un error al restablecer la contraseña. Por favor, inténtelo de nuevo",
           "error_missing_reset_token": "Token de restablecimiento de contraseña no encontrado",
-          "signup_user_error": "Ocurrió un error al registrar su cuenta. Por favor, inténtelo de nuevo",
           "email_already_registered": "Usuario ya registrado.",
           "user_not_registered": "Usuario no encontrado."
         },

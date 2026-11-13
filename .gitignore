@@ -36,3 +36,4 @@ local_pubsub_forwarder.py
 # Local Agent Development Kit Databases
 src/Agent/.adk/
 *.db
+src/Backend/.coverage

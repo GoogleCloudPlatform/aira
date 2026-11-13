@@ -9,19 +9,7 @@
             "button_sign_in": "Entrar",
             "forgot_password": "Esqueci a senha",
             "reset_password": "Recuperação de senha",
-            "button_reset_password": "Recuperar senha",
-            "create_account": "Não possui uma conta? Cadastre-se gratuitamente"
-        },
-        "signup": {
-            "register": "Cadastre-se",
-            "name": "Nome",
-            "email_address": "E-mail",
-            "password": "Senha",
-            "confirm_password": "Confirmação de senha",
-            "button_google_sign_up": "Cadastrar com o Google",
-            "button_cni_sign_up": "Cadastrar com a minha conta CNI",
-            "button_sign_up": "Cadastrar",
-            "already_have_account": "Já possui uma conta? Entre"
+            "button_reset_password": "Recuperar senha"
         },
         "organization": {
             "list_title": "Escolas",

@@ -1,4 +1,5 @@
 import asyncio
+import collections.abc
 import datetime
 import os
 import pytest
@@ -8,13 +9,15 @@ from sqlalchemy.ext import asyncio as sqlalchemy_aio
 import injector
 import fastapi
 import typing
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
+from passlib import context
 
 
 # Set test environment variable before imports
 os.environ["_ENV"] = "local"
 
 from api import db, ports, factory, typings, models
+from api.adapters import memory  # noqa: E402
 from api.typings import SessionFactory, Settings
 from api.helpers import auth
 from api.helpers.schemas import TokenData
@@ -227,6 +230,28 @@ def mock_gen_ai():
     return MockGenAI()
 
 
+_TEST_SECRET_MANAGER = memory.SecretManager()
+_TEST_EXTERNAL_AUTH = memory.ExternalAuth()
+
+
+class TestAuthAndHashingModule(injector.Module):
+
+    @injector.provider
+    @injector.singleton
+    def provide_secret_manager(self) -> ports.SecretManager:
+        return _TEST_SECRET_MANAGER
+
+    @injector.provider
+    @injector.singleton
+    def provide_external_auth(self) -> ports.ExternalAuth:
+        return _TEST_EXTERNAL_AUTH
+
+    @injector.multiprovider
+    @injector.singleton
+    def provide_hashing_context(self) -> context.CryptContext:
+        return context.CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 @pytest_asyncio.fixture
 async def test_app(db_engine, mock_publisher, mock_gen_ai):
     # Setup dependencies injection container with in-memory database
@@ -256,6 +281,7 @@ async def test_app(db_engine, mock_publisher, mock_gen_ai):
 
     modules = (
         TestSettingsModule(),
+        TestAuthAndHashingModule(),
         TestSQLAlchemyModule(db_engine),
         SQLAlchemyModule(),
         SyncModule(),
@@ -293,3 +319,19 @@ async def client(test_app):
         yield async_client
 
     test_app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def unauthenticated_client(
+    test_app: fastapi.FastAPI,
+) -> collections.abc.AsyncIterator[AsyncClient]:
+    saved_overrides = dict(test_app.dependency_overrides)
+    test_app.dependency_overrides.clear()
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=test_app),
+            base_url="http://testserver",
+        ) as async_client:
+            yield async_client
+    finally:
+        test_app.dependency_overrides.update(saved_overrides)
