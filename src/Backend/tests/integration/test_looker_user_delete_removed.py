@@ -10,6 +10,7 @@ import urllib.parse
 import uuid
 
 import pytest
+import sqlalchemy as sa
 from api import models, ports
 from api.adapters.google import looker
 from api.routers import schemas as router_schemas
@@ -20,6 +21,15 @@ from passlib import context
 
 if typing.TYPE_CHECKING:
     from tests.conftest import MockMessagePublisher
+
+
+def _clear_lookersdk_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for env_key in (
+        "LOOKERSDK_BASE_URL",
+        "LOOKERSDK_CLIENT_ID",
+        "LOOKERSDK_CLIENT_SECRET",
+    ):
+        monkeypatch.delenv(env_key, raising=False)
 
 
 async def _create_viewer_role(session_factory: SessionFactory) -> models.Role:
@@ -41,23 +51,19 @@ async def test_looker_delete_handle_endpoint_removed(
     unauthenticated_client: AsyncClient,
 ) -> None:
     encoded = base64.b64encode(b'{"user_id": "1"}').decode("utf-8")
+    envelope = {
+        "message": {"data": encoded, "messageId": "1"},
+        "subscription": "projects/test/subscriptions/sub",
+    }
 
-    valid_resp = await unauthenticated_client.post(
-        "/api/v1/auth/user/looker/_handle",
-        json={
-            "message": {"data": encoded, "messageId": "1"},
-            "subscription": "projects/test/subscriptions/sub",
-        },
-    )
-    assert valid_resp.status_code == 404
-    assert valid_resp.json() == {"detail": "Not Found"}
-
-    minimal_resp = await unauthenticated_client.post(
-        "/api/v1/auth/user/looker/_handle",
-        json={"message": {"data": encoded}},
-    )
-    assert minimal_resp.status_code == 404
-    assert minimal_resp.json() == {"detail": "Not Found"}
+    for path, body in (
+        ("/api/v1/auth/user/looker/_handle", envelope),
+        ("/api/v1/auth/user/looker/_handle", {"message": {"data": encoded}}),
+        ("/api/v1/auth/user/looker/_handle/", envelope),
+    ):
+        resp = await unauthenticated_client.post(path, json=body)
+        assert resp.status_code == 404
+        assert resp.json() == {"detail": "Not Found"}
 
     for method in ("GET", "DELETE"):
         resp = await unauthenticated_client.request(
@@ -72,21 +78,18 @@ async def test_looker_list_users_scheduler_endpoint_removed(
     unauthenticated_client: AsyncClient,
     mock_publisher: "MockMessagePublisher",
 ) -> None:
-    unauth_resp = await unauthenticated_client.get("/api/v1/auth/users/looker")
-    assert unauth_resp.status_code == 404
-    assert unauth_resp.json() == {"detail": "Not Found"}
-
-    sched_resp = await unauthenticated_client.get(
-        "/api/v1/auth/users/looker",
-        headers={"Authorization": "Bearer fake-scheduler-oidc-token"},
-    )
-    assert sched_resp.status_code == 404
-    assert sched_resp.json() == {"detail": "Not Found"}
+    for path, headers in (
+        ("/api/v1/auth/users/looker", None),
+        ("/api/v1/auth/users/looker", {"Authorization": "Bearer fake-oidc-token"}),
+        ("/api/v1/auth/users/looker/", None),
+    ):
+        resp = await unauthenticated_client.get(path, headers=headers)
+        assert resp.status_code == 404
+        assert resp.json() == {"detail": "Not Found"}
 
     post_resp = await unauthenticated_client.post("/api/v1/auth/users/looker")
     assert post_resp.status_code == 404
     assert post_resp.json() == {"detail": "Not Found"}
-
     assert mock_publisher.published == []
 
 
@@ -108,7 +111,9 @@ async def test_openapi_excludes_removed_looker_routes_and_schemas(
         "/api/v1/auth/reset",
     ):
         assert retained_path in paths
+        assert "PubsubRequest" not in json.dumps(paths[retained_path])
 
+    # Remaining PubsubRequest routes (processor & KB) set include_in_schema=False.
     schemas = spec.get("components", {}).get("schemas", {})
     for absent_schema in (
         "PubsubDeleteUserData",
@@ -137,6 +142,13 @@ async def test_dashboard_endpoint_rejects_unauthenticated_and_forged_tokens(
     assert missing_auth_resp.status_code == 403
     assert missing_auth_resp.json() == {"detail": "Not authenticated"}
 
+    basic_auth_resp = await unauthenticated_client.get(
+        "/api/v1/auth/dashboard?src=/embed/dashboards/1",
+        headers={"Authorization": "Basic dGVzdDp0ZXN0"},
+    )
+    assert basic_auth_resp.status_code == 403
+    assert basic_auth_resp.json() == {"detail": "Invalid authentication credentials"}
+
     forged_jwt_resp = await unauthenticated_client.get(
         "/api/v1/auth/dashboard?src=/embed/dashboards/1",
         headers={"Authorization": "Bearer invalid.jwt.token"},
@@ -151,13 +163,7 @@ async def test_dashboard_returns_valid_hmac_signed_url_for_authenticated_session
     session_factory: SessionFactory,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    for env_key in (
-        "LOOKERSDK_BASE_URL",
-        "LOOKERSDK_CLIENT_ID",
-        "LOOKERSDK_CLIENT_SECRET",
-    ):
-        monkeypatch.delenv(env_key, raising=False)
-
+    _clear_lookersdk_env(monkeypatch)
     role = await _create_viewer_role(session_factory)
     email = f"viewer-{uuid.uuid4()}@example.com"
     password = "Password123!"
@@ -191,9 +197,7 @@ async def test_dashboard_returns_valid_hmac_signed_url_for_authenticated_session
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert dashboard_resp.status_code == 200
-    signed_url = dashboard_resp.json()["url"]
-
-    parsed = urllib.parse.urlsplit(signed_url)
+    parsed = urllib.parse.urlsplit(dashboard_resp.json()["url"])
     assert parsed.scheme == "https"
     assert parsed.netloc == "looker.example.com"
     assert parsed.path == "/login/embed/%2Fembed%2Fdashboards%2F1"
@@ -239,22 +243,30 @@ async def test_dashboard_returns_valid_hmac_signed_url_for_authenticated_session
     ).decode("utf-8")
     assert params["signature"] == expected_sig
 
+    async with session_factory() as session:
+        await session.execute(
+            sa.delete(models.Session).where(models.Session.user_id == user.id)
+        )
+        await session.commit()
+
+    revoked_resp = await unauthenticated_client.get(
+        "/api/v1/auth/dashboard?src=/embed/dashboards/1",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert revoked_resp.status_code == 401
+    assert revoked_resp.json() == {
+        "detail": "You don't have enough permission to do it."
+    }
+
 
 def test_dead_looker_delete_symbols_and_sdk_removed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    for env_key in (
-        "LOOKERSDK_BASE_URL",
-        "LOOKERSDK_CLIENT_ID",
-        "LOOKERSDK_CLIENT_SECRET",
-    ):
-        monkeypatch.delenv(env_key, raising=False)
-
+    _clear_lookersdk_env(monkeypatch)
     assert not hasattr(auth_schemas, "DeleteLookerUserMessage")
     assert not hasattr(auth_schemas, "PubsubDeleteUserData")
     assert hasattr(router_schemas, "PubsubRequest")
     assert hasattr(router_schemas, "PubsubMessage")
-
     assert not hasattr(ports.Dashboard, "delete_looker_user")
     assert not hasattr(ports.Dashboard, "get_all_looker_users")
     assert not hasattr(looker.LookerDashboard, "delete_looker_user")

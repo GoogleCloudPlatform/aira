@@ -11,7 +11,7 @@ AIRA embeds Looker dashboards solely through stateless HMAC-SHA1 SSO URL signing
 1. **`POST /api/v1/auth/user/looker/_handle`** (CWE-306 / CWE-284): Had zero `fastapi.Security(...)` or OIDC push-token validation. Any unauthenticated caller on `--allow-unauthenticated` Cloud Run could base64-encode `{"user_id": "<id>"}` inside a `PubsubRequest` envelope and invoke `LookerDashboard.delete_looker_user(user_id)` -> `looker_sdk.delete_user(user_id)` using admin `LOOKERSDK_CLIENT_ID` / `LOOKERSDK_CLIENT_SECRET` credentials, permanently deleting arbitrary Looker users (including non-embed administrators).
 2. **`GET /api/v1/auth/users/looker`**: Listed embed Looker users via `looker_sdk.search_users(embed_user=True)` and published `DeleteLookerUserMessage` payloads to an unprovisioned `pubsub_delete_user_topic`.
 
-In addition, `LookerDashboard.get_signed_url` referenced `user.county`, which had been removed from `models.User` in migration `c0155b262135`.
+In addition, `LookerDashboard.get_signed_url` referenced `user.county`, which had been removed from `models.User` in migration `80dc3596cd72`.
 
 Both endpoints—along with their orphaned auth schemas, `Dashboard` port methods, `LookerDashboard` SDK client/methods, `looker-sdk` dependency (`+ cattrs`), local Compose queue/env vars, and Cloud Run `LOOKERSDK_*` secret mounts—have been permanently removed without introducing a runtime feature flag, while fixing `getattr(user, "county", None)` and preserving `GET /api/v1/auth/dashboard`.
 
