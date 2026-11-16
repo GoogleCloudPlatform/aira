@@ -438,31 +438,6 @@ files = [
 ]
 
 [[package]]
-name = "cattrs"
-version = "24.1.2"
-description = "Composable complex class support for attrs and dataclasses."
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "cattrs-24.1.2-py3-none-any.whl", hash = "sha256:67c7495b760168d931a10233f979b28dc04daf853b30752246f4f8471c6d68d0"},
-    {file = "cattrs-24.1.2.tar.gz", hash = "sha256:8028cfe1ff5382df59dd36474a86e02d817b06eaf8af84555441bac915d2ef85"},
-]
-
-[package.dependencies]
-attrs = ">=23.1.0"
-
-[package.extras]
-bson = ["pymongo (>=4.4.0)"]
-cbor2 = ["cbor2 (>=5.4.6)"]
-msgpack = ["msgpack (>=1.0.5)"]
-msgspec = ["msgspec (>=0.18.5) ; implementation_name == \"cpython\""]
-orjson = ["orjson (>=3.9.2) ; implementation_name == \"cpython\""]
-pyyaml = ["pyyaml (>=6.0)"]
-tomlkit = ["tomlkit (>=0.11.8)"]
-ujson = ["ujson (>=5.7.0)"]
-
-[[package]]
 name = "certifi"
 version = "2024.12.14"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -2595,24 +2570,6 @@ files = [
     {file = "legacy_cgi-2.6.4-py3-none-any.whl", hash = "sha256:7e235ce58bf1e25d1fc9b2d299015e4e2cd37305eccafec1e6bac3fc04b878cd"},
     {file = "legacy_cgi-2.6.4.tar.gz", hash = "sha256:abb9dfc7835772f7c9317977c63253fd22a7484b5c9bbcdca60a29dcce97c577"},
 ]
-
-[[package]]
-name = "looker-sdk"
-version = "24.20.0"
-description = "Looker REST API"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "looker_sdk-24.20.0-py3-none-any.whl", hash = "sha256:4d09a8572d2b1c2df5a5e820b4275718a766e5024bb5d02b335cd85a4e4adcb8"},
-    {file = "looker_sdk-24.20.0.tar.gz", hash = "sha256:de6e2b8beca5345e3538ea0d90c1044381e2c228d068aff372af0b1ff19313e2"},
-]
-
-[package.dependencies]
-attrs = {version = ">=20.1.0", markers = "python_version >= \"3.7\""}
-cattrs = {version = ">=1.3", markers = "python_version >= \"3.7\""}
-requests = ">=2.22"
-typing-extensions = ">=4.1.1"
 
 [[package]]
 name = "lxml"
@@ -6133,4 +6090,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "3d9a3cfdb267f2ec27093cbaf199c5c837bae44258210db6bdeb011e646d81f1"
+content-hash = "ad74a9de66ace688d80c7716227d2f38da4547ba433dd12382468d38307d475e"

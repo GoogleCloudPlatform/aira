@@ -49,7 +49,6 @@ opentelemetry-instrumentation-sqlalchemy = "^0.41b0"
 opentelemetry-propagator-gcp = "^1.5.0"
 opentelemetry-resourcedetector-gcp = "^1.5.0a0"
 httpx = "^0.27.0"
-looker-sdk = "^24.0.0"
 pyjwt = {version = "^2.8.0", extras = ["crypto"]}
 sentry-sdk = {extras = ["fastapi"], version = "^2.20.0"}
 phonemizer = "^3.2.1"

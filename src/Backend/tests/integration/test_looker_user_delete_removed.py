@@ -3,13 +3,15 @@
 import base64
 import hashlib
 import hmac
+import importlib.util
 import json
 import typing
 import urllib.parse
 import uuid
 
 import pytest
-from api import models
+from api import models, ports
+from api.adapters.google import looker
 from api.routers import schemas as router_schemas
 from api.routers.auth import schemas as auth_schemas
 from api.typings import SessionFactory
@@ -124,11 +126,6 @@ async def test_openapi_excludes_removed_looker_routes_and_schemas(
     ):
         assert retained_schema in schemas
 
-    assert not hasattr(auth_schemas, "DeleteLookerUserMessage")
-    assert not hasattr(auth_schemas, "PubsubDeleteUserData")
-    assert hasattr(router_schemas, "PubsubRequest")
-    assert hasattr(router_schemas, "PubsubMessage")
-
 
 @pytest.mark.asyncio
 async def test_dashboard_endpoint_rejects_unauthenticated_and_forged_tokens(
@@ -154,10 +151,12 @@ async def test_dashboard_returns_valid_hmac_signed_url_for_authenticated_session
     session_factory: SessionFactory,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # Characterization workarounds for pre-existing looker.py:71 & looker.py:109 bugs
-    # (removed via TDD Red->Green in Slice 3).
-    monkeypatch.setenv("LOOKERSDK_BASE_URL", "https://looker.example.com")
-    monkeypatch.setattr(models.User, "county", None, raising=False)
+    for env_key in (
+        "LOOKERSDK_BASE_URL",
+        "LOOKERSDK_CLIENT_ID",
+        "LOOKERSDK_CLIENT_SECRET",
+    ):
+        monkeypatch.delenv(env_key, raising=False)
 
     role = await _create_viewer_role(session_factory)
     email = f"viewer-{uuid.uuid4()}@example.com"
@@ -239,3 +238,30 @@ async def test_dashboard_returns_valid_hmac_signed_url_for_authenticated_session
         ).digest()
     ).decode("utf-8")
     assert params["signature"] == expected_sig
+
+
+def test_dead_looker_delete_symbols_and_sdk_removed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for env_key in (
+        "LOOKERSDK_BASE_URL",
+        "LOOKERSDK_CLIENT_ID",
+        "LOOKERSDK_CLIENT_SECRET",
+    ):
+        monkeypatch.delenv(env_key, raising=False)
+
+    assert not hasattr(auth_schemas, "DeleteLookerUserMessage")
+    assert not hasattr(auth_schemas, "PubsubDeleteUserData")
+    assert hasattr(router_schemas, "PubsubRequest")
+    assert hasattr(router_schemas, "PubsubMessage")
+
+    assert not hasattr(ports.Dashboard, "delete_looker_user")
+    assert not hasattr(ports.Dashboard, "get_all_looker_users")
+    assert not hasattr(looker.LookerDashboard, "delete_looker_user")
+    assert not hasattr(looker.LookerDashboard, "get_all_looker_users")
+
+    dashboard = looker.LookerDashboard(
+        looker_host="looker.example.com", looker_secret="secret"
+    )
+    assert not hasattr(dashboard, "_looker")
+    assert importlib.util.find_spec("looker_sdk") is None
