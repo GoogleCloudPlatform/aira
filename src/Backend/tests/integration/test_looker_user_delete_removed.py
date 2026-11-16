@@ -1,4 +1,4 @@
-"""Characterization and regression tests for Looker endpoints and SSO signing."""
+"""Regression tests for Looker user-deletion removal and retained SSO URL signing."""
 
 import base64
 import hashlib
@@ -8,11 +8,9 @@ import typing
 import urllib.parse
 import uuid
 
-import fastapi
 import pytest
 from api import models
-from api.adapters.google import looker
-from api.helpers import auth
+from api.routers import schemas as router_schemas
 from api.routers.auth import schemas as auth_schemas
 from api.typings import SessionFactory
 from httpx import AsyncClient
@@ -37,24 +35,11 @@ async def _create_viewer_role(session_factory: SessionFactory) -> models.Role:
 
 
 @pytest.mark.asyncio
-async def test_characterize_looker_delete_handle_endpoint_unauthenticated(
+async def test_looker_delete_handle_endpoint_removed(
     unauthenticated_client: AsyncClient,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("LOOKERSDK_BASE_URL", "https://looker.example.com")
-    deleted_ids: list[str] = []
-
-    async def fake_delete_looker_user(
-        self: looker.LookerDashboard, user_id: str
-    ) -> str:
-        deleted_ids.append(user_id)
-        return ""
-
-    monkeypatch.setattr(
-        looker.LookerDashboard, "delete_looker_user", fake_delete_looker_user
-    )
-
     encoded = base64.b64encode(b'{"user_id": "1"}').decode("utf-8")
+
     valid_resp = await unauthenticated_client.post(
         "/api/v1/auth/user/looker/_handle",
         json={
@@ -62,63 +47,57 @@ async def test_characterize_looker_delete_handle_endpoint_unauthenticated(
             "subscription": "projects/test/subscriptions/sub",
         },
     )
-    assert valid_resp.status_code == 200
-    assert deleted_ids == ["1"]
+    assert valid_resp.status_code == 404
+    assert valid_resp.json() == {"detail": "Not Found"}
 
     minimal_resp = await unauthenticated_client.post(
         "/api/v1/auth/user/looker/_handle",
         json={"message": {"data": encoded}},
     )
-    assert minimal_resp.status_code == 422
+    assert minimal_resp.status_code == 404
+    assert minimal_resp.json() == {"detail": "Not Found"}
+
+    for method in ("GET", "DELETE"):
+        resp = await unauthenticated_client.request(
+            method, "/api/v1/auth/user/looker/_handle"
+        )
+        assert resp.status_code == 404
+        assert resp.json() == {"detail": "Not Found"}
 
 
 @pytest.mark.asyncio
-async def test_characterize_looker_list_users_scheduler_endpoint(
+async def test_looker_list_users_scheduler_endpoint_removed(
     unauthenticated_client: AsyncClient,
-    test_app: fastapi.FastAPI,
     mock_publisher: "MockMessagePublisher",
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     unauth_resp = await unauthenticated_client.get("/api/v1/auth/users/looker")
-    assert unauth_resp.status_code == 403
-    assert unauth_resp.json() == {"detail": "Not authenticated"}
+    assert unauth_resp.status_code == 404
+    assert unauth_resp.json() == {"detail": "Not Found"}
 
-    monkeypatch.setenv("LOOKERSDK_BASE_URL", "https://looker.example.com")
-
-    class _StubLookerUser:
-        id = "42"
-
-    async def fake_get_all_looker_users(
-        self: looker.LookerDashboard,
-    ) -> list[typing.Any]:
-        return [_StubLookerUser()]
-
-    monkeypatch.setattr(
-        looker.LookerDashboard, "get_all_looker_users", fake_get_all_looker_users
+    sched_resp = await unauthenticated_client.get(
+        "/api/v1/auth/users/looker",
+        headers={"Authorization": "Bearer fake-scheduler-oidc-token"},
     )
+    assert sched_resp.status_code == 404
+    assert sched_resp.json() == {"detail": "Not Found"}
 
-    test_app.dependency_overrides[auth.validate_scheduler_token] = lambda: None
-    try:
-        sched_resp = await unauthenticated_client.get("/api/v1/auth/users/looker")
-    finally:
-        test_app.dependency_overrides.pop(auth.validate_scheduler_token, None)
+    post_resp = await unauthenticated_client.post("/api/v1/auth/users/looker")
+    assert post_resp.status_code == 404
+    assert post_resp.json() == {"detail": "Not Found"}
 
-    assert sched_resp.status_code == 200
-    assert mock_publisher.published == [
-        (auth_schemas.DeleteLookerUserMessage(user_id="42"), None)
-    ]
+    assert mock_publisher.published == []
 
 
 @pytest.mark.asyncio
-async def test_characterize_openapi_currently_exposes_looker_routes_and_pubsub_schemas(
+async def test_openapi_excludes_removed_looker_routes_and_schemas(
     unauthenticated_client: AsyncClient,
 ) -> None:
     resp = await unauthenticated_client.get("/openapi.json")
     assert resp.status_code == 200
     spec = resp.json()
     paths = spec["paths"]
-    assert "/api/v1/auth/user/looker/_handle" in paths
-    assert "/api/v1/auth/users/looker" in paths
+    assert "/api/v1/auth/user/looker/_handle" not in paths
+    assert "/api/v1/auth/users/looker" not in paths
     for retained_path in (
         "/api/v1/auth/token",
         "/api/v1/auth/refresh",
@@ -129,10 +108,13 @@ async def test_characterize_openapi_currently_exposes_looker_routes_and_pubsub_s
         assert retained_path in paths
 
     schemas = spec.get("components", {}).get("schemas", {})
-    assert "PubsubRequest" in schemas
-    assert "PubsubMessage" in schemas
-    assert "PubsubDeleteUserData" not in schemas
-    assert "DeleteLookerUserMessage" not in schemas
+    for absent_schema in (
+        "PubsubDeleteUserData",
+        "DeleteLookerUserMessage",
+        "PubsubRequest",
+        "PubsubMessage",
+    ):
+        assert absent_schema not in schemas
     for retained_schema in (
         "FirebaseLogin",
         "EmailPasswordLogin",
@@ -141,6 +123,11 @@ async def test_characterize_openapi_currently_exposes_looker_routes_and_pubsub_s
         "ResetPassword",
     ):
         assert retained_schema in schemas
+
+    assert not hasattr(auth_schemas, "DeleteLookerUserMessage")
+    assert not hasattr(auth_schemas, "PubsubDeleteUserData")
+    assert hasattr(router_schemas, "PubsubRequest")
+    assert hasattr(router_schemas, "PubsubMessage")
 
 
 @pytest.mark.asyncio

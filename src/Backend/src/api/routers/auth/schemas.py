@@ -2,14 +2,11 @@
 Module containing schemas for all auth endpoints
 """
 
-import dataclasses
 import datetime
 import typing
 import uuid
 
 import pydantic
-
-from api import typings
 
 
 class FirebaseLogin(pydantic.BaseModel):
@@ -59,20 +56,3 @@ class ResetPassword(pydantic.BaseModel):
 
     token: str
     password: pydantic.StrictStr
-
-
-@dataclasses.dataclass
-class DeleteLookerUserMessage(typings.Message):
-    """
-    Dataclass to delete looker user.
-    """
-
-    user_id: str
-
-
-class PubsubDeleteUserData(pydantic.BaseModel, extra=pydantic.Extra.allow):
-    """
-    Defines only needed data that will be converted from pubsub.
-    """
-
-    user_id: str
