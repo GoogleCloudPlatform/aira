@@ -191,6 +191,8 @@ class TestGoogleModule(injector.Module):
         return looker.LookerDashboard(
             looker_host="looker.example.com",
             looker_secret="test-looker-secret",
+            allowed_dashboard_ids=["1", "2"],
+            allowed_embed_domains=["https://app.example.com"],
         )
 
 

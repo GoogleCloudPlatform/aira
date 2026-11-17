@@ -91,7 +91,15 @@ async def refresh_token(
     return response
 
 
-@router.get("/dashboard", dependencies=[fastapi.Security(auth.get_token)])
+_DASHBOARD_ALLOWED_SCOPES: tuple[str, ...] = ("admin", "dashboard.viewer")
+
+
+@router.get(
+    "/dashboard",
+    dependencies=[
+        fastapi.Security(auth.get_token, scopes=list(_DASHBOARD_ALLOWED_SCOPES))
+    ],
+)
 async def dashboard_signed_url(
     request: fastapi.Request,
     session_manager: sess_mg.SessionManager = fastapi.Depends(
@@ -103,6 +111,11 @@ async def dashboard_signed_url(
     Creates a signed url to access the dashboard.
     """
     session = await session_manager.get_current_session()
+    role_scopes = (
+        session.user.role.scopes if session.user and session.user.role else []
+    )
+    if not any(scope in role_scopes for scope in _DASHBOARD_ALLOWED_SCOPES):
+        raise errors.Forbidden()
     response = await dashboard.get_signed_url(
         user=session.user, query=request.query_params
     )

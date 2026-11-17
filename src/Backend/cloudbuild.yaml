@@ -49,7 +49,7 @@ steps:
         "sa-$PROJECT_NUMBER-back-engine@$PROJECT_ID.iam.gserviceaccount.com",
         "--remove-secrets=LOOKERSDK_BASE_URL,LOOKERSDK_CLIENT_ID,LOOKERSDK_CLIENT_SECRET",
         "--update-secrets=_BUCKET_PATH=bucket_name:latest,_DATABASE_URI=sql_connection_url:latest,_PUBSUB_TOPIC=processor_queue:latest,_BQ_DATASET=dataset_name:latest,_BQ_TABLE_NAME=table_name:latest,_PUBSUB_CONVERT_TOPIC=conversion_queue:latest,_ORIGIN=front_url:latest,_LOOKER_SECRET=looker_secret:latest,/secrets/api/gcs_sa_key=gcs_sa_key:latest,_SENDGRID_KEY=sendgrid_api_key:latest",
-        "--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_MODEL_VERSION=gemini-2.5-flash,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=update_value.cloud.looker.com,_FRONT_BASE_URL=https://frontend-1035050987841.us-central1.run.app,_FORGOT_PW_TEMPLATE=update-here,_SENDER_EMAIL=update-here@domain.com,_KB_BUCKET_PATH=$PROJECT_ID-aira-kb-files,_KB_PROCESSING_TOPIC=kb_processing_topic",
+        "--set-env-vars=_GCP_STORAGE_CREDENTIALS=/secrets/api/gcs_sa_key,_MODEL_VERSION=gemini-2.5-flash,_PROJECT_ID=$PROJECT_ID,_ENV=prd,_LOOKER_HOST=update_value.cloud.looker.com,_LOOKER_ALLOWED_DASHBOARD_IDS=1,2,_FRONT_BASE_URL=https://frontend-1035050987841.us-central1.run.app,_FORGOT_PW_TEMPLATE=update-here,_SENDER_EMAIL=update-here@domain.com,_KB_BUCKET_PATH=$PROJECT_ID-aira-kb-files,_KB_PROCESSING_TOPIC=kb_processing_topic",
         "--allow-unauthenticated",
         "--vpc-connector=vpc-con",
         "--set-cloudsql-instances=$PROJECT_ID:us-central1:$PROJECT_ID-sql-instance",

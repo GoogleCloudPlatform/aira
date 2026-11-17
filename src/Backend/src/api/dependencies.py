@@ -574,6 +574,38 @@ class MemoryModule(injector.Module):
         return memory.ExternalAuth()
 
 
+def _parse_csv_setting(value: str | None) -> list[str]:
+    if not isinstance(value, str):
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _build_looker_dashboard(settings: Settings) -> google.LookerDashboard:
+    allowed_dashboard_ids = _parse_csv_setting(
+        settings.get("looker_allowed_dashboard_ids")
+    )
+    for key in ("looker_general_dashboard_id", "looker_learners_dashboard_id"):
+        if dash_id := settings.get(key):
+            stripped = str(dash_id).strip()
+            if stripped:
+                allowed_dashboard_ids.append(stripped)
+
+    allowed_embed_domains = _parse_csv_setting(settings.get("looker_embed_domains"))
+    if front_base_url := settings.get("front_base_url"):
+        allowed_embed_domains.append(str(front_base_url).strip())
+    for origin in _parse_csv_setting(settings.get("origin")):
+        if origin != "*":
+            allowed_embed_domains.append(origin)
+
+    return google.LookerDashboard(
+        looker_secret=settings.get("looker_secret", ""),
+        looker_host=settings.get("looker_host", ""),
+        allowed_dashboard_ids=allowed_dashboard_ids,
+        allowed_embed_domains=allowed_embed_domains,
+        models=_parse_csv_setting(settings.get("looker_models")),
+    )
+
+
 class GoogleModule(injector.Module):
     """
     Google module.
@@ -675,10 +707,7 @@ class GoogleModule(injector.Module):
         """
         Provide the GCP's Looker.
         """
-        return google.LookerDashboard(
-            looker_secret=settings.get("looker_secret", ""),
-            looker_host=settings.get("looker_host", ""),
-        )
+        return _build_looker_dashboard(settings)
 
 
 class UtilModule(injector.Module):
@@ -796,10 +825,7 @@ class InternetlessModule(injector.Module):
         """
         Provide the GCP's Looker.
         """
-        return google.LookerDashboard(
-            looker_secret=settings.get("looker_secret", ""),
-            looker_host=settings.get("looker_host", ""),
-        )
+        return _build_looker_dashboard(settings)
 
 
 class TracingModule(injector.Module):

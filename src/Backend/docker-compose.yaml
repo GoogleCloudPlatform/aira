@@ -47,6 +47,9 @@ services:
       _LOOKER_HOST: ${_LOOKER_HOST}
       _LOG_LEVEL: ${_LOG_LEVEL:-DEBUG}
       _LOOKER_SECRET: ${_LOOKER_SECRET}
+      _LOOKER_ALLOWED_DASHBOARD_IDS: ${_LOOKER_ALLOWED_DASHBOARD_IDS:-1,2}
+      _LOOKER_MODELS: ${_LOOKER_MODELS}
+      _LOOKER_EMBED_DOMAINS: ${_LOOKER_EMBED_DOMAINS}
       _ORIGIN: ${_ORIGIN:-http://dev.localhost}
       _ENV: ${_ENV:-local}
       _EXPORT_TO: ${_EXPORT_TO:-console}
