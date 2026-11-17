@@ -64,6 +64,9 @@ services:
       _SMTP_PASSWORD: ${_SMTP_PASSWORD}
       _EMAIL_FROM: ${_EMAIL_FROM}
       _SMTP_PORT: ${_SMTP_PORT}
+      _SCHEDULER_SERVICE_ACCOUNT_EMAIL: ${_SCHEDULER_SERVICE_ACCOUNT_EMAIL}
+      _SCHEDULER_AUDIENCE: ${_SCHEDULER_AUDIENCE}
+      _SCHEDULER_SERVICE_ACCOUNT_SUB: ${_SCHEDULER_SERVICE_ACCOUNT_SUB}
     command: make migrate fixture server
     labels:
       - "traefik.enable=true"
