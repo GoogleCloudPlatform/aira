@@ -12,8 +12,6 @@ import urllib.parse
 import uuid
 from hashlib import sha1
 
-import looker_sdk
-from looker_sdk.sdk.api40 import models as mdls
 from starlette import datastructures
 
 from api import ports
@@ -68,7 +66,6 @@ class LookerDashboard(ports.Dashboard):
     def __init__(self, looker_host: str, looker_secret: str):
         self.looker_host = looker_host
         self.looker_secret = looker_secret
-        self._looker = looker_sdk.init40()
 
     async def get_signed_url(
         self,
@@ -106,7 +103,7 @@ class LookerDashboard(ports.Dashboard):
                 ),
                 "state": user.state,
                 "region": user.region,
-                "county": user.county,
+                "county": getattr(user, "county", None),
             },
         )
         src = query.get("src", "")
@@ -169,16 +166,3 @@ class LookerDashboard(ports.Dashboard):
         )
 
         return f"{self.looker_host}{path}?{query_string}"
-
-    async def delete_looker_user(self, user_id: str) -> str:
-        """
-        Delete Looker User by user id
-        """
-        # pylint: disable=arguments-differ
-        return self._looker.delete_user(user_id)
-
-    async def get_all_looker_users(self) -> typing.Sequence[mdls.User]:
-        """
-        Get a list of all Looker Users.
-        """
-        return self._looker.search_users(embed_user=True)

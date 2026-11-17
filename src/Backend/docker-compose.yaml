@@ -39,7 +39,6 @@ services:
       _DATABASE_URI: postgresql+asyncpg://postgres:postgres@db:5432/postgres
       _PUBSUB_TOPIC: ${_PUBSUB_TOPIC:-processor-queue}
       _PUBSUB_CONVERT_TOPIC: ${_PUBSUB_CONVERT_TOPIC:-conversion-queue}
-      _PUBSUB_DELETE_USER_TOPIC: ${_PUBSUB_DELETE_USER_TOPIC:-delete-looker-user-queue}
       _PUBSUB_SEND_EMAIL_TOPIC: ${_PUBSUB_SEND_EMAIL_TOPIC:-send-email-queue}
       _DATABASE_TEST_URI: postgresql+asyncpg://postgres:postgres@db-test:5432/postgres
       _BUCKET_PATH: ${_BUCKET_PATH:-rad-stt-dev-store-audio}
@@ -58,9 +57,6 @@ services:
       _FORGOT_PW_TEMPLATE: ${_FORGOT_PW_TEMPLATE}
       _SENDER_EMAIL: support@radhark.tech
       STORAGE_EMULATOR_HOST: ${STORAGE_EMULATOR_HOST}
-      LOOKERSDK_BASE_URL: ${LOOKERSDK_BASE_URL}
-      LOOKERSDK_CLIENT_ID: ${LOOKERSDK_CLIENT_ID}
-      LOOKERSDK_CLIENT_SECRET: ${LOOKERSDK_CLIENT_SECRET}
       _SEDUC_TOKEN: ${_SEDUC_TOKEN}
       _GEMINI_API_KEY: ${_GEMINI_API_KEY}
       _SMTP_SERVER: ${_SMTP_SERVER}
@@ -145,12 +141,6 @@ services:
             "name": "conversion-queue",
             "subscriptions": [
               {"id": "convert-api", "endpoint": "http://host.docker.internal:8000/api/v1/processor/convert/_handle"}
-            ]
-          },
-          {
-            "name": "delete-looker-user-queue",
-            "subscriptions": [
-              {"id": "delete-looker-user-api", "endpoint": "http://host.docker.internal:8000/api/v1/auth/user/looker/_handle"}
             ]
           },
           {

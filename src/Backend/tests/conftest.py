@@ -18,6 +18,7 @@ os.environ["_ENV"] = "local"
 
 from api import db, ports, factory, typings, models
 from api.adapters import memory  # noqa: E402
+from api.adapters.google import looker  # noqa: E402
 from api.typings import SessionFactory, Settings
 from api.helpers import auth
 from api.helpers.schemas import TokenData
@@ -183,6 +184,14 @@ class TestGoogleModule(injector.Module):
     @injector.singleton
     def provide_generative_ai(self) -> ports.GenAI:
         return self.gen_ai
+
+    @injector.provider
+    @injector.singleton
+    def provide_looker(self) -> ports.Dashboard:
+        return looker.LookerDashboard(
+            looker_host="looker.example.com",
+            looker_secret="test-looker-secret",
+        )
 
 
 

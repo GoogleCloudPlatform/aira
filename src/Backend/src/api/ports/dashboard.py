@@ -3,7 +3,6 @@ Module related to all dashboard stuff.
 """
 
 import abc
-import typing
 
 from starlette import datastructures
 
@@ -23,16 +22,4 @@ class Dashboard(abc.ABC):
     ) -> str:
         """
         Generates signed url to access the dashboard.
-        """
-
-    @abc.abstractmethod
-    async def delete_looker_user(self, user_id: str) -> str:
-        """
-        Delete Looker User by user id
-        """
-
-    @abc.abstractmethod
-    async def get_all_looker_users(self) -> typing.Any:
-        """
-        Get a list of all Looker Users.
         """
