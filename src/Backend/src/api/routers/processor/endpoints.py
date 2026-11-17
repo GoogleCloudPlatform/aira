@@ -3,14 +3,19 @@ Endpoints related to processing speech to text.
 """
 
 import base64
+import binascii
 import datetime
+import hmac
 import logging
 import os
+import re
+import typing
 import urllib.parse
 import uuid
 
 import fastapi
 import fastapi_injector
+import pydantic
 import sqlalchemy as sa
 from opentelemetry import trace
 
@@ -152,8 +157,157 @@ def chunk_list(lst, chunk_size):
         yield lst[i : i + chunk_size]
 
 
-@router.post("/_handle", response_model=None)
-async def process(
+_PROCESSABLE_EUQ_STATUSES: frozenset[models.ExamStatus] = frozenset(
+    {models.ExamStatus.NOT_STARTED, models.ExamStatus.IN_PROGRESS}
+)
+_ALLOWED_GCS_HOSTS: frozenset[str] = frozenset(
+    {"storage.googleapis.com", "storage.cloud.google.com"}
+)
+_SAFE_BUCKET_RE = re.compile(r"[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]", re.ASCII)
+_SAFE_EXT_RE = re.compile(r"\.[A-Za-z0-9][A-Za-z0-9-]{0,15}", re.ASCII)
+_ENCODED_TRAVERSAL_RE = re.compile(r"%(?:2[ef]|5c|00)", re.IGNORECASE)
+_PubsubSchemaT = typing.TypeVar("_PubsubSchemaT", bound=pydantic.BaseModel)
+
+
+def _has_control_chars(value: str) -> bool:
+    return any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in value)
+
+
+def _decode_pubsub_payload(
+    body: PubsubRequest, schema_cls: type[_PubsubSchemaT]
+) -> _PubsubSchemaT:
+    try:
+        decoded = base64.b64decode(body.message.data.decode("utf-8"), validate=True)
+        return schema_cls.parse_raw(decoded)
+    except (
+        binascii.Error,
+        UnicodeDecodeError,
+        ValueError,
+        pydantic.ValidationError,
+    ) as exc:
+        logger.warning("Rejected malformed Pub/Sub payload.")
+        raise errors.InvalidField("data") from exc
+
+
+def _extract_gcs_bucket_and_path(raw_audio: str, *, allow_https_url: bool) -> str:
+    if (
+        not raw_audio
+        or raw_audio != raw_audio.strip()
+        or _has_control_chars(raw_audio)
+        or "\\" in raw_audio
+        or "?" in raw_audio
+        or "#" in raw_audio
+    ):
+        raise errors.InvalidField("audio")
+
+    if allow_https_url:
+        if _ENCODED_TRAVERSAL_RE.search(raw_audio):
+            raise errors.InvalidField("audio")
+        parsed = urllib.parse.urlsplit(raw_audio)
+        if (
+            parsed.scheme != "https"
+            or parsed.netloc.lower() not in _ALLOWED_GCS_HOSTS
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+            or not parsed.path.startswith("/")
+        ):
+            raise errors.InvalidField("audio")
+        return urllib.parse.unquote(parsed.path[1:])
+
+    if "://" in raw_audio or raw_audio.startswith("/") or "%" in raw_audio:
+        raise errors.InvalidField("audio")
+    return raw_audio
+
+
+def _validate_and_parse_gcs_audio(
+    raw_audio: str,
+    raw_expected_bucket: typing.Any,
+    *,
+    allow_https_url: bool,
+) -> tuple[str, str, str]:
+    """Validate audio URI against configured GCS bucket and return canonical parts."""
+    expected_bucket = (
+        raw_expected_bucket.strip() if isinstance(raw_expected_bucket, str) else ""
+    )
+    if not expected_bucket or not _SAFE_BUCKET_RE.fullmatch(expected_bucket):
+        logger.error("GCS bucket_path setting is missing or invalid; failing closed.")
+        raise errors.Forbidden()
+
+    remainder = _extract_gcs_bucket_and_path(
+        raw_audio, allow_https_url=allow_https_url
+    )
+    if "/" not in remainder:
+        raise errors.InvalidField("audio")
+
+    bucket, object_path = remainder.split("/", 1)
+    if not hmac.compare_digest(bucket.encode("utf-8"), expected_bucket.encode("utf-8")):
+        raise errors.InvalidField("audio")
+
+    segments = object_path.split("/")
+    if len(segments) < 2 or segments[0] == "import":
+        raise errors.InvalidField("audio")
+    if any(
+        not seg
+        or seg in {".", ".."}
+        or seg.startswith("-")
+        or "\\" in seg
+        or _has_control_chars(seg)
+        for seg in segments
+    ):
+        raise errors.InvalidField("audio")
+
+    basename = segments[-1]
+    if "." not in basename:
+        raise errors.InvalidField("audio")
+    ext = f".{basename.rsplit('.', 1)[1].lower()}"
+    if not _SAFE_EXT_RE.fullmatch(ext):
+        raise errors.InvalidField("audio")
+
+    return expected_bucket, object_path, ext
+
+
+async def _assert_pending_result(
+    uow: ports.UnitOfWork, result_id: uuid.UUID
+) -> models.ExamUserQuestion:
+    """Load an ExamUserQuestion row and verify it is still pending processing."""
+    try:
+        user_question = await uow.result_repository.get(result_id)
+    except errors.NotFound as exc:
+        logger.warning(
+            "Rejecting Pub/Sub message for unknown result_id.",
+            extra={"result_id": str(result_id)},
+        )
+        raise errors.InvalidField("result_id") from exc
+
+    if user_question.status not in _PROCESSABLE_EUQ_STATUSES:
+        logger.warning(
+            "Rejecting Pub/Sub message for already-finalized result_id.",
+            extra={
+                "result_id": str(result_id),
+                "status": str(user_question.status),
+            },
+        )
+        raise errors.InvalidField("result_id")
+
+    return user_question
+
+
+def _safe_remove_file(path: str | None) -> None:
+    if path and os.path.exists(path):
+        try:
+            os.remove(path)
+        except OSError:
+            logger.warning("Failed to clean up temporary audio file.")
+
+
+@router.post(
+    "/_handle",
+    response_model=None,
+    dependencies=[fastapi.Security(auth.validate_pubsub_token)],
+)
+async def process(  # noqa: PLR0915
     request: fastapi.Request,
     body: PubsubRequest = fastapi.Body(...),
     uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
@@ -185,11 +339,21 @@ async def process(
     :return: status_code indicating success or failure.
     """
     logger.info("Starting processing pubsub message.")
-    data = schemas.PubsubDataReprocessed.parse_raw(
-        base64.b64decode(body.message.data.decode("utf-8"))
+    data = _decode_pubsub_payload(body, schemas.PubsubDataReprocessed)
+    bucket, object_path, ext = _validate_and_parse_gcs_audio(
+        data.audio,
+        settings.get("bucket_path"),
+        allow_https_url=False,
     )
+    file_data = f"{bucket}/{object_path}"
+
+    # Verify result_id exists and is not finalized before incurring STT/Gemini cost.
+    async with uow_builder() as uow:
+        pending_euq = await _assert_pending_result(uow, data.result_id)
+        target_exam_id = pending_euq.exam_id
+        target_user_id = pending_euq.user_id
+
     logger.info("Start processing data", extra={"result_id": str(data.result_id)})
-    file_data = data.audio
     version = "v2"
     model_type = "latest_long"
     if data.question_type in {
@@ -202,7 +366,7 @@ async def process(
     tts_words = await speech.process(
         phrases_id=data.phrase_set_id,
         path=f"gs://{file_data}",
-        desired=file_data.rsplit("/", 1)[1],
+        desired=f"{uuid.uuid4().hex}{ext}",
         words=data.words,
         duration=data.duration,
         sample_rate=data.sample_rate,
@@ -234,10 +398,37 @@ async def process(
             )
 
     async with uow_builder() as uow:
-        try:
-            user_question = await uow.result_repository.get(data.result_id)
-        except errors.NotFound:
+        # Acquire row lock on ExamUser first to serialize per-student exam updates.
+        stmt_lock = (
+            sa.select(models.ExamUser)
+            .where(models.ExamUser.exam_id == target_exam_id)
+            .where(models.ExamUser.user_id == target_user_id)
+            .with_for_update()
+        )
+        lock_result = await uow._session.execute(stmt_lock)
+        exam_user = lock_result.unique().scalars().one_or_none()
+
+        if not exam_user:
+            logger.warning(
+                "Exam user not found", extra={"result_id": str(data.result_id)}
+            )
             return fastapi.Response(status_code=200)
+
+        # Lock the ExamUserQuestion row (without outer joins) and re-check status.
+        stmt_lock_euq = (
+            sa.select(models.ExamUserQuestion.status)
+            .where(models.ExamUserQuestion.id == data.result_id)
+            .with_for_update()
+        )
+        locked_status = (await uow._session.execute(stmt_lock_euq)).scalar_one_or_none()
+        if locked_status not in _PROCESSABLE_EUQ_STATUSES:
+            logger.warning(
+                "Rejecting concurrent or stale Pub/Sub update for result_id.",
+                extra={"result_id": str(data.result_id)},
+            )
+            raise errors.InvalidField("result_id")
+
+        user_question = await _assert_pending_result(uow, data.result_id)
         user_question.ai_feedback = ai_feedback
         user_question.ai_is_correct = ai_is_correct
         user_question.result = user_result
@@ -251,21 +442,6 @@ async def process(
         user_question.total_accuracy = (
             user_question.right_count / len(data.words) if data.words else 0.0
         )
-        # Acquire row lock on ExamUser to serialize processing for this student's exam
-        stmt_lock = (
-            sa.select(models.ExamUser)
-            .where(models.ExamUser.exam_id == user_question.exam_id)
-            .where(models.ExamUser.user_id == user_question.user_id)
-            .with_for_update()
-        )
-        lock_result = await uow._session.execute(stmt_lock)
-        exam_user = lock_result.unique().scalars().one_or_none()
-
-        if not exam_user:
-            logger.warning(
-                "Exam user not found", extra={"result_id": str(data.result_id)}
-            )
-            return fastapi.Response(status_code=200)
 
         # Query pending questions using UOW's transaction session to see status updates
         Question = models.Question
@@ -356,10 +532,17 @@ async def process(
     return fastapi.Response(status_code=200)
 
 
-@router.post("/convert/_handle", response_model=None)
+@router.post(
+    "/convert/_handle",
+    response_model=None,
+    dependencies=[fastapi.Security(auth.validate_pubsub_token)],
+)
 async def convert_audio_type(
     request: fastapi.Request,
     body: PubsubRequest = fastapi.Body(...),
+    uow_builder: ports.UnitOfWorkBuilder = fastapi_injector.Injected(
+        ports.UnitOfWorkBuilder
+    ),
     publisher: ports.MessagePublisher = fastapi_injector.Injected(
         ports.MessagePublisher
     ),
@@ -378,50 +561,62 @@ async def convert_audio_type(
 
     :return: status_code indicating success or failure.
     """
-    data = schemas.PubsubData.parse_raw(
-        base64.b64decode(body.message.data.decode("utf-8"))
-    )
+    data = _decode_pubsub_payload(body, schemas.PubsubData)
     logger.debug("Starting audio conversion.", extra={"result_id": str(data.result_id)})
-    file_data = urllib.parse.unquote(data.audio)
-    file_stripped = (
-        file_data.replace("https://", "")
-        .replace("http://", "")
-        .replace("storage.googleapis.com/", "")
+    bucket, file_path, ext = _validate_and_parse_gcs_audio(
+        data.audio,
+        settings.get("bucket_path"),
+        allow_https_url=True,
     )
-    file_path = file_stripped.split("/", 1)[1]
+    async with uow_builder() as uow:
+        await _assert_pending_result(uow, data.result_id)
+
     if not await storage.get_blob_size(file_path):
         logger.warning("File with 0 bytes.", extra={"result_id": str(data.result_id)})
         return fastapi.Response(status_code=200)
     content_type = await storage.get_blob_content_type(file_path)
     sample_rate = channels = None
-    _, file_name = file_path.rsplit("/", 1)
 
-    download_path = await storage.download(f"gs://{file_stripped}", file_name)
-    metadata = helpers.util.get_file_metadata(download_path)
-    if content_type not in {"audio/wav", "audio/x-wav"}:
-        logger.debug(
-            "Audio needs to be converted.", extra={"result_id": str(data.result_id)}
+    local_stem = uuid.uuid4().hex
+    safe_local_name = f"{local_stem}{ext}"
+    canonical_ref = f"{bucket}/{file_path}"
+    download_path: str | None = None
+    new_name: str | None = None
+    try:
+        download_path = await storage.download(
+            f"gs://{canonical_ref}", safe_local_name
         )
-        new_name = download_path.rsplit(".")[0] + ".wav"
-        helpers.util.convert_audio(
-            download_path, new_name, settings.get("env") == "prod"
-        )
-        metadata = helpers.util.get_file_metadata(new_name)
-        file_stripped = await storage.upload_by_file(
-            file_path.rsplit(".")[0] + ".wav", new_name
-        )
+        metadata = helpers.util.get_file_metadata(download_path)
+        if content_type not in {"audio/wav", "audio/x-wav"}:
+            logger.debug(
+                "Audio needs to be converted.",
+                extra={"result_id": str(data.result_id)},
+            )
+            new_name = os.path.join(
+                os.path.dirname(download_path), f"{local_stem}.wav"
+            )
+            helpers.util.convert_audio(
+                download_path, new_name, settings.get("env") == "prod"
+            )
+            metadata = helpers.util.get_file_metadata(new_name)
+            canonical_ref = await storage.upload_by_file(
+                file_path.rsplit(".", 1)[0] + ".wav", new_name
+            )
+    finally:
+        _safe_remove_file(download_path)
+        _safe_remove_file(new_name)
+
     sample_str: str | None = metadata.get("sample_rate")
     sample_rate = int(sample_str) if sample_str else None
 
     channels_str: str | None = metadata.get("channels")
     channels = int(channels_str) if channels_str else None
     duration = int(metadata.get("duration", 61))
-    os.remove(download_path)
     await publisher.publish(
         schemas.ReprocessedMessage(
             result_id=data.result_id,
             phrase_set_id=data.phrase_set_id,
-            audio=file_stripped,
+            audio=canonical_ref,
             duration=duration,
             words=[word.strip() for word in data.words if word.strip()],
             sample_rate=sample_rate,

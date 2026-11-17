@@ -20,14 +20,23 @@ resource "google_pubsub_subscription" "processor_queue" {
   expiration_policy {
     ttl = ""
   }
-  
+
   push_config {
-    push_endpoint = "${var.backend_url}/api/v1/processor/_handle" 
+    push_endpoint = "${var.backend_url}/api/v1/processor/_handle"
+
+    oidc_token {
+      service_account_email = google_service_account.service_account_pubsub_push.email
+      audience              = var.backend_url
+    }
 
     attributes = {
       x-goog-version = "v1"
     }
   }
+
+  depends_on = [
+    google_service_account_iam_member.pubsub_push_token_creator
+  ]
 }
 
 // Create a Pub/Sub topic for conversion_queue.
@@ -55,12 +64,21 @@ resource "google_pubsub_subscription" "conversion_queue" {
   }
 
   push_config {
-    push_endpoint = "${var.backend_url}/api/v1/processor/convert/_handle" 
+    push_endpoint = "${var.backend_url}/api/v1/processor/convert/_handle"
+
+    oidc_token {
+      service_account_email = google_service_account.service_account_pubsub_push.email
+      audience              = var.backend_url
+    }
 
     attributes = {
       x-goog-version = "v1"
     }
   }
+
+  depends_on = [
+    google_service_account_iam_member.pubsub_push_token_creator
+  ]
 }
 
 // Create a Pub/Sub topic for kb_processing.
@@ -86,7 +104,9 @@ resource "google_pubsub_subscription" "kb_processing" {
   }
 
   push_config {
-    push_endpoint = "${var.backend_url}/api/v1/admin/knowledge-base/process-message" 
+    # TODO(security): Attach oidc_token and enforce auth.validate_pubsub_token on
+    # /api/v1/admin/knowledge-base/process-message (and update local_pubsub_forwarder.py.example).
+    push_endpoint = "${var.backend_url}/api/v1/admin/knowledge-base/process-message"
 
     attributes = {
       x-goog-version = "v1"

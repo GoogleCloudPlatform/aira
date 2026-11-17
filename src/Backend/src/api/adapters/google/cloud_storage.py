@@ -10,7 +10,7 @@ import os
 from google.cloud import storage  # type: ignore[attr-defined]
 from google.oauth2 import service_account
 
-from api import ports
+from api import errors, ports
 
 
 class CloudStorage(ports.Storage):
@@ -32,10 +32,38 @@ class CloudStorage(ports.Storage):
         """
         Download audio from GCS.
         """
-        file_gcs_path = uri
-        audio_temp = f"{self.audio_path}/{file_name}"
+        expected_bucket = self.storage_path.strip()
+        expected_prefix = f"gs://{expected_bucket}/"
+        if (
+            not expected_bucket
+            or not uri.startswith(expected_prefix)
+            or "\\" in uri
+            or any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in uri)
+        ):
+            raise errors.InvalidField("audio")
+
+        object_path = uri[len(expected_prefix) :]
+        if not object_path or any(
+            seg in {"", ".", ".."} for seg in object_path.split("/")
+        ):
+            raise errors.InvalidField("audio")
+
+        if (
+            not file_name
+            or "/" in file_name
+            or "\\" in file_name
+            or file_name in {".", ".."}
+            or os.path.basename(file_name) != file_name
+        ):
+            raise errors.InvalidField("audio")
+
+        base_dir = os.path.realpath(self.audio_path)
+        audio_temp = os.path.realpath(os.path.join(base_dir, file_name))
+        if not audio_temp.startswith(base_dir + os.sep):
+            raise errors.InvalidField("audio")
+
         await asyncio.to_thread(
-            functools.partial(self._download_sync, file_gcs_path, audio_temp)
+            functools.partial(self._download_sync, uri, audio_temp)
         )
         return audio_temp
 
@@ -90,10 +118,14 @@ class CloudStorage(ports.Storage):
 
     async def get_blob_content_type(self, path: str) -> str | None:
         blob = self.client.bucket(self.storage_path).get_blob(path)
+        if blob is None:
+            return None
         content_type: str | None = blob.content_type
         return content_type
 
     async def get_blob_size(self, path: str) -> int | None:
         blob = self.client.bucket(self.storage_path).get_blob(path)
+        if blob is None:
+            return None
         size: int | None = blob.size
         return size

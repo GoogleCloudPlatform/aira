@@ -32,6 +32,8 @@ class MockStorage(ports.Storage):
         self.project_id = project_id
         self.storage_path = storage_path
         self.signed_url_calls: list[tuple[str, str, str]] = []
+        self.download_calls: list[tuple[str, str]] = []
+        self.upload_file_calls: list[tuple[str, str]] = []
         # Capture path in deletion
         mock_blob = lambda path: type("MockBlob", (), {"delete": lambda s: MockStorage.deleted_paths.append(path)})()
         mock_bucket = type(
@@ -42,6 +44,7 @@ class MockStorage(ports.Storage):
         )()
 
     async def download(self, uri: str, file_name: str) -> str:
+        self.download_calls.append((uri, file_name))
         path = f"/tmp/{file_name}"
         # Write minimal valid PDF bytes so pypdf doesn't crash
         minimal_pdf = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<< /Length 21 >>\nstream\nBT\n/F1 12 Tf\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000056 00000 n\n0000000111 00000 n\n0000000282 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n352\n%%EOF"
@@ -55,7 +58,8 @@ class MockStorage(ports.Storage):
         return "mock-upload-id"
 
     async def upload_by_file(self, path: str, audio_path: str) -> str:
-        return "mock-upload-id"
+        self.upload_file_calls.append((path, audio_path))
+        return f"{self.storage_path}/{path}"
 
     async def generate_signed_url(
         self, path: str, mimetype: str, method: str = "PUT"
@@ -68,6 +72,30 @@ class MockStorage(ports.Storage):
 
     async def get_blob_size(self, path: str) -> int | None:
         return 100
+
+
+class MockAnalyticalResult(ports.AnalyticalResult):
+
+    def __init__(self) -> None:
+        self.saved: list[typing.Any] = []
+
+    async def save(self, result: typing.Any) -> typing.Sequence[dict[str, typing.Any]]:
+        self.saved.append(result)
+        return []
+
+    async def get_student_results(
+        self,
+        school_region: str | None = None,
+        school_city: str | None = None,
+        exam_name: str | None = None,
+        school_name: str | None = None,
+        class_name: str | None = None,
+        exam_start_date: datetime.datetime | None = None,
+        exam_end_date: datetime.datetime | None = None,
+        organizations: list[str] | None = None,
+        groups: list[str] | None = None,
+    ) -> typing.Sequence[dict[str, typing.Any]]:
+        return []
 
 
 class MockMessagePublisher(ports.MessagePublisher):
@@ -105,6 +133,7 @@ class MockGenAI(ports.GenAI):
     def __init__(self):
         self.deleted_doc_ids = []
         self.exam_feedback_calls: list[list[typing.Any]] = []
+        self.evaluate_test_calls: list[tuple[typing.Any, ...]] = []
 
     def generate_words(
         self,
@@ -143,6 +172,9 @@ class MockGenAI(ports.GenAI):
         tts_data: str,
         question_theme: models.QuestionTheme | None = None,
     ) -> tuple[bool, str]:
+        self.evaluate_test_calls.append(
+            (question_type, text_data, tts_data, question_theme)
+        )
         return True, "correct"
 
     def get_exam_feedback(self, questions: list[typing.Any]) -> str:
@@ -173,12 +205,14 @@ class TestGoogleModule(injector.Module):
         publisher: MockMessagePublisher,
         gen_ai: MockGenAI,
         storage: MockStorage | None = None,
+        analytical: MockAnalyticalResult | None = None,
     ):
         self.publisher = publisher
         self.gen_ai = gen_ai
         self.storage = storage or MockStorage(
             project_id="test", storage_path="test-bucket", creds_path=""
         )
+        self.analytical = analytical or MockAnalyticalResult()
 
     @injector.provider
     @injector.singleton
@@ -201,6 +235,11 @@ class TestGoogleModule(injector.Module):
     @injector.singleton
     def provide_generative_ai(self) -> ports.GenAI:
         return self.gen_ai
+
+    @injector.provider
+    @injector.singleton
+    def provide_bigquery(self) -> ports.AnalyticalResult:
+        return self.analytical
 
     @injector.provider
     @injector.singleton
@@ -263,6 +302,11 @@ def mock_storage():
     return MockStorage(project_id="test", storage_path="test-bucket", creds_path="")
 
 
+@pytest.fixture
+def mock_analytical():
+    return MockAnalyticalResult()
+
+
 _TEST_SECRET_MANAGER = memory.SecretManager()
 _TEST_EXTERNAL_AUTH = memory.ExternalAuth()
 
@@ -286,7 +330,9 @@ class TestAuthAndHashingModule(injector.Module):
 
 
 @pytest_asyncio.fixture
-async def test_app(db_engine, mock_publisher, mock_gen_ai, mock_storage):
+async def test_app(
+    db_engine, mock_publisher, mock_gen_ai, mock_storage, mock_analytical
+):
     # Setup dependencies injection container with in-memory database
     from api.dependencies import (
         SettingsModule,
@@ -299,6 +345,7 @@ async def test_app(db_engine, mock_publisher, mock_gen_ai, mock_storage):
     settings = Settings(
         {
             "project_id": "test-project",
+            "bucket_path": "test-bucket",
             "kb_bucket_path": "test-kb-bucket",
             "kb_processing_topic": "kb_processing_topic",
             "env": "local",
@@ -318,7 +365,7 @@ async def test_app(db_engine, mock_publisher, mock_gen_ai, mock_storage):
         TestSQLAlchemyModule(db_engine),
         SQLAlchemyModule(),
         SyncModule(),
-        TestGoogleModule(mock_publisher, mock_gen_ai, mock_storage),
+        TestGoogleModule(mock_publisher, mock_gen_ai, mock_storage, mock_analytical),
         UtilModule(),
         TracingModule(),
     )

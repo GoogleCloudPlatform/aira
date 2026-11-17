@@ -27,7 +27,7 @@ from .schemas import TokenData
 
 logger = logging.getLogger(__name__)
 
-_ALLOWED_SCHEDULER_ISSUER = "https://accounts.google.com"
+_ALLOWED_GOOGLE_ISSUER = "https://accounts.google.com"
 
 
 def _secure_equals(
@@ -97,32 +97,22 @@ def create_token(
     )
 
 
-async def validate_scheduler_token(
-    token: http_sec.HTTPAuthorizationCredentials = fastapi.Depends(auth_scheme),
-    settings: Settings = fastapi_injector.Injected(Settings),
+async def _verify_google_oidc_token(
+    *,
+    token: http_sec.HTTPAuthorizationCredentials,
+    raw_expected_email: typing.Any,
+    raw_expected_audience: typing.Any,
+    raw_expected_sub: typing.Any,
+    label: str,
 ) -> None:
-    """
-    Validate a Cloud Scheduler OIDC ID token.
-
-    Fails closed if expected service account email or audience is unconfigured,
-    verifies Google signature/expiration/audience, and pins issuer, audience,
-    verified email, and (when configured) subject (`sub`).
-    """
-    raw_expected_email = settings.get("scheduler_service_account_email")
-    raw_expected_audience = settings.get("scheduler_audience") or settings.get(
-        "project_id"
-    )
-    raw_expected_sub = settings.get("scheduler_service_account_sub")
-
+    """Verify a Google-signed OIDC ID token with fail-closed identity pinning."""
     expected_email = (
         raw_expected_email.strip().lower()
         if isinstance(raw_expected_email, str)
         else ""
     )
     expected_audience = (
-        raw_expected_audience.strip()
-        if isinstance(raw_expected_audience, str)
-        else ""
+        raw_expected_audience.strip() if isinstance(raw_expected_audience, str) else ""
     )
     expected_sub = (
         raw_expected_sub.strip() if isinstance(raw_expected_sub, str) else ""
@@ -130,8 +120,9 @@ async def validate_scheduler_token(
 
     if not expected_email or not expected_audience:
         logger.error(
-            "Cloud Scheduler OIDC auth misconfigured: missing expected "
-            "scheduler_service_account_email or audience."
+            "%s OIDC auth misconfigured: missing expected service account email "
+            "or audience.",
+            label,
         )
         raise errors.Forbidden()
 
@@ -147,33 +138,71 @@ async def validate_scheduler_token(
             audience=expected_audience,
         )
     except (ValueError, google_exceptions.GoogleAuthError) as exc:
-        logger.warning("Rejected Cloud Scheduler OIDC token during verification.")
+        logger.warning("Rejected %s OIDC token during verification.", label)
         raise errors.TokenExpired() from exc
 
     if not isinstance(claims, collections.abc.Mapping):
         raise errors.TokenExpired()
 
     if not _secure_equals(
-        claims.get("iss"), _ALLOWED_SCHEDULER_ISSUER
+        claims.get("iss"), _ALLOWED_GOOGLE_ISSUER
     ) or not _secure_equals(claims.get("aud"), expected_audience):
-        logger.warning(
-            "Rejected Cloud Scheduler OIDC token: invalid issuer or audience."
-        )
+        logger.warning("Rejected %s OIDC token: invalid issuer or audience.", label)
         raise errors.TokenExpired()
 
     if claims.get("email_verified") is not True or not _secure_equals(
         claims.get("email"), expected_email, case_insensitive=True
     ):
-        logger.warning(
-            "Rejected Cloud Scheduler OIDC token: unauthorized caller identity."
-        )
+        logger.warning("Rejected %s OIDC token: unauthorized caller identity.", label)
         raise errors.Forbidden()
 
     if expected_sub and not _secure_equals(claims.get("sub"), expected_sub):
-        logger.warning(
-            "Rejected Cloud Scheduler OIDC token: caller subject mismatch."
-        )
+        logger.warning("Rejected %s OIDC token: caller subject mismatch.", label)
         raise errors.Forbidden()
+
+
+async def validate_scheduler_token(
+    token: http_sec.HTTPAuthorizationCredentials = fastapi.Depends(auth_scheme),
+    settings: Settings = fastapi_injector.Injected(Settings),
+) -> None:
+    """
+    Validate a Cloud Scheduler OIDC ID token.
+
+    Fails closed if expected service account email or audience is unconfigured,
+    verifies Google signature/expiration/audience, and pins issuer, audience,
+    verified email, and (when configured) subject (`sub`).
+    """
+    await _verify_google_oidc_token(
+        token=token,
+        raw_expected_email=settings.get("scheduler_service_account_email"),
+        raw_expected_audience=(
+            settings.get("scheduler_audience") or settings.get("project_id")
+        ),
+        raw_expected_sub=settings.get("scheduler_service_account_sub"),
+        label="Cloud Scheduler",
+    )
+
+
+async def validate_pubsub_token(
+    token: http_sec.HTTPAuthorizationCredentials = fastapi.Depends(auth_scheme),
+    settings: Settings = fastapi_injector.Injected(Settings),
+) -> None:
+    """
+    Validate a Cloud Pub/Sub push OIDC ID token.
+
+    Fails closed if expected service account email or audience is unconfigured,
+    verifies Google signature/expiration/audience, and pins issuer, audience,
+    verified email, and (when configured) subject (`sub`).
+    """
+    await _verify_google_oidc_token(
+        token=token,
+        raw_expected_email=settings.get("pubsub_service_account_email"),
+        raw_expected_audience=(
+            settings.get("pubsub_audience") or settings.get("project_id")
+        ),
+        raw_expected_sub=settings.get("pubsub_service_account_sub"),
+        label="Pub/Sub push",
+    )
 
 
 async def get_token(

@@ -120,6 +120,25 @@ resource "google_project_iam_member" "service_account_gcs" {
 }
 
 
+resource "google_service_account" "service_account_pubsub_push" {
+  account_id   = "sa-${var.project_number}-pubsub-push"
+  display_name = "Service Account for Pub/Sub push OIDC authentication"
+  project      = var.project_id
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+resource "google_service_account_iam_member" "pubsub_push_token_creator" {
+  service_account_id = google_service_account.service_account_pubsub_push.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  depends_on = [
+    google_project_service.project
+  ]
+}
+
+
 resource "google_project_iam_member" "service_account_looker" {
   project = var.project_id
   provider = google-beta
