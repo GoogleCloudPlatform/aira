@@ -67,13 +67,17 @@ class GetUsersExamDetails(abc.ABC):
 
     @abc.abstractmethod
     async def __call__(
-        self, exam_id: uuid.UUID, user_id: uuid.UUID
+        self,
+        exam_id: uuid.UUID,
+        user_id: uuid.UUID,
+        groups: list[uuid.UUID] | None = None,
     ) -> list[Row[typing.Any]]:
         """
         Method to get a specific user exam.
 
         :param exam_id: the exam identifier.
         :param user_id: the user identifier.
+        :param groups: optional list of authorized group identifiers.
         """
 
 

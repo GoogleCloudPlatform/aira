@@ -88,6 +88,48 @@ async def get(
     return schemas.ExamGet.from_orm(exam)
 
 
+async def _resolve_authorized_exam_groups(
+    session: models.Session,
+    target_user_id: uuid.UUID,
+    get_user_query: ports.GetUser,
+) -> list[uuid.UUID]:
+    """Resolve group IDs the caller is authorized to view for `target_user_id`."""
+    role_scopes = (
+        session.user.role.scopes if session.user and session.user.role else []
+    )
+    has_exam_list = "exam.list" in role_scopes
+    has_user = "user" in role_scopes
+    if not has_exam_list and not has_user:
+        raise errors.Forbidden()
+
+    caller_group_ids = (
+        [group.id for group in session.user.groups] if session.user else []
+    )
+    if not caller_group_ids:
+        raise errors.Forbidden()
+
+    if not has_exam_list:
+        if target_user_id != session.user_id:
+            raise errors.Forbidden()
+        return caller_group_ids
+
+    if target_user_id == session.user_id:
+        return caller_group_ids
+
+    try:
+        target_user = await get_user_query(user_id=target_user_id)
+    except errors.NotFound as exc:
+        raise errors.Forbidden() from exc
+
+    caller_group_id_set = set(caller_group_ids)
+    shared_group_ids = [
+        group.id for group in target_user.groups if group.id in caller_group_id_set
+    ]
+    if not shared_group_ids:
+        raise errors.Forbidden()
+    return shared_group_ids
+
+
 @router.get(
     "/{exam_id}/users/{user_id}",
     dependencies=[fastapi.Security(auth.get_token, scopes=["exam.list", "user"])],
@@ -95,6 +137,10 @@ async def get(
 async def get_user_exam(
     get_user_exam: ports.GetUsersExamDetails = fastapi_injector.Injected(
         ports.GetUsersExamDetails
+    ),
+    get_user_query: ports.GetUser = fastapi_injector.Injected(ports.GetUser),
+    session_manager: sess_mg.SessionManager = fastapi.Depends(
+        dependencies.get_session_manager
     ),
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
     exam_id: uuid.UUID = fastapi.Path(...),
@@ -113,13 +159,24 @@ async def get_user_exam(
     :param exam_id: query param with exam identifier.
     :param user_id: query param with user identifier.
     """
-    result = await get_user_exam(exam_id=exam_id, user_id=user_id)
+    session = await session_manager.get_current_session()
+    allowed_group_ids = await _resolve_authorized_exam_groups(
+        session=session,
+        target_user_id=user_id,
+        get_user_query=get_user_query,
+    )
+
+    result = await get_user_exam(
+        exam_id=exam_id,
+        user_id=user_id,
+        groups=allowed_group_ids,
+    )
 
     if not result:
         raise errors.NotFound()
 
     exam, questions = result[0]
-    exam_dict = exam.__dict__
+    exam_dict = dict(exam.__dict__)
     questions = json.loads(questions)
 
     for question in questions:

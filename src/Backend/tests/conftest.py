@@ -31,6 +31,7 @@ class MockStorage(ports.Storage):
     def __init__(self, project_id: str, storage_path: str, creds_path: str):
         self.project_id = project_id
         self.storage_path = storage_path
+        self.signed_url_calls: list[tuple[str, str, str]] = []
         # Capture path in deletion
         mock_blob = lambda path: type("MockBlob", (), {"delete": lambda s: MockStorage.deleted_paths.append(path)})()
         mock_bucket = type(
@@ -59,6 +60,7 @@ class MockStorage(ports.Storage):
     async def generate_signed_url(
         self, path: str, mimetype: str, method: str = "PUT"
     ) -> str:
+        self.signed_url_calls.append((path, mimetype, method))
         return f"https://storage.googleapis.com/test-bucket/{path}?signed=true"
 
     async def get_blob_content_type(self, path: str) -> str | None:
@@ -102,6 +104,7 @@ class MockGenAI(ports.GenAI):
 
     def __init__(self):
         self.deleted_doc_ids = []
+        self.exam_feedback_calls: list[list[typing.Any]] = []
 
     def generate_words(
         self,
@@ -143,6 +146,7 @@ class MockGenAI(ports.GenAI):
         return True, "correct"
 
     def get_exam_feedback(self, questions: list[typing.Any]) -> str:
+        self.exam_feedback_calls.append(questions)
         return "feedback"
 
     async def index_document(
@@ -164,14 +168,27 @@ class MockGenAI(ports.GenAI):
 
 class TestGoogleModule(injector.Module):
 
-    def __init__(self, publisher: MockMessagePublisher, gen_ai: MockGenAI):
+    def __init__(
+        self,
+        publisher: MockMessagePublisher,
+        gen_ai: MockGenAI,
+        storage: MockStorage | None = None,
+    ):
         self.publisher = publisher
         self.gen_ai = gen_ai
+        self.storage = storage or MockStorage(
+            project_id="test", storage_path="test-bucket", creds_path=""
+        )
 
     @injector.provider
     @injector.singleton
     def provide_pubsub(self) -> ports.MessagePublisher:
         return self.publisher
+
+    @injector.provider
+    @injector.singleton
+    def provide_storage(self) -> ports.Storage:
+        return self.storage
 
     @injector.provider
     @injector.singleton
@@ -241,6 +258,11 @@ def mock_gen_ai():
     return MockGenAI()
 
 
+@pytest.fixture
+def mock_storage():
+    return MockStorage(project_id="test", storage_path="test-bucket", creds_path="")
+
+
 _TEST_SECRET_MANAGER = memory.SecretManager()
 _TEST_EXTERNAL_AUTH = memory.ExternalAuth()
 
@@ -264,7 +286,7 @@ class TestAuthAndHashingModule(injector.Module):
 
 
 @pytest_asyncio.fixture
-async def test_app(db_engine, mock_publisher, mock_gen_ai):
+async def test_app(db_engine, mock_publisher, mock_gen_ai, mock_storage):
     # Setup dependencies injection container with in-memory database
     from api.dependencies import (
         SettingsModule,
@@ -296,7 +318,7 @@ async def test_app(db_engine, mock_publisher, mock_gen_ai):
         TestSQLAlchemyModule(db_engine),
         SQLAlchemyModule(),
         SyncModule(),
-        TestGoogleModule(mock_publisher, mock_gen_ai),
+        TestGoogleModule(mock_publisher, mock_gen_ai, mock_storage),
         UtilModule(),
         TracingModule(),
     )

@@ -125,14 +125,21 @@ class GetUsersExamDetails(ports.GetUsersExamDetails):
         self._session_factory = session_factory
 
     async def __call__(
-        self, exam_id: uuid.UUID, user_id: uuid.UUID
+        self,
+        exam_id: uuid.UUID,
+        user_id: uuid.UUID,
+        groups: list[uuid.UUID] | None = None,
     ) -> list[Row[typing.Any]]:
         """
         Method to get a specific user exam.
 
         :param exam_id: the exam identifier.
         :param user_id: the user identifier.
+        :param groups: optional list of authorized group identifiers.
         """
+        if groups is not None and not groups:
+            return []
+
         exam = models.Exam
         euq = models.ExamUserQuestion
         eu = models.ExamUser
@@ -196,8 +203,22 @@ class GetUsersExamDetails(ports.GetUsersExamDetails):
                 sa.and_(question.id == euq.question_id, question.exam_id == exam.id),
             )
             .where(exam.id == exam_id)
-            .group_by(exam.id)
         )
+
+        if groups is not None:
+            exam_stmt = (
+                exam_stmt.where(euq.group_id.in_(groups))
+                .join(models.Group, models.Group.id == euq.group_id)
+                .join(
+                    models.Series,
+                    sa.and_(
+                        models.Series.id == models.Group.series_id,
+                        models.Series.name == _get_grade_mapping_case(exam.grade),
+                    ),
+                )
+            )
+
+        exam_stmt = exam_stmt.group_by(exam.id)
 
         async with self._session_factory() as session:
             result = await session.execute(exam_stmt)
