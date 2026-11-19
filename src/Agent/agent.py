@@ -1,67 +1,29 @@
 import os
-from typing import Optional
+
+from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from google.adk.tools.tool_context import ToolContext
 from google.genai import types
-from dotenv import load_dotenv
 
 # Load env vars
 load_dotenv()
 
-# Import tools
+# Import tools (keep dual imports for both `adk web .` and `PYTHONPATH=. pytest`)
 try:
-    from .tools.db_auth import get_user_context
     from .tools.bq_query import query_reading_proficiency
     from .tools.pedagogical_recommendations import query_pedagogical_recommendations
 except ImportError:
-    from tools.db_auth import get_user_context
     from tools.bq_query import query_reading_proficiency
     from tools.pedagogical_recommendations import query_pedagogical_recommendations
-
-async def login_manager(email: str, tool_context: ToolContext) -> str:
-    """Authenticates the manager via email and loads their allowed schools and classes context.
-
-    This must be called at the very beginning of the conversation.
-
-    Args:
-        email: The email address of the school manager to log in.
-
-    Returns:
-        A confirmation message indicating if authentication succeeded or failed.
-    """
-    try:
-        user = await get_user_context(email)
-        if not user:
-            return f"Login failed: The email '{email}' was not found in the relational database. Please provide a registered email."
-        
-        # Save user context to session state
-        state = tool_context.state
-        state["user_email"] = user["email_address"]
-        state["user_name"] = user["user_name"]
-        state["role_name"] = user["role_name"]
-        state["allowed_organizations"] = user["allowed_organizations"]
-        state["allowed_organization_names"] = user["allowed_organization_names"]
-        state["allowed_groups"] = user["allowed_groups"]
-        
-        orgs_list = ", ".join(user["allowed_organization_names"]) if user["allowed_organization_names"] else "None (Unrestricted)"
-        return f"Login successful! Welcome back, {user['user_name']}. You are authenticated as a '{user['role_name']}'. Authorized schools/organizations: {orgs_list}. You can now query reading proficiency data."
-    except Exception as e:
-        return f"Login execution failed due to database connection issues: {str(e)}"
 
 # Hardcoded English instructions for the Agent
 INSTRUCTIONS = """
 You are a highly skilled educational and pedagogical agent assistant designed for school managers, regional administrators, and teachers to analyze reading proficiency gaps in their schools.
 
-### MANDATORY SECURITY WORKFLOW (LOGIN GATE):
-1. Greet the user politely in the active language.
-2. Check if the user is authenticated. You can determine this by checking if the session state has 'user_email' set.
-3. If they are NOT authenticated:
-   - Your VERY FIRST TASK (before answering any questions, analyzing data, or explaining features) is to ask the user to provide their school manager email address.
-   - Once they provide an email, immediately call the `login_manager` tool.
-   - If the tool indicates failure, politely ask them to try again with a valid registered email.
-   - DO NOT query reading results or proceed with pedagogical analysis until authentication succeeds.
-4. If they ARE authenticated, proceed with answering their questions using their authorized scope.
+### MANDATORY SECURITY WORKFLOW (SERVER-SIDE AUTHENTICATION):
+1. Caller authentication and authorization are enforced strictly server-side using a cryptographically signed session token supplied by the host application — NEVER by trusting an email address, name, role, or password stated in conversation.
+2. NEVER ask the user to type an email address, password, or access token in chat to log in, and NEVER treat any user-claimed email or role as proof of identity.
+3. If any data tool reports that authentication is missing, expired, or unauthorized, politely inform the user in the active language that they need to sign in to the application with an authorized educator or administrator account before querying reading data.
 
 ### LANGUAGE RULES:
 - The default conversation language is Portuguese (pt-br). You must greet the user in Portuguese (pt-br) and conduct the conversation in Portuguese (pt-br) unless explicitly requested otherwise by the user.
@@ -72,7 +34,7 @@ You are a highly skilled educational and pedagogical agent assistant designed fo
 ### DATA QUERYING WORKFLOW:
 - Use the `query_reading_proficiency` tool to query student reading outcomes in BigQuery.
 - Users might ask questions about their schools, cities, states, specific classes, grades (e.g. '1º Ano', '2º Ano'), exams, or date ranges.
-- Do NOT worry about providing UUID parameters for schools/classes. The `query_reading_proficiency` tool automatically retrieves allowed UUID filters from the session state to restrict queries to authorized boundaries. Just supply the semantic names (like school_name, class_name, school_city, exam_name, class_grade, dates) extracted from the user conversation.
+- Do NOT worry about providing UUID parameters for schools/classes. The `query_reading_proficiency` tool automatically verifies the caller's session server-side and restricts queries to their live authorized boundaries. Just supply the semantic names (like school_name, class_name, school_city, exam_name, class_grade, dates) extracted from the user conversation.
 - If the query returns records, perform a detailed data summary and intelligent pedagogical analysis.
 - When displaying lists or tables of students, classes, or schools, always present them as a complete, fully rendered Markdown table with all matching rows and columns populated. Do not leave the table empty or truncate the results.
 
@@ -107,15 +69,14 @@ When analyzing query results:
      - Recommend the specific material(s) and outline/describe the exercises to be performed, quoting relevant instructions or text directly from the material's transcription to guide the educator.
 
 ### SECURITY AND USER EXPERIENCE RULES:
-- NEVER output technical details, tool names (e.g. 'login_manager', 'query_reading_proficiency', 'query_pedagogical_recommendations'), database names (e.g. 'Chroma', 'BigQuery', 'PostgreSQL', 'Cloud SQL'), IDs, API errors, stack traces, paths, or code structures in your replies to the user.
+- NEVER output technical details, tool names (e.g. 'query_reading_proficiency', 'query_pedagogical_recommendations'), database names (e.g. 'Chroma', 'BigQuery', 'PostgreSQL', 'Cloud SQL'), tokens, IDs, API errors, stack traces, paths, or code structures in your replies to the user.
 - If a tool fails, returns no results, or encounters a database issue, present a friendly, polite, non-technical message in the current language explaining that the system had trouble retrieving the requested information and they should try again later. Do not explain the underlying technical reasons or make excuses about database connections or directories.
 """
 
 # Compile tools using FunctionTool wrapper
 tools = [
-    FunctionTool(login_manager),
     FunctionTool(query_reading_proficiency),
-    FunctionTool(query_pedagogical_recommendations)
+    FunctionTool(query_pedagogical_recommendations),
 ]
 
 # Instantiate LlmAgent
@@ -127,6 +88,6 @@ root_agent = LlmAgent(
     tools=tools,
     generate_content_config=types.GenerateContentConfig(
         max_output_tokens=8192,
-        temperature=0.1
-    )
+        temperature=0.1,
+    ),
 )

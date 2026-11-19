@@ -33,6 +33,8 @@ AGENT_IDENTIFIER="{AGENT_IDENTIFIER}"
 DATABASE_URI="{DATABASE_URI}"
 INSTANCE_CONNECTION_NAME="{INSTANCE_CONNECTION_NAME}"
 GCP_PROJECT_ID="{PROJECT_ID}"
+AUTH_TOKEN_AUDIENCE="{PROJECT_ID}"
+AUTH_PUBLIC_KEY_SECRET_ID="public-key"
 BQ_DATASET="{BQ_DATASET}"
 BQ_TABLE_NAME="{BQ_TABLE_NAME}"
 GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY="true"
@@ -45,6 +47,8 @@ google-cloud-bigquery>=3.42.2,<4.0.0
 google-cloud-aiplatform>=1.162.0,<2.0.0
 opentelemetry-exporter-otlp-proto-http<=1.42.1
 cloud-sql-python-connector>=1.20.4
+cryptography>=42.0.0
+httpx>=0.27.0
 """
     
     with open(temp_env_path, "w") as f:
