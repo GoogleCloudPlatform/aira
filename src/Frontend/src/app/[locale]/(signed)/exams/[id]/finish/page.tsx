@@ -8,10 +8,10 @@ import { ErrorBoundary } from "react-error-boundary";
 export const metadata = examFinishMetadata
 
 type TExamFinishPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         id: string;
-    }
+    }>
 }
 
 export default async function ExamFinishPage({ params } : TExamFinishPageProps) {

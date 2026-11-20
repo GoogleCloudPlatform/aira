@@ -6,11 +6,138 @@ import abc
 import collections.abc
 import contextlib
 import logging.config
+import re
 import typing
 
 import structlog.contextvars
 
 T = typing.TypeVar("T")
+
+REDACTED = "[REDACTED]"
+_MAX_REDACT_DEPTH = 20
+_STRUCTLOG_INTERNAL_KEYS: frozenset[str] = frozenset({"_record", "_from_structlog"})
+
+_SENSITIVE_KEYS: frozenset[str] = frozenset(
+    {
+        "password",
+        "_password",
+        "passwd",
+        "pwd",
+        "secret",
+        "client_secret",
+        "looker_secret",
+        "private_key",
+        "api_key",
+        "apikey",
+        "x_api_key",
+        "sendgrid_key",
+        "smtp_password",
+        "token",
+        "id_token",
+        "access_token",
+        "refresh_token",
+        "reset_token",
+        "seduc_token",
+        "authorization",
+        "cookie",
+        "set_cookie",
+        "email",
+        "email_address",
+    }
+)
+
+_SENSITIVE_KEY_PATTERN = (
+    r"(?:_?password|passwd|pwd|client_secret|looker_secret|private_key|"
+    r"api_key|apikey|x-api-key|sendgrid_key|smtp_password|"
+    r"id_token|access_token|refresh_token|reset_token|seduc_token|"
+    r"authorization|cookie|set-cookie|email_address|email|secret|token)"
+)
+
+_QUERY_SECRET_RE = re.compile(
+    r"([?&](?:_?password|passwd|secret|token|id_token|access_token|"
+    r"refresh_token|reset_token|api_key|apikey|sig|signature)=)"
+    r"[^&\s'\"<>]+",
+    re.IGNORECASE,
+)
+
+_BEARER_RE = re.compile(r"\b(Bearer\s+)[A-Za-z0-9._~+/=-]+", re.IGNORECASE)
+
+_QUOTED_KV_SECRET_RE = re.compile(
+    rf"""(?P<prefix>(?P<kquote>['"]){_SENSITIVE_KEY_PATTERN}(?P=kquote)\s*:\s*)"""
+    rf"""(?P<value>"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s,}}\]]+)""",
+    re.IGNORECASE,
+)
+
+_UNQUOTED_KV_SECRET_RE = re.compile(
+    rf"""(?P<prefix>(?<![A-Za-z0-9_]){_SENSITIVE_KEY_PATTERN}\s*[:=]\s*)"""
+    rf"""(?P<value>"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s,}}\]&;]+)""",
+    re.IGNORECASE,
+)
+
+
+def _is_sensitive_key(key: typing.Any) -> bool:
+    if not isinstance(key, str):
+        return False
+    return key.strip().lower().replace("-", "_") in _SENSITIVE_KEYS
+
+
+def _replace_kv_match(match: re.Match[str]) -> str:
+    prefix = match.group("prefix")
+    value = match.group("value")
+    if value.startswith('"'):
+        return f'{prefix}"{REDACTED}"'
+    if value.startswith("'"):
+        return f"{prefix}'{REDACTED}'"
+    return f"{prefix}{REDACTED}"
+
+
+def redact_string(value: str) -> str:
+    """Scrub plaintext credentials, tokens, and PII key-value pairs from a string."""
+    scrubbed = _QUERY_SECRET_RE.sub(rf"\1{REDACTED}", value)
+    scrubbed = _BEARER_RE.sub(rf"\1{REDACTED}", scrubbed)
+    scrubbed = _QUOTED_KV_SECRET_RE.sub(_replace_kv_match, scrubbed)
+    scrubbed = _UNQUOTED_KV_SECRET_RE.sub(_replace_kv_match, scrubbed)
+    return scrubbed
+
+
+def redact_value(
+    value: typing.Any,
+    *,
+    _depth: int = 0,
+    preserve_internal_keys: bool = False,
+) -> typing.Any:
+    """Recursively scrub sensitive keys and secret patterns from structured data."""
+    if _depth >= _MAX_REDACT_DEPTH:
+        return REDACTED
+    if isinstance(value, str):
+        return redact_string(value)
+    if isinstance(value, collections.abc.Mapping):
+        redacted_map: dict[typing.Any, typing.Any] = {}
+        for k, v in value.items():
+            if preserve_internal_keys and k in _STRUCTLOG_INTERNAL_KEYS:
+                redacted_map[k] = v
+            elif _is_sensitive_key(k):
+                redacted_map[k] = REDACTED
+            else:
+                redacted_map[k] = redact_value(v, _depth=_depth + 1)
+        return redacted_map
+    if isinstance(value, list):
+        return [redact_value(item, _depth=_depth + 1) for item in value]
+    if isinstance(value, tuple):
+        return tuple(redact_value(item, _depth=_depth + 1) for item in value)
+    return value
+
+
+def redact_sensitive_data(
+    logger: logging.Logger | None,
+    name: str,
+    event_dict: structlog.typing.EventDict,
+) -> structlog.typing.EventDict:
+    """Structlog processor that redacts credentials and PII before rendering logs."""
+    return typing.cast(
+        structlog.typing.EventDict,
+        redact_value(event_dict, preserve_internal_keys=True),
+    )
 
 
 class LogContext(metaclass=abc.ABCMeta):
@@ -154,6 +281,8 @@ default_processors: tuple[structlog.types.Processor, ...] = (
     # so that values passed in the extra parameter of log methods pass
     # through to log output.
     structlog.stdlib.ExtraAdder(),
+    # Scrub credentials, tokens, and PII before rendering to Cloud Logging.
+    redact_sensitive_data,
 )
 
 LOG_RENDERER = {

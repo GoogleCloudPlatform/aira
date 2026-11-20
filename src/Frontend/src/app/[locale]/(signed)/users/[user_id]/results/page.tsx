@@ -9,13 +9,14 @@ export const metadata = {
 }
 
 type TResultsPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         user_id: string;
-    }
+    }>
 }
 
 export default async function ResultsPage({ params } : TResultsPageProps) {
+    const { user_id } = await params;
     return (
         <>
             <article className='flex justify-center w-full h-full overflow-x-hidden overflow-y-auto relative z-10 [&::-webkit-scrollbar]:hidden'>
@@ -23,7 +24,7 @@ export default async function ResultsPage({ params } : TResultsPageProps) {
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️ Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>
-                                <UserResults user_id={params.user_id} />
+                                <UserResults user_id={user_id} />
                             </Suspense>
                         </ErrorBoundary>
                     </div>

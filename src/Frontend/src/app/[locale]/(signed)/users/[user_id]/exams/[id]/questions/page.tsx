@@ -8,11 +8,11 @@ import Loading from "@/components/loading/Loading";
 export const metadata = examQuestionsMetadata
 
 type TExamPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         user_id: string;
         id: string;
-    }
+    }>
 }
 
 // const fetchData = async ({ user_id, id }: { user_id: string, id: string }) => {
@@ -35,7 +35,8 @@ type TExamPageProps = {
 // }
 
 export default async function ExamPage({ params } : TExamPageProps) {
-    //const data = await fetchData({ user_id: params.user_id, id: params.id });
+    const { user_id, id } = await params;
+    //const data = await fetchData({ user_id, id });
     
     return (
         <>
@@ -44,7 +45,7 @@ export default async function ExamPage({ params } : TExamPageProps) {
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️ Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>
-                                <ExamDisplay user_id={params.user_id} exam_id={params.id} />
+                                <ExamDisplay user_id={user_id} exam_id={id} />
                                 <Blocker />
                             </Suspense>
                         </ErrorBoundary>

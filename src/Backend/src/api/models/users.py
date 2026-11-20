@@ -102,7 +102,7 @@ class User(db.Base, db.DefaultColumns):
     email_address: Mapped[db.Str100] = mapped_column(sa.String(100), unique=True)
 
     _password: Mapped[str | None] = mapped_column(
-        "password", sa.String(100), nullable=True, init=False
+        "password", sa.String(100), nullable=True, init=False, repr=False
     )
 
     last_login: Mapped[db.DateTime] = mapped_column(init=False, nullable=True)
@@ -134,7 +134,7 @@ class User(db.Base, db.DefaultColumns):
     )
 
     reset_token: Mapped[str | None] = mapped_column(
-        sa.String(100), nullable=True, init=False
+        sa.String(100), nullable=True, init=False, repr=False
     )
 
     __table_args__ = (

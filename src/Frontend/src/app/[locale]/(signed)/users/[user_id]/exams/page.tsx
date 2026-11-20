@@ -7,13 +7,14 @@ import { ErrorBoundary } from "react-error-boundary";
 export const metadata = examsMetadata
 
 type TUserExamsPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         user_id: string;
-    }
+    }>
 }
 
 export default async function UserExamsPage({ params } : TUserExamsPageProps) {
+    const { user_id } = await params;
     return (
         <>
             <article className='flex justify-center items-center w-full h-full overflow-x-hidden overflow-y-auto relative z-10'>
@@ -21,7 +22,7 @@ export default async function UserExamsPage({ params } : TUserExamsPageProps) {
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️ Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>
-                                <UserExams user_id={params.user_id} />
+                                <UserExams user_id={user_id} />
                             </Suspense>
                         </ErrorBoundary>
                     </div>

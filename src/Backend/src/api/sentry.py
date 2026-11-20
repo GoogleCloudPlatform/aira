@@ -9,7 +9,23 @@ from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.grpc import GRPCIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-from api import typings
+from api import logging_config, typings
+
+
+def _scrub_sentry_event(
+    event: typing.Any,
+    hint: typing.Any,
+) -> typing.Any:
+    del hint
+    return logging_config.redact_value(event)
+
+
+def _scrub_sentry_breadcrumb(
+    crumb: dict[str, typing.Any],
+    hint: typing.Any,
+) -> dict[str, typing.Any]:
+    del hint
+    return typing.cast(dict[str, typing.Any], logging_config.redact_value(crumb))
 
 
 class _OfflineTransport(sentry_sdk.Transport):
@@ -45,6 +61,10 @@ def setup(settings: typings.Settings) -> None:
         dsn=dsn,
         environment=settings.get("project_id"),
         release=settings.get("git_sha"),
+        send_default_pii=False,
+        include_local_variables=False,
+        before_send=_scrub_sentry_event,
+        before_breadcrumb=_scrub_sentry_breadcrumb,
         default_integrations=True,
         auto_enabling_integrations=False,
         integrations=[

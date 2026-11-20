@@ -9,14 +9,15 @@ import Loading from "@/components/loading/Loading";
 export const metadata = examsMetadata
 
 type TUserExamsPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
-    }
+    }>
 }
 
-const getUser = () : IUser | null => {
+const getUser = async () : Promise<IUser | null> => {
     try {
-        const user_cookie = cookies().get("user");
+        const cookieStore = await cookies();
+        const user_cookie = cookieStore.get("user");
         if (!user_cookie || !user_cookie.value) return null;
         return JSON.parse(user_cookie.value);
     } catch (error) {
@@ -26,7 +27,7 @@ const getUser = () : IUser | null => {
 }
 
 export default async function UserExamsPage({ params } : TUserExamsPageProps) {
-    const user = getUser();
+    const user = await getUser();
 
     if (!user) return <>Could not load informations from user</>
 

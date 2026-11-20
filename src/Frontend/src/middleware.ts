@@ -3,7 +3,6 @@ import { match } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
 import { NextRequest } from 'next/server'
 import { locales, defaultLocale } from './libs/i18n/i18n-config';
-import { cookies } from 'next/headers';
 import { api } from './api/api';
 
 const fallbackLocale = defaultLocale;
@@ -28,7 +27,7 @@ function getLocale(request : NextRequest) {
 }
 
 export default async function middleware(request: NextRequest) {
-    const token = cookies().get("token");
+    const token = request.cookies.get("token");
 
     if (token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;

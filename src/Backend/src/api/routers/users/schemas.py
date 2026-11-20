@@ -132,7 +132,7 @@ class UserCreate(pydantic.BaseModel):
     email_address: pydantic.EmailStr
     customer_id: str | None = None
     type: models.UserType
-    password: pydantic.StrictStr | None = None
+    password: pydantic.StrictStr | None = pydantic.Field(default=None, repr=False)
     external_id: str | None = None
     state: str | None = None
     region: str | None = None

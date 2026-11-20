@@ -7,11 +7,11 @@ import Loading from "@/components/loading/Loading";
 export const metadata = examFinishMetadata
 
 type TExamPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         user_id: string;
         id: string;
-    }
+    }>
 }
 
 export default async function ExamFinishPage({ params } : TExamPageProps) {

@@ -13,7 +13,8 @@ export const metadata : Metadata = appMetadata
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default async function RootLayout({ children, params: { locale } }: { children: React.ReactNode, params: { locale: string } }) {
+export default async function RootLayout({ children, params }: { children: React.ReactNode, params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
     let messages;
     try {
         messages = await getMessages(locale as Locale);

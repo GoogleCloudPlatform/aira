@@ -9,15 +9,16 @@ import Loading from "@/components/loading/Loading";
 export const metadata = examQuestionsMetadata
 
 type TExamPageProps = {
-    params: {
+    params: Promise<{
         locale: string,
         id: string;
-    }
+    }>
 }
 
-const getUser = () : IUser | null => {
+const getUser = async () : Promise<IUser | null> => {
     try {
-        const user_cookie = cookies().get("user");
+        const cookieStore = await cookies();
+        const user_cookie = cookieStore.get("user");
         if (!user_cookie || !user_cookie.value) return null;
         return JSON.parse(user_cookie.value);
     } catch (error) {
@@ -27,7 +28,8 @@ const getUser = () : IUser | null => {
 }
 
 export default async function ExamPage({ params } : TExamPageProps) {
-    const user = getUser();
+    const { id } = await params;
+    const user = await getUser();
 
     if (!user) return <>Could not load informations from user</>
 
@@ -38,7 +40,7 @@ export default async function ExamPage({ params } : TExamPageProps) {
                     <div className="h-full">
                         <ErrorBoundary fallback={<p>⚠️ Something went wrong</p>}>
                             <Suspense fallback={<Loading style="vertical" text={true}/>}>
-                                <ExamDisplay user_id={user.user_id} exam_id={params.id} />
+                                <ExamDisplay user_id={user.user_id} exam_id={id} />
                             </Suspense>
                         </ErrorBoundary>
                     </div>

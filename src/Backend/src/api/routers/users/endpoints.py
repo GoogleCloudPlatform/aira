@@ -5,7 +5,6 @@ Module containing all endpoints related to user services
 from __future__ import annotations
 
 import json
-import logging
 import re
 import uuid
 from datetime import datetime
@@ -24,8 +23,6 @@ from api.routers.exams import schemas as exam_schemas
 from . import crud, schemas
 
 router = fastapi.APIRouter(tags=["users"])
-
-logger = logging.getLogger(__name__)
 
 
 @router.get("/me", dependencies=[fastapi.Security(auth.get_token)])

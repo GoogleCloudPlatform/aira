@@ -14,7 +14,7 @@ class FirebaseLogin(pydantic.BaseModel):
     Schema related to the login request.
     """
 
-    token: str
+    token: str = pydantic.Field(..., repr=False)
 
 
 class EmailPasswordLogin(pydantic.BaseModel):
@@ -23,7 +23,7 @@ class EmailPasswordLogin(pydantic.BaseModel):
     """
 
     email_address: str
-    password: pydantic.StrictStr
+    password: pydantic.StrictStr = pydantic.Field(..., repr=False)
 
 
 class Session(pydantic.BaseModel):
@@ -35,8 +35,8 @@ class Session(pydantic.BaseModel):
     user_id: uuid.UUID
     user_name: str
     token_type: typing.Literal["bearer"] = "bearer"
-    access_token: str
-    refresh_token: str
+    access_token: str = pydantic.Field(..., repr=False)
+    refresh_token: str = pydantic.Field(..., repr=False)
     expires_in: datetime.timedelta
     scopes: list[str]
 
@@ -54,5 +54,5 @@ class ResetPassword(pydantic.BaseModel):
     Schema related to resetting passwords.
     """
 
-    token: str
-    password: pydantic.StrictStr
+    token: str = pydantic.Field(..., repr=False)
+    password: pydantic.StrictStr = pydantic.Field(..., repr=False)
