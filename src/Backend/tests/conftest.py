@@ -32,6 +32,7 @@ class MockStorage(ports.Storage):
         self.project_id = project_id
         self.storage_path = storage_path
         self.signed_url_calls: list[tuple[str, str, str]] = []
+        self.signed_url_options: list[dict[str, str | None]] = []
         self.download_calls: list[tuple[str, str]] = []
         self.upload_file_calls: list[tuple[str, str]] = []
         # Capture path in deletion
@@ -62,9 +63,20 @@ class MockStorage(ports.Storage):
         return f"{self.storage_path}/{path}"
 
     async def generate_signed_url(
-        self, path: str, mimetype: str, method: str = "PUT"
+        self,
+        path: str,
+        mimetype: str,
+        method: str = "PUT",
+        response_disposition: str | None = None,
+        response_type: str | None = None,
     ) -> str:
         self.signed_url_calls.append((path, mimetype, method))
+        self.signed_url_options.append(
+            {
+                "response_disposition": response_disposition,
+                "response_type": response_type,
+            }
+        )
         return f"https://storage.googleapis.com/test-bucket/{path}?signed=true"
 
     async def get_blob_content_type(self, path: str) -> str | None:

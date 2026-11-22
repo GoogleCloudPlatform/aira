@@ -6,11 +6,26 @@ import asyncio
 import datetime
 import functools
 import os
+import re
 
 from google.cloud import storage  # type: ignore[attr-defined]
 from google.oauth2 import service_account
 
 from api import errors, ports
+
+_SAFE_MIMETYPE_RE = re.compile(
+    r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$",
+    re.ASCII,
+)
+
+
+def _is_safe_mimetype(value: str) -> bool:
+    return bool(
+        value
+        and ".." not in value
+        and "\\" not in value
+        and _SAFE_MIMETYPE_RE.fullmatch(value)
+    )
 
 
 class CloudStorage(ports.Storage):
@@ -102,17 +117,51 @@ class CloudStorage(ports.Storage):
         return end_path
 
     async def generate_signed_url(
-        self, path: str, mimetype: str, method: str = "PUT"
+        self,
+        path: str,
+        mimetype: str,
+        method: str = "PUT",
+        response_disposition: str | None = None,
+        response_type: str | None = None,
     ) -> str:
+        if (
+            not path
+            or path.startswith("/")
+            or path.endswith("/")
+            or "\\" in path
+            or any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in path)
+            or any(seg in {"", ".", ".."} for seg in path.split("/"))
+        ):
+            raise errors.InvalidField("path")
+
+        if method != "GET":
+            if not _is_safe_mimetype(mimetype):
+                raise errors.InvalidField("mimetype")
+        elif mimetype and not _is_safe_mimetype(mimetype):
+            raise errors.InvalidField("mimetype")
+
+        if response_disposition is not None and any(
+            ord(ch) < 0x20 or ord(ch) == 0x7F for ch in response_disposition
+        ):
+            raise errors.InvalidField("response_disposition")
+
+        if response_type is not None and not _is_safe_mimetype(response_type):
+            raise errors.InvalidField("response_type")
+
         blob = self.client.bucket(self.storage_path).blob(path)
+        kwargs: dict[str, object] = {
+            "method": method,
+            "expiration": datetime.timedelta(hours=1),
+            "version": "v4",
+            "content_type": mimetype if method != "GET" else None,
+        }
+        if method == "GET":
+            if response_disposition is not None:
+                kwargs["response_disposition"] = response_disposition
+            if response_type is not None:
+                kwargs["response_type"] = response_type
         response: str = await asyncio.to_thread(
-            functools.partial(
-                blob.generate_signed_url,
-                method=method,
-                expiration=datetime.timedelta(hours=1),
-                version="v4",
-                content_type=mimetype if method != "GET" else None,
-            )
+            functools.partial(blob.generate_signed_url, **kwargs)
         )
         return response
 

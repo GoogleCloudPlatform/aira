@@ -919,6 +919,15 @@ async def create_signed_url(
         case schemas.CreateUserSignedRequest() if (
             "user" in user.role.scopes or "user.impersonate" in user.role.scopes
         ):
+            if (
+                not isinstance(body.file_type, schemas.AudioFileType)
+                or not isinstance(body.mimetype, schemas.AudioMimeType)
+                or body.mimetype
+                not in schemas.ALLOWED_AUDIO_MIME_TYPES.get(
+                    body.file_type, frozenset()
+                )
+            ):
+                raise errors.InvalidField("file_type")
             user_id = body.user_id
             if "user.impersonate" in user.role.scopes:
                 impersonate_list = await list_personifiable(
@@ -938,22 +947,33 @@ async def create_signed_url(
                 group_id = user_tb_imp.group_id
                 organization_id = user_tb_imp.organization_id
             else:
-                if session.user_id != user_id:
+                if session.user_id != user_id or not user.groups:
                     raise errors.Forbidden()
                 group = user.groups[0]
                 group_id = group.id
                 organization_id = group.organization_id
             file_path = (
                 f"{organization_id}/{group_id}/{body.exam_id}"
-                f"|{body.question_id}|{user_id}.{body.file_type}"
+                f"|{body.question_id}|{user_id}.{body.file_type.value}"
             )
+            mimetype = body.mimetype.value
         case schemas.CreateImportSignedRequest() if "admin" in user.role.scopes:
+            if (
+                not isinstance(body.file_type, schemas.ImportFileType)
+                or not isinstance(body.mimetype, schemas.ImportMimeType)
+                or body.mimetype
+                not in schemas.ALLOWED_IMPORT_MIME_TYPES.get(
+                    body.file_type, frozenset()
+                )
+            ):
+                raise errors.InvalidField("file_type")
             current_date = datetime.datetime.now().strftime("%Y%m%d")
             file_path = (
                 f"import/{body.type.value}"
-                f"/{current_date}|{uuid.uuid4().hex}.{body.file_type}"
+                f"/{current_date}|{uuid.uuid4().hex}.{body.file_type.value}"
             )
+            mimetype = body.mimetype.value
         case _:
-            raise errors.FieldNotNullable()
-    signed_url = await storage.generate_signed_url(file_path, body.mimetype)
+            raise errors.Forbidden()
+    signed_url = await storage.generate_signed_url(file_path, mimetype)
     return schemas.SignedUrl(signed_url=signed_url)

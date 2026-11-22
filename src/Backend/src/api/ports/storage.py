@@ -32,7 +32,12 @@ class Storage(abc.ABC):
 
     @abc.abstractmethod
     async def generate_signed_url(
-        self, path: str, mimetype: str, method: str = "PUT"
+        self,
+        path: str,
+        mimetype: str,
+        method: str = "PUT",
+        response_disposition: str | None = None,
+        response_type: str | None = None,
     ) -> str:
         """
         Method to generate a signed url

@@ -179,10 +179,27 @@ async def get_user_exam(
     exam_dict = dict(exam.__dict__)
     questions = json.loads(questions)
 
+    audio_response_types = {
+        "wav": "audio/wav",
+        "ogg": "audio/ogg",
+        "webm": "audio/webm",
+        "mp3": "audio/mpeg",
+    }
     for question in questions:
-        if question.get("response"):
+        if question.get("response") and question["response"].get("audio_url"):
+            object_path = question["response"]["audio_url"].split("/", 4)[-1]
+            ext = (
+                object_path.rsplit(".", 1)[-1].lower() if "." in object_path else ""
+            )
+            safe_response_type = audio_response_types.get(
+                ext, "application/octet-stream"
+            )
             signed_audio_url = await storage.generate_signed_url(
-                question["response"]["audio_url"].split("/", 4)[-1], "", "GET"
+                object_path,
+                "",
+                "GET",
+                response_disposition="attachment",
+                response_type=safe_response_type,
             )
             question["response"]["audio_url"] = signed_audio_url
     exam_dict["questions"] = sorted(questions, key=lambda x: x["order"])
