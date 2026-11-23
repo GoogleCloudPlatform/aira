@@ -22,7 +22,7 @@ from opentelemetry import trace
 from api import dependencies, errors, helpers, models, ports, typings
 from api.adapters import sere
 from api.domain.service import process_result
-from api.helpers import auth, util
+from api.helpers import auth, prompt_safety, util
 from api.helpers import session_manager as sess_mg
 from api.helpers.schemas import AnalyticalResult as UserResult
 from api.routers.schemas import PubsubRequest
@@ -352,13 +352,19 @@ async def process(  # noqa: PLR0915
         pending_euq = await _assert_pending_result(uow, data.result_id)
         target_exam_id = pending_euq.exam_id
         target_user_id = pending_euq.user_id
+        authoritative_question = await uow.question_repository.get(
+            pending_euq.question_id
+        )
+        authoritative_question_type = authoritative_question.type
+        authoritative_question_text = authoritative_question.data
+        authoritative_question_theme = authoritative_question.theme
 
     logger.info("Start processing data", extra={"result_id": str(data.result_id)})
     version = "v2"
     model_type = "latest_long"
-    if data.question_type in {
-        models.QuestionType.WORDS.value,
-        models.QuestionType.COMPLEX_WORDS.value,
+    if authoritative_question_type in {
+        models.QuestionType.WORDS,
+        models.QuestionType.COMPLEX_WORDS,
     }:
         model_type = "chirp"
         version = "v2chirp"
@@ -375,26 +381,40 @@ async def process(  # noqa: PLR0915
     )
     right_count = 0
     user_result = []
-    ai_is_correct = None
-    ai_feedback = None
+    ai_is_correct: bool | None = None
+    ai_feedback: str | None = None
 
-    match data.question_type:
+    match authoritative_question_type:
         case (
             models.QuestionType.UNDERSTANDING_CHECK
             | models.QuestionType.LOGICAL_SITUATIONS
             | models.QuestionType.SHORT_EXPLANATIONS
             | models.QuestionType.SPECIFIC_KNOWLEDGE
         ):
-            ai_is_correct, ai_feedback = gen_ai.evaluate_test(
-                data.question_type,
-                data.words,
-                tts_words,
-                question_theme=data.question_theme,
-            )
+            if prompt_safety.detect_prompt_injection(tts_words):
+                logger.warning(
+                    "Blocked suspected prompt injection during audio evaluation.",
+                    extra={"result_id": str(data.result_id)},
+                )
+                ai_is_correct = False
+                ai_feedback = prompt_safety.INJECTION_FALLBACK_FEEDBACK
+            else:
+                raw_is_correct, raw_feedback = gen_ai.evaluate_test(
+                    authoritative_question_type,
+                    authoritative_question_text,
+                    tts_words,
+                    question_theme=authoritative_question_theme,
+                )
+                ai_is_correct, ai_feedback = prompt_safety.validate_evaluation_result(
+                    authoritative_question_text,
+                    tts_words,
+                    raw_is_correct,
+                    raw_feedback,
+                )
             user_result = tts_words.split()
         case _:
             right_count, user_result = process_result.get_right_count_user_result(
-                data.words, tts_words, data.question_type
+                data.words, tts_words, authoritative_question_type
             )
 
     async with uow_builder() as uow:

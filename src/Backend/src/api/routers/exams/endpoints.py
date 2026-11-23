@@ -13,7 +13,7 @@ import fastapi
 import fastapi_injector
 
 from api import dependencies, errors, models, ports, typings
-from api.helpers import auth, util
+from api.helpers import auth, prompt_safety, util
 from api.helpers import schemas as util_schemas
 from api.helpers import session_manager as sess_mg
 
@@ -186,31 +186,48 @@ async def get_user_exam(
         "mp3": "audio/mpeg",
     }
     for question in questions:
-        if question.get("response") and question["response"].get("audio_url"):
-            object_path = question["response"]["audio_url"].split("/", 4)[-1]
-            ext = (
-                object_path.rsplit(".", 1)[-1].lower() if "." in object_path else ""
-            )
-            safe_response_type = audio_response_types.get(
-                ext, "application/octet-stream"
-            )
-            signed_audio_url = await storage.generate_signed_url(
-                object_path,
-                "",
-                "GET",
-                response_disposition="attachment",
-                response_type=safe_response_type,
-            )
-            question["response"]["audio_url"] = signed_audio_url
+        response_data = question.get("response")
+        if isinstance(response_data, dict):
+            if isinstance(response_data.get("ai_feedback"), str):
+                response_data["ai_feedback"] = prompt_safety.sanitize_feedback_text(
+                    response_data["ai_feedback"],
+                    max_length=prompt_safety.MAX_QUESTION_FEEDBACK_LENGTH,
+                )
+            if response_data.get("audio_url"):
+                object_path = response_data["audio_url"].split("/", 4)[-1]
+                ext = (
+                    object_path.rsplit(".", 1)[-1].lower() if "." in object_path else ""
+                )
+                safe_response_type = audio_response_types.get(
+                    ext, "application/octet-stream"
+                )
+                signed_audio_url = await storage.generate_signed_url(
+                    object_path,
+                    "",
+                    "GET",
+                    response_disposition="attachment",
+                    response_type=safe_response_type,
+                )
+                response_data["audio_url"] = signed_audio_url
     exam_dict["questions"] = sorted(questions, key=lambda x: x["order"])
 
     async with uow_builder() as uow:
         exam_user = await uow.exam_user_repository.get(exam_id=exam_id, user_id=user_id)
         if not exam_user.ai_exam_feedback:
             exam_feedback = gen_ai.get_exam_feedback(questions)
-            exam_user.ai_exam_feedback = exam_feedback
+            exam_user.ai_exam_feedback = prompt_safety.sanitize_feedback_text(
+                exam_feedback,
+                max_length=prompt_safety.MAX_EXAM_FEEDBACK_LENGTH,
+            )
 
-        exam_dict["ai_exam_feedback"] = exam_user.ai_exam_feedback
+        exam_dict["ai_exam_feedback"] = (
+            prompt_safety.sanitize_feedback_text(
+                exam_user.ai_exam_feedback,
+                max_length=prompt_safety.MAX_EXAM_FEEDBACK_LENGTH,
+            )
+            if isinstance(exam_user.ai_exam_feedback, str)
+            else exam_user.ai_exam_feedback
+        )
         await uow.commit()
 
     return schemas.ExamWithQuestionsDataGet(**exam_dict)

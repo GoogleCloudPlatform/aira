@@ -62,7 +62,7 @@ class GenAI(abc.ABC):
         text_data: str,
         tts_data: str,
         question_theme: models.QuestionTheme | None = None,
-    ) -> tuple[bool, str]:
+    ) -> tuple[bool | None, str | None]:
         """
         Method that evaluate user answer.
         """
