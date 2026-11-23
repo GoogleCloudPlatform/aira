@@ -8,6 +8,7 @@ import hmac
 import logging
 import os
 import re
+import tempfile
 import typing
 import urllib.parse
 import uuid
@@ -25,10 +26,52 @@ _ALLOWED_GCS_HOSTS: frozenset[str] = frozenset(
 )
 _SAFE_BUCKET_RE = re.compile(r"[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]", re.ASCII)
 _ENCODED_TRAVERSAL_RE = re.compile(r"%(?:2[ef]|5c|00)", re.IGNORECASE)
+_SAFE_EXP_TYPE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", re.ASCII)
+_CSV_FORMULA_START_CHARS: frozenset[str] = frozenset(
+    {"=", "+", "-", "@", "\t", "\r", "\n"}
+)
+_CSV_FORMULA_PREFIX_CHARS: frozenset[str] = frozenset({"=", "+", "-", "@"})
+_IGNORABLE_LEADING_CHARS: frozenset[str] = frozenset(
+    {"\ufeff", "\u200b", "\u200c", "\u200d", "\u2060", "\u00ad"}
+)
 
 
 def _has_control_chars(value: str) -> bool:
     return any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in value)
+
+
+def _first_significant_char(text: str) -> str:
+    for ch in text:
+        if (
+            ch.isspace()
+            or ord(ch) < 0x20
+            or ord(ch) == 0x7F
+            or ch in _IGNORABLE_LEADING_CHARS
+        ):
+            continue
+        return ch
+    return ""
+
+
+def sanitize_csv_cell(value: typing.Any) -> str:
+    """Neutralize CSV/spreadsheet formula injection (OWASP CWE-1236).
+
+    Prefixes any cell starting with ``=``, ``+``, ``-``, ``@``, ``\\t``,
+    ``\\r``, or ``\\n`` — or starting with leading whitespace, control, or
+    invisible/BOM characters followed by ``=``, ``+``, ``-``, or ``@`` —
+    with a leading single quote (``'``) so spreadsheets treat it as text.
+    """
+    if value is None:
+        return ""
+    text = value if isinstance(value, str) else str(value)
+    if not text:
+        return ""
+    if (
+        text[0] in _CSV_FORMULA_START_CHARS
+        or _first_significant_char(text) in _CSV_FORMULA_PREFIX_CHARS
+    ):
+        return f"'{text}"
+    return text
 
 
 def _safe_remove_file(path: str | None) -> None:
@@ -36,7 +79,7 @@ def _safe_remove_file(path: str | None) -> None:
         try:
             os.remove(path)
         except OSError:
-            logger.warning("Failed to clean up temporary import file.")
+            logger.warning("Failed to clean up temporary file.")
 
 
 def _extract_import_bucket_and_object_path(file_url: str) -> tuple[str, str]:
@@ -219,40 +262,55 @@ async def handle_export(
     """
     Function to handle data from exports
     """
-    path = f"/tmp/{user_id}/{exp_type}"
-    if not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
-    local_file = f"{path}/export.csv"
-    result: list[list[typing.Any]] = [export_keys]
-    for obj in objs:
-        temp_result: list[typing.Any] = []
-        for key in export_keys:
-            match getattr(obj, key):
-                case sqlalchemy.orm.collections.InstrumentedList():
-                    temp_result.append([str(obj.id) for obj in getattr(obj, key)])
-                case db.Base():
-                    temp_result.append(str(getattr(obj, key).id))
-                case uuid.UUID():
-                    temp_result.append(str(getattr(obj, key)))
-                case _:
-                    temp_result.append(getattr(obj, key))
-        result.append(temp_result)
+    if not isinstance(exp_type, str) or not _SAFE_EXP_TYPE_RE.fullmatch(exp_type):
+        raise errors.InvalidField("exp_type")
 
     match fmt:
         case "csv":
             mimetype = "text/csv"
-            with open(
-                local_file,
-                "w",
-                newline="",
-                encoding="utf-8",
-            ) as f:
-                writer = csv.writer(f, delimiter=delimiter)
-                writer.writerows(result)
         case _:
             raise NotImplementedError()
-    now = datetime.datetime.now().strftime("%Y%m%d")
+
+    result: list[list[str]] = [[sanitize_csv_cell(key) for key in export_keys]]
+    for obj in objs:
+        temp_result: list[str] = []
+        for key in export_keys:
+            raw_value = getattr(obj, key)
+            match raw_value:
+                case sqlalchemy.orm.collections.InstrumentedList():
+                    cell_value: typing.Any = [str(item.id) for item in raw_value]
+                case db.Base():
+                    cell_value = str(getattr(raw_value, "id", raw_value))
+                case uuid.UUID():
+                    cell_value = str(raw_value)
+                case _:
+                    cell_value = raw_value
+            temp_result.append(sanitize_csv_cell(cell_value))
+        result.append(temp_result)
+
+    local_file = os.path.join(
+        tempfile.gettempdir(), f"export-{uuid.uuid4().hex}.{fmt}"
+    )
+    now = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")
     file_path = f"export/{now}-{user_id.hex}-{exp_type}.{fmt}"
-    await storage.upload_by_file(file_path, local_file)
-    signed_url = await storage.generate_signed_url(file_path, mimetype, method="GET")
+    try:
+        with open(
+            local_file,
+            "w",
+            newline="",
+            encoding="utf-8",
+        ) as f:
+            writer = csv.writer(f, delimiter=delimiter)
+            writer.writerows(result)
+        await storage.upload_by_file(file_path, local_file)
+    finally:
+        _safe_remove_file(local_file)
+
+    signed_url = await storage.generate_signed_url(
+        file_path,
+        mimetype,
+        method="GET",
+        response_disposition="attachment",
+        response_type=mimetype,
+    )
     return signed_url

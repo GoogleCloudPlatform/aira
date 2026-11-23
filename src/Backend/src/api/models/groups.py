@@ -11,6 +11,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from api import db
 
 from . import organizations
+from .series import Series
+from .shifts import WorkShift
 
 
 class Grades(enum.StrEnum):
@@ -41,10 +43,6 @@ class Shifts(enum.StrEnum):
     AFTERNOON = "afternoon"
     EVENING = "evening"
     ALLDAY = "allday"
-
-
-from .series import Series
-from .shifts import WorkShift
 
 
 class Group(db.Base, db.DefaultColumns):
@@ -82,6 +80,16 @@ class Group(db.Base, db.DefaultColumns):
 
     series: Mapped[Series] = orm.relationship("Series", init=False)
     work_shift: Mapped[WorkShift] = orm.relationship("WorkShift", init=False)
+
+    @property
+    def grade(self) -> str:
+        series = self.__dict__.get("series")
+        return str(series.name) if series is not None else ""
+
+    @property
+    def shift(self) -> str:
+        work_shift = self.__dict__.get("work_shift")
+        return str(work_shift.code).lower() if work_shift is not None else ""
 
     def __repr__(self) -> str:
         return f"Group(id={self.id}, name={self.name})"
