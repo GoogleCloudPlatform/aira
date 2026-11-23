@@ -12,7 +12,7 @@ import fastapi_injector
 import sqlalchemy as sa
 from sqlalchemy.orm import joinedload
 
-from api import dependencies, errors, models, ports
+from api import dependencies, errors, models, ports, typings
 from api.helpers import auth, data
 from api.helpers import schemas as util_schemas
 from api.helpers import session_manager as sess_mg
@@ -275,6 +275,7 @@ async def import_org_batch(
         ports.UnitOfWorkBuilder
     ),
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
     body: util_schemas.ImportData = fastapi.Body(...),
 ) -> fastapi.Response:
     """
@@ -286,7 +287,11 @@ async def import_org_batch(
     :param body: parsed data for user import.
     """
     org_ids, customer_ids, result = await data.handle_import(
-        body.url, body.key_relation, storage
+        body.url,
+        body.key_relation,
+        storage,
+        settings.get("bucket_path"),
+        expected_import_type=util_schemas.ImportType.ORGANIZATION,
     )
     async with uow_builder() as uow:
         org_list = await uow.organization_repository.list(

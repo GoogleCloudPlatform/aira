@@ -17,7 +17,7 @@ from api import dependencies, errors, models, ports, typings
 from api.helpers import auth, data
 from api.helpers import session_manager as sess_mg
 from api.helpers.schemas import AnalyticalResult as UserResult
-from api.helpers.schemas import ImportData, ListSchema
+from api.helpers.schemas import ImportData, ImportType, ListSchema
 from api.routers.exams import schemas as exam_schemas
 
 from . import crud, schemas
@@ -433,6 +433,7 @@ async def import_users_batch(
         ports.UnitOfWorkBuilder
     ),
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
     hash_ctx: context.CryptContext = fastapi_injector.Injected(context.CryptContext),
     body: ImportData = fastapi.Body(...),
 ) -> fastapi.Response:
@@ -446,7 +447,11 @@ async def import_users_batch(
     """
 
     user_ids, customer_ids, result = await data.handle_import(
-        body.url, body.key_relation, storage
+        body.url,
+        body.key_relation,
+        storage,
+        settings.get("bucket_path"),
+        expected_import_type=ImportType.USER,
     )
     group_ids: list[uuid.UUID] = []
     org_ids: list[uuid.UUID] = []

@@ -31,7 +31,7 @@ class ImportData(pydantic.BaseModel):
     Schema related to all import data
     """
 
-    url: pydantic.AnyHttpUrl
+    url: pydantic.StrictStr
     key_relation: dict[str, str]
 
 

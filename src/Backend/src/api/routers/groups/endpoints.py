@@ -10,7 +10,7 @@ import uuid
 import fastapi
 import fastapi_injector
 
-from api import dependencies, errors, models, ports
+from api import dependencies, errors, models, ports, typings
 from api.helpers import auth, data
 from api.helpers import schemas as util_schemas
 from api.helpers import session_manager as sess_mg
@@ -232,6 +232,7 @@ async def import_groups_batch(
         ports.UnitOfWorkBuilder
     ),
     storage: ports.Storage = fastapi_injector.Injected(ports.Storage),
+    settings: typings.Settings = fastapi_injector.Injected(typings.Settings),
     body: util_schemas.ImportData = fastapi.Body(...),
 ) -> fastapi.Response:
     """
@@ -244,7 +245,11 @@ async def import_groups_batch(
     """
 
     group_ids, customer_ids, result = await data.handle_import(
-        body.url, body.key_relation, storage
+        body.url,
+        body.key_relation,
+        storage,
+        settings.get("bucket_path"),
+        expected_import_type=util_schemas.ImportType.GROUP,
     )
     async with uow_builder() as uow:
         group_list = await uow.group_repository.list(
